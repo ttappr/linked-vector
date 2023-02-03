@@ -493,8 +493,9 @@ impl<T> Default for LinkedVector<T> {
         Self::new()
     }
 }
-// unsafe impl<#[may_dangle] T> Drop for LinkedVector<T> {
 impl<T> Drop for LinkedVector<T> {
+// TOOD - See if I need this #[may_dangle] macro.
+// unsafe impl<#[may_dangle] T> Drop for LinkedVector<T> {
     fn drop(&mut self) {
         struct DropGuard<'a, T>(&'a mut LinkedVector<T>);
 

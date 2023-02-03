@@ -48,6 +48,16 @@ fn clear() {
 }
 
 #[test]
+fn clone() {
+    let mut lv1 = LinkedVector::new();
+    lv1.push_back(1);
+    lv1.push_back(2);
+    lv1.push_back(3);
+    let lv2 = lv1.clone();
+    assert_eq!(lv1, lv2); // Also tests PartialEq.
+}
+
+#[test]
 fn contains() {
     let mut lv1 = LinkedVector::new();
     lv1.push_back(1);
@@ -55,6 +65,12 @@ fn contains() {
     lv1.push_back(3);
     assert_eq!(lv1.contains(&2), true);
     assert_eq!(lv1.contains(&4), false);
+}
+
+#[test]
+fn default() {
+    let lv1 = LinkedVector::<i32>::default();
+    assert_eq!(lv1.is_empty(), true);
 }
 
 #[test]
@@ -154,6 +170,30 @@ fn into_iter() {
 }
 
 #[test]
+fn into_iter_rev() {
+    let mut lv1 = LinkedVector::new();
+
+    lv1.push_back(1);
+    lv1.push_back(2);
+    lv1.push_back(3);
+
+    let lv2 = lv1.clone();
+
+    let mut it = lv1.into_iter();
+
+    assert_eq!(it.next(), Some(1));
+    assert_eq!(it.next(), Some(2));
+    assert_eq!(it.next(), Some(3));
+
+    let mut it = lv2.into_iter().rev();
+
+    assert_eq!(it.next(), Some(3));
+    assert_eq!(it.next(), Some(2));
+    assert_eq!(it.next(), Some(1));
+    assert!(it.next().is_none());
+}
+
+#[test]
 fn is_empty() {
     let mut lv1 = LinkedVector::new();
     assert_eq!(lv1.is_empty(), true);
@@ -175,6 +215,19 @@ fn iter() {
 }
 
 #[test]
+fn iter_rev() {
+    let mut lv1 = LinkedVector::new();
+    lv1.push_back(3);
+    lv1.push_back(2);
+    lv1.push_back(1);
+    lv1.iter().rev().zip(1..).for_each(|(a, b)| assert_eq!(a, &b));
+
+    for (v1, v2) in (1..).zip(lv1.iter().rev()) {
+        assert_eq!(v1, *v2);
+    }
+}
+
+#[test]
 fn iter_mut() {
     let mut lv1 = LinkedVector::new();
     lv1.push_back(1);
@@ -187,6 +240,27 @@ fn iter_mut() {
         *v2 = v1;
     }
     lv1.iter().zip(10..).for_each(|(a, b)| assert_eq!(a, &b));
+}
+
+#[test]
+fn iter_mut_rev() {
+    let mut lv1 = LinkedVector::new();
+    lv1.push_back(3);
+    lv1.push_back(2);
+    lv1.push_back(1);
+    
+    lv1.iter_mut().rev().zip(7..).for_each(|(a, b)| *a = b);
+
+    let mut it = lv1.iter();
+
+    assert_eq!(it.next(), Some(&9));
+    assert_eq!(it.next(), Some(&8));
+    assert_eq!(it.next(), Some(&7));
+
+    for (v1, v2) in (10..).zip(lv1.iter_mut().rev()) {
+        *v2 = v1;
+    }
+    lv1.iter().rev().zip(10..).for_each(|(a, b)| assert_eq!(a, &b));
 }
 
 #[test]
