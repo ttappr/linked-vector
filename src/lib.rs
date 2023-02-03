@@ -1,12 +1,11 @@
-#![allow(unused)]
+use core::iter::{FromIterator, FusedIterator};
+use core::mem;
 
-use std::{marker::PhantomData, iter::FusedIterator};
+#[cfg(test)]
+mod tests;
 
+#[cfg(debug_assertions)]
 use uuid::{uuid, Uuid};
-
-fn main() {
-    println!("Hello, world!");
-}
 
 #[cfg(not(debug_assertions))]
 const BAD_HANDLE : HNode = HNode(usize::MAX);
@@ -16,7 +15,7 @@ const BAD_HANDLE : HNode =
         HNode(usize::MAX, uuid!("deadbeef-dead-beef-dead-beefdeadbeef"));
 
 #[cfg(not(debug_assertions))]
-#[transparent]
+#[repr(transparent)]
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct HNode(usize);
 
@@ -96,7 +95,7 @@ impl<T> LinkedVector<T> {
         if self.is_empty() {
             None
         } else {
-            self.get_(self.get_(self.head).prev).value.as_ref()
+            self.back_().unwrap().value.as_ref()
         }
     }
     /// Gives a mutable reference to the element back element, or `None` if the
@@ -139,7 +138,7 @@ impl<T> LinkedVector<T> {
         if self.is_empty() {
             None
         } else {
-            self.get_(self.head).value.as_ref()
+            self.front_().unwrap().value.as_ref()
         }
     }
 
@@ -207,13 +206,6 @@ impl<T> LinkedVector<T> {
         self.insert_(Some(node), value)
     }
 
-    /// Returns an iterator over the elements of the list.
-    /// 
-    #[inline]
-    pub fn into_iter(self) -> IntoIter<T> {
-        IntoIter(self)
-    }
-
     /// Returns `true` if the list contains no elements.
     /// 
     #[inline]
@@ -277,7 +269,7 @@ impl<T> LinkedVector<T> {
     #[inline]
     pub fn push_front(&mut self, value: T) -> HNode {
         if self.is_empty() {
-            return self.insert_(None, value);
+            self.insert_(None, value)
         } else {
             self.insert_(Some(self.head), value)
         }
@@ -303,8 +295,27 @@ impl<T> LinkedVector<T> {
         self.iter().cloned().collect()
     }
 
+    #[inline]
+    fn back_(&self) -> Option<&Node<T>> {
+        if self.is_empty() {
+            None
+        } else {
+            Some(self.get_(self.get_(self.head).prev))
+        }
+    }
+
+    #[inline]
+    fn front_(&self) -> Option<&Node<T>> {
+        if self.is_empty() {
+            None
+        } else {
+            Some(self.get_(self.head))
+        }
+    }
+
     /// Returns true if the handle within the Option is valid; false otherwise.
     /// 
+    #[allow(dead_code)]
     #[inline]
     fn handleopt_is_valid(&self, node: Option<HNode>) -> bool {
         node.map_or(true, |h| self.get_(h).value.is_some())
@@ -313,6 +324,7 @@ impl<T> LinkedVector<T> {
     /// Returns true if the handle within the Option belongs to this list; false 
     /// otherwise. This check is only performed in debug builds.
     /// 
+    #[allow(dead_code)]
     #[cfg(debug_assertions)]
     #[inline]
     fn handleopt_is_native(&self, node: Option<HNode>) -> bool {
@@ -481,13 +493,28 @@ impl<T> Default for LinkedVector<T> {
         Self::new()
     }
 }
-/*
+// unsafe impl<#[may_dangle] T> Drop for LinkedVector<T> {
 impl<T> Drop for LinkedVector<T> {
     fn drop(&mut self) {
-        while let Some(_) = self.pop_back() {}
+        struct DropGuard<'a, T>(&'a mut LinkedVector<T>);
+
+        impl<'a, T> Drop for DropGuard<'a, T> {
+            fn drop(&mut self) {
+                // Continue the same loop we do below. This only runs when a 
+                // destructor has panicked. If another one panics this will 
+                // abort.
+                while self.0.pop_front().is_some() {}
+            }
+        }
+
+        while let Some(node) = self.pop_front() {
+            let guard = DropGuard(self);
+            drop(node);
+            mem::forget(guard);
+        }
     }
 }
-*/
+
 impl<T: Eq> Eq for LinkedVector<T> {}
 
 impl<'a, T> Extend<&'a T> for LinkedVector<T> 
@@ -542,17 +569,31 @@ impl<T> FromIterator<T> for LinkedVector<T> {
     }
 }
 
+impl<T> PartialEq for LinkedVector<T> 
+where 
+    T: PartialEq
+{
+    #[inline]
+    fn eq(&self, other: &Self) -> bool {
+        self.len() == other.len() && self.iter().eq(other)
+    }
+}
+
 pub struct Handles<'a, T> {
-    lv   : &'a LinkedVector<T>,
-    node : HNode,
+    lv    : &'a LinkedVector<T>,
+    hnode : HNode,
+    hrev  : HNode,
+    len   : usize,
 }
 
 impl<'a, T> Handles<'a, T> {
     #[inline]
     pub fn new(lv: &'a LinkedVector<T>) -> Self {
         Self {
-            node : lv.head,
-            lv   : lv,
+            hnode : lv.head,
+            hrev  : BAD_HANDLE,
+            len   : lv.len(),
+            lv,
         }
     }
 }
@@ -561,26 +602,57 @@ impl<'a, T> Iterator for Handles<'a, T> {
     type Item = HNode;
     #[inline]
     fn next(&mut self) -> Option<Self::Item> {
-        if self.node == BAD_HANDLE {
-            None
-        } else {
-            let hnode = self.node;
-            self.node = self.lv.get_(hnode).next;
+        if self.len > 0 {
+            let hnode = self.hnode;
+            self.hnode = self.lv.get_(hnode).next;
+            self.len -= 1;
             Some(hnode)
+        } else {
+            None
+        }
+    }
+    #[inline]
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        (self.len, Some(self.len))
+    }
+    #[inline]
+    fn last(self) -> Option<Self::Item> {
+        self.lv.front_().map(|h| h.prev)
+    }
+}
+
+impl<'a, T> DoubleEndedIterator for Handles<'a, T> {
+    #[inline]
+    fn next_back(&mut self) -> Option<Self::Item> {
+        if self.len > 0 {
+            let mut hrev = self.hrev;
+            if hrev == BAD_HANDLE {
+               hrev = self.lv.front_().unwrap().prev;
+            }
+            let node = self.lv.get_(hrev);
+            self.hrev = node.prev;
+            self.len -= 1;
+            Some(hrev)
+        } else {
+            None
         }
     }
 }
 
+impl<T> ExactSizeIterator for Handles<'_, T> {}
+
+impl<T> FusedIterator for Handles<'_, T> {}
+
 pub struct Iter<'a, T> {
-    lv   : &'a LinkedVector<T>,
-    node : HNode,
+    lv    : &'a LinkedVector<T>,
+    hnode : HNode,
 }
 impl<'a, T> Iter<'a, T> {
     #[inline]
     pub fn new(lv: &'a LinkedVector<T>) -> Self {
         Self {
-            node : lv.head,
-            lv   : lv,
+            hnode : lv.head,
+            lv,
         }
     }
 }
@@ -589,15 +661,33 @@ impl<'a, T> Iterator for Iter<'a, T> {
     type Item = &'a T;
     #[inline]
     fn next(&mut self) -> Option<Self::Item> {
-        if self.node == BAD_HANDLE {
+        if self.hnode == BAD_HANDLE {
             None
         } else {
-            let hnode = self.node;
-            self.node = self.lv.get_(hnode).next;
+            let hnode = self.hnode;
+            self.hnode = self.lv.get_(hnode).next;
             self.lv.get(hnode)
         }
     }
 }
+
+impl<'a, T> DoubleEndedIterator for Iter<'a, T> {
+    #[inline]
+    fn next_back(&mut self) -> Option<Self::Item> {
+        let prev = self.lv.get_(self.hnode).prev;
+        if self.lv.get_(prev).next == BAD_HANDLE {
+            None
+        } else {
+            let hnode  = self.hnode;
+            self.hnode = prev;
+            self.lv.get(hnode)
+        }
+    }
+}
+
+impl<T> ExactSizeIterator for Iter<'_, T> {}
+
+impl<T> FusedIterator for Iter<'_, T> {}
 
 impl<'a, T> IntoIterator for &'a LinkedVector<T> {
     type Item = &'a T;
@@ -605,8 +695,8 @@ impl<'a, T> IntoIterator for &'a LinkedVector<T> {
     #[inline]
     fn into_iter(self) -> Self::IntoIter {
         Iter {
-            node : self.head,
-            lv   : self,
+            hnode : self.head,
+            lv    : self,
         }
     }
 }
@@ -621,7 +711,7 @@ impl<'a, T> IterMut<'a, T> {
     pub fn new(lv: &'a mut LinkedVector<T>) -> Self {
         Self {
             hnode : lv.head,
-            lv    : lv,
+            lv,
         }
     }
 }
@@ -644,7 +734,7 @@ impl<'a, T> Iterator for IterMut<'a, T> {
         (len, Some(len))
     }
     #[inline]
-    fn last(mut self) -> Option<Self::Item> {
+    fn last(self) -> Option<Self::Item> {
         self.lv.back_mut()
     }
 }
@@ -705,263 +795,7 @@ impl<T> DoubleEndedIterator for IntoIter<T> {
     }
 }
 
-impl<T> PartialEq for LinkedVector<T> 
-where 
-    T: PartialEq
-{
-    #[inline]
-    fn eq(&self, other: &Self) -> bool {
-        self.len() == other.len() && self.iter().eq(other)
-    }
-    #[inline]
-    fn ne(&self, other: &Self) -> bool {
-        self.len() != other.len() || self.iter().ne(other)
-    }
-}
+impl<T> ExactSizeIterator for IntoIter<T> {}
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+impl<T> FusedIterator for IntoIter<T> {}
 
-    #[test] 
-    fn append() {
-        let mut lv1 = LinkedVector::new();
-        let mut lv2 = LinkedVector::new();
-        for val in [1, 2, 3] {
-            lv1.push_back(val);
-        }
-        for val in [4, 5, 6] {
-            lv2.push_back(val);
-        }
-        lv1.append(&mut lv2);
-
-        lv1.iter().zip(1..).for_each(|(a, b)| assert_eq!(a, &b));
-        assert_eq!(lv2.is_empty(), true);
-    }
-
-    #[test]
-    fn back() {
-        let mut lv1 = LinkedVector::new();
-        lv1.push_back(1);
-        lv1.push_back(2);
-        lv1.push_back(3);
-        assert_eq!(lv1.back(), Some(&3));
-    }
-
-    #[test]
-    fn back_mut() {
-        let mut lv1 = LinkedVector::new();
-        lv1.push_back(1);
-        lv1.push_back(2);
-        lv1.push_back(3);
-        *lv1.back_mut().unwrap() = 4;
-        assert_eq!(lv1.back(), Some(&4));
-    }
-
-    #[test]
-    fn clear() {
-        let mut lv1 = LinkedVector::new();
-        lv1.push_back(1);
-        lv1.push_back(2);
-        lv1.push_back(3);
-        lv1.clear();
-        assert_eq!(lv1.is_empty(), true);
-    }
-
-    #[test]
-    fn contains() {
-        let mut lv1 = LinkedVector::new();
-        lv1.push_back(1);
-        lv1.push_back(2);
-        lv1.push_back(3);
-        assert_eq!(lv1.contains(&2), true);
-        assert_eq!(lv1.contains(&4), false);
-    }
-
-    #[test]
-    fn front() {
-        let mut lv1 = LinkedVector::new();
-        lv1.push_back(1);
-        lv1.push_back(2);
-        lv1.push_back(3);
-        assert_eq!(lv1.front(), Some(&1));
-    }
-
-    #[test]
-    fn front_mut() {
-        let mut lv1 = LinkedVector::new();
-        lv1.push_back(1);
-        lv1.push_back(2);
-        lv1.push_back(3);
-        *lv1.front_mut().unwrap() = 4;
-        assert_eq!(lv1.front(), Some(&4));
-    }
-
-    #[test]
-    fn get() {
-        let mut lv1 = LinkedVector::new();
-        let h1 = lv1.push_back(1);
-        let h2 = lv1.push_back(2);
-        let h3 = lv1.push_back(3);
-        assert_eq!(lv1.get(h1), Some(&1));
-        assert_eq!(lv1.get(h2), Some(&2));
-        assert_eq!(lv1.get(h3), Some(&3));
-    }
-
-    #[test]
-    fn insert_after() {
-        let mut lv1 = LinkedVector::new();
-        let h1 = lv1.push_back(1);
-        let h2 = lv1.push_back(2);
-        let h3 = lv1.push_back(3);
-        let h4 = lv1.insert_after(h1, 4);
-        assert_eq!(lv1.front(), Some(&1));
-        assert_eq!(lv1.back(), Some(&3));
-        assert_eq!(lv1.get_(h1).next, h4);
-        assert_eq!(lv1.get_(h4).next, h2);
-        assert_eq!(lv1.get_(h4).prev, h1);
-    }
-
-    #[test]
-    fn insert_before() {
-        let mut lv1 = LinkedVector::new();
-        let h1 = lv1.push_back(1);
-        let h2 = lv1.push_back(2);
-        let h3 = lv1.push_back(3);
-        let h4 = lv1.insert_before(h3, 4);
-        assert_eq!(lv1.front(), Some(&1));
-        assert_eq!(lv1.back(), Some(&3));
-        assert_eq!(lv1.get_(h4).next, h3);
-    }
-    #[test]
-    fn into_iter() {
-        let mut lv1 = LinkedVector::new();
-        lv1.push_back(1);
-        lv1.push_back(2);
-        lv1.push_back(3);
-        lv1.into_iter().zip(1..).for_each(|(a, b)| assert_eq!(a, b));
-
-        let mut lv2 = LinkedVector::new();
-        (0..100).for_each(|n| { lv2.push_back(n); });
-
-        assert_eq!(lv2.len(), 100);
-
-        for (v1, v2) in (0..).zip(lv2) {
-            assert_eq!(v1, v2);
-        }
-    }
-
-    #[test]
-    fn is_empty() {
-        let mut lv1 = LinkedVector::new();
-        assert_eq!(lv1.is_empty(), true);
-        lv1.push_back(1);
-        assert_eq!(lv1.is_empty(), false);
-    }
-
-    #[test]
-    fn iter() {
-        let mut lv1 = LinkedVector::new();
-        lv1.push_back(1);
-        lv1.push_back(2);
-        lv1.push_back(3);
-        lv1.iter().zip(1..).for_each(|(a, b)| assert_eq!(a, &b));
-
-        for (v1, v2) in (1..).zip(&lv1) {
-            assert_eq!(v1, *v2);
-        }
-    }
-
-    #[test]
-    fn iter_mut() {
-        let mut lv1 = LinkedVector::new();
-        lv1.push_back(1);
-        lv1.push_back(2);
-        lv1.push_back(3);
-        lv1.iter_mut().zip(7..).for_each(|(a, b)| *a = b);
-        lv1.iter().zip(7..).for_each(|(a, b)| assert_eq!(a, &b));
-
-        for (v1, v2) in (10..).zip(&mut lv1) {
-            *v2 = v1;
-        }
-        lv1.iter().zip(10..).for_each(|(a, b)| assert_eq!(a, &b));
-    }
-
-    #[test]
-    fn len() {
-        let mut lv1 = LinkedVector::new();
-        assert_eq!(lv1.len(), 0);
-        lv1.push_back(1);
-        assert_eq!(lv1.len(), 1);
-        lv1.push_back(2);
-        assert_eq!(lv1.len(), 2);
-        lv1.push_back(3);
-        assert_eq!(lv1.len(), 3);
-        lv1.pop_front();
-        assert_eq!(lv1.len(), 2);
-        lv1.pop_back();
-        assert_eq!(lv1.len(), 1);
-        lv1.pop_back();
-        assert_eq!(lv1.len(), 0);
-    }
-
-    #[test]
-    fn pop_back() {
-        let mut lv1 = LinkedVector::new();
-        lv1.push_back(1);
-        lv1.push_back(2);
-        lv1.push_back(3);
-        assert_eq!(lv1.pop_back(), Some(3));
-        assert_eq!(lv1.pop_back(), Some(2));
-        assert_eq!(lv1.pop_back(), Some(1));
-        assert_eq!(lv1.pop_back(), None);
-    }
-
-    #[test]
-    fn pop_front() {
-        let mut lv1 = LinkedVector::new();
-        lv1.push_back(1);
-        lv1.push_back(2);
-        lv1.push_back(3);
-        assert_eq!(lv1.pop_front(), Some(1));
-        assert_eq!(lv1.pop_front(), Some(2));
-        assert_eq!(lv1.pop_front(), Some(3));
-        assert_eq!(lv1.pop_front(), None);
-    }
-
-    #[test]
-    fn push_back() {
-        let mut lv1 = LinkedVector::new();
-        lv1.push_back(1);
-        lv1.push_back(2);
-        lv1.push_back(3);
-        assert_eq!(lv1.front(), Some(&1));
-        assert_eq!(lv1.back(), Some(&3));
-    }
-
-    #[test]
-    fn push_front() {
-        let mut lv1 = LinkedVector::new();
-        lv1.push_front(1);
-        lv1.push_front(2);
-        lv1.push_front(3);
-        assert_eq!(lv1.front(), Some(&3));
-        assert_eq!(lv1.back(), Some(&1));
-    }
-
-    #[test]
-    fn  iinsert() {
-        let mut lv1 = LinkedVector::new();
-
-        let h1 = lv1.insert_(None, 1);
-        let h2 = lv1.insert_(Some(h1), 2);
-
-        assert_eq!(lv1.front(), Some(&2));
-        assert_eq!(lv1.back(), Some(&1));
-
-        let h3 = lv1.insert_(None, 3);
-
-        assert_eq!(lv1.back(), Some(&3));
-        assert_eq!(lv1.front(), Some(&2));
-    }
-}
