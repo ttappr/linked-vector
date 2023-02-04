@@ -246,7 +246,11 @@ impl<T> LinkedVector<T> {
     /// 
     #[inline]
     pub fn insert_after(&mut self, node: HNode, value: T) -> HNode {
-        self.insert_(Some(self.get_(node).next), value)
+        if let Some(next) = self.get_next(node) {
+            self.insert_(Some(next), value)
+        } else {
+            self.push_back(value)
+        }
     }
 
     /// Inserts a new element before the one indicated by the handle, `node`.
