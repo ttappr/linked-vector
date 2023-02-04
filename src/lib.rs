@@ -173,7 +173,6 @@ impl<T> LinkedVector<T> {
     /// 
     /// assert_eq!(cursor.get(), Some(&2));
     /// ```
-    /// 
     pub fn cursor(&self, hnode: Option<HNode>) -> Cursor<T> {
         if let Some(hnode) = hnode {
             Cursor::new_at(self, hnode)
@@ -197,7 +196,6 @@ impl<T> LinkedVector<T> {
     /// cursor.get_mut().map(|v| *v = 42);
     /// 
     /// assert_eq!(lv.to_vec(), vec![1, 2, 3, 42, 5, 6]);
-    /// 
     /// ```
     pub fn cursor_mut(&mut self, hnode: Option<HNode>) -> CursorMut<T> {
         if let Some(hnode) = hnode {
