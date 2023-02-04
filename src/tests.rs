@@ -177,6 +177,31 @@ fn handles() {
 }
 
 #[test]
+fn index() {
+    let mut lv1 = LinkedVector::new();
+    let h1 = lv1.push_back(1);
+    let h2 = lv1.push_back(2);
+    let h3 = lv1.push_back(3);
+    assert_eq!(lv1[h1], 1);
+    assert_eq!(lv1[h2], 2);
+    assert_eq!(lv1[h3], 3);
+}
+
+#[test]
+fn index_mut() {
+    let mut lv1 = LinkedVector::new();
+    let h1 = lv1.push_back(1);
+    let h2 = lv1.push_back(2);
+    let h3 = lv1.push_back(3);
+    lv1[h1] = 4;
+    lv1[h2] = 5;
+    lv1[h3] = 6;
+    assert_eq!(lv1[h1], 4);
+    assert_eq!(lv1[h2], 5);
+    assert_eq!(lv1[h3], 6);
+}
+
+#[test]
 fn insert_after() {
     let mut lv1 = LinkedVector::new();
     let h1 = lv1.push_back(1);
