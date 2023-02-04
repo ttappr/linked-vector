@@ -168,6 +168,26 @@ impl<T> LinkedVector<T> {
         }
     }
 
+    /// Returns a handle to the first node in the list, or `None` if the list is
+    /// empty. This operation completes in O(1) time.
+    /// 
+    #[inline]
+    pub fn front_node(&self) -> Option<HNode> {
+        if self.len_ == 0 {
+            None
+        } else {
+            Some(self.head)
+        }
+    }
+
+    /// Returns a handle to the last node in the list, or `None` if the list is
+    /// empty. This operation completes in O(1) time.
+    /// 
+    #[inline]
+    pub fn back_node(&self) -> Option<HNode> {
+        self.front_().map(|node| node.prev)
+    }
+
     /// Provides a reference to the element indicated by the given handle, or
     /// `None` if the handle is invalid. This operation completes in O(1) time.
     /// 
