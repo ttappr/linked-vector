@@ -74,6 +74,56 @@ fn default() {
 }
 
 #[test]
+fn eq() {
+    let mut lv1 = LinkedVector::new();
+    let mut lv2 = LinkedVector::new();
+    lv1.push_back(1);
+    lv1.push_back(2);
+    lv1.push_back(3);
+    lv2.push_back(1);
+    lv2.push_back(2);
+    lv2.push_back(3);
+    assert_eq!(lv1, lv2);
+}
+
+#[test]
+fn extend() {
+    let mut lv1 = LinkedVector::new();
+    let mut lv2 = LinkedVector::new();
+    for val in [1, 2, 3] {
+        lv1.push_back(val);
+    }
+    for val in [4, 5, 6] {
+        lv2.push_back(val);
+    }
+    lv1.extend(lv2.iter());
+
+    lv1.iter().zip(1..).for_each(|(a, b)| assert_eq!(a, &b));
+    assert_eq!(lv2.is_empty(), false);
+}
+
+#[test]
+fn test_drop() {
+    let mut lv1 = LinkedVector::new();
+    lv1.push_back(1);
+    lv1.push_back(2);
+    lv1.push_back(3);
+    drop(lv1);
+}
+
+#[test]
+fn from_array() {
+    let lv1 = LinkedVector::from([1, 2, 3]);
+    lv1.iter().zip(1..).for_each(|(a, b)| assert_eq!(a, &b));
+}
+
+#[test]
+fn from_iter() {
+    let lv1 = LinkedVector::from_iter(1..4);
+    lv1.iter().zip(1..).for_each(|(a, b)| assert_eq!(a, &b));
+}
+
+#[test]
 fn front() {
     let mut lv1 = LinkedVector::new();
     lv1.push_back(1);
@@ -260,7 +310,7 @@ fn iter_mut_rev() {
     for (v1, v2) in (10..).zip(lv1.iter_mut().rev()) {
         *v2 = v1;
     }
-    lv1.iter().rev().zip(10..).for_each(|(a, b)| assert_eq!(a, &b));
+    lv1.iter().zip((10..=12).rev()).for_each(|(a, b)| assert_eq!(a, &b));
 }
 
 #[test]

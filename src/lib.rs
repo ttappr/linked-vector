@@ -1,5 +1,5 @@
 use core::iter::{FromIterator, FusedIterator};
-use core::mem;
+//  use core::mem;
 
 #[cfg(test)]
 mod tests;
@@ -180,8 +180,9 @@ impl<T> LinkedVector<T> {
         self.get_mut_(node).value.as_mut()
     }
 
-    /// Returns an iterator over the handles of the vector. This operation
-    /// completes in O(1) time.
+    /// Returns an iterator over the handles of the vector. The handles will 
+    /// reflect the order of the linked list. This operation completes in O(1) 
+    /// time.
     /// 
     #[inline]
     pub fn handles(&self) -> Handles<T> {
@@ -295,6 +296,9 @@ impl<T> LinkedVector<T> {
         self.iter().cloned().collect()
     }
 
+    /// Returns a reference to the last node. Returns `None` if the list is
+    /// empty. This operation completes in O(1) time.
+    /// 
     #[inline]
     fn back_(&self) -> Option<&Node<T>> {
         if self.is_empty() {
@@ -304,6 +308,9 @@ impl<T> LinkedVector<T> {
         }
     }
 
+    /// returns a reference to the first node. Returns `None` if the list is
+    /// empty. This operation completes in O(1) time.
+    /// 
     #[inline]
     fn front_(&self) -> Option<&Node<T>> {
         if self.is_empty() {
@@ -493,8 +500,10 @@ impl<T> Default for LinkedVector<T> {
         Self::new()
     }
 }
+/*
+TODO - Find out if this imple is necessary. I think we can rely on the Vec's
+       Drop impl to handle the nodes.
 impl<T> Drop for LinkedVector<T> {
-// TOOD - See if I need this #[may_dangle] macro.
 // unsafe impl<#[may_dangle] T> Drop for LinkedVector<T> {
     fn drop(&mut self) {
         struct DropGuard<'a, T>(&'a mut LinkedVector<T>);
@@ -514,7 +523,7 @@ impl<T> Drop for LinkedVector<T> {
             mem::forget(guard);
         }
     }
-}
+}*/
 
 impl<T: Eq> Eq for LinkedVector<T> {}
 
@@ -592,7 +601,7 @@ impl<'a, T> Handles<'a, T> {
     pub fn new(lv: &'a LinkedVector<T>) -> Self {
         Self {
             hnode : lv.head,
-            hrev  : BAD_HANDLE,
+            hrev  : lv.front_().map(|h| h.prev).unwrap_or(BAD_HANDLE),
             len   : lv.len(),
             lv,
         }
@@ -626,10 +635,7 @@ impl<'a, T> DoubleEndedIterator for Handles<'a, T> {
     #[inline]
     fn next_back(&mut self) -> Option<Self::Item> {
         if self.len > 0 {
-            let mut hrev = self.hrev;
-            if hrev == BAD_HANDLE {
-               hrev = self.lv.front_().unwrap().prev;
-            }
+            let hrev = self.hrev;
             let node = self.lv.get_(hrev);
             self.hrev = node.prev;
             self.len -= 1;
@@ -647,12 +653,16 @@ impl<T> FusedIterator for Handles<'_, T> {}
 pub struct Iter<'a, T> {
     lv    : &'a LinkedVector<T>,
     hnode : HNode,
+    hrev  : HNode,
+    len   : usize,
 }
 impl<'a, T> Iter<'a, T> {
     #[inline]
     pub fn new(lv: &'a LinkedVector<T>) -> Self {
         Self {
             hnode : lv.head,
+            hrev  : lv.front_().map(|h| h.prev).unwrap_or(BAD_HANDLE),
+            len   : lv.len(),
             lv,
         }
     }
@@ -662,26 +672,36 @@ impl<'a, T> Iterator for Iter<'a, T> {
     type Item = &'a T;
     #[inline]
     fn next(&mut self) -> Option<Self::Item> {
-        if self.hnode == BAD_HANDLE {
-            None
-        } else {
+        if self.len > 0 {
             let hnode = self.hnode;
             self.hnode = self.lv.get_(hnode).next;
+            self.len -= 1;
             self.lv.get(hnode)
+        } else {
+            None
         }
+    }
+    #[inline]
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        (self.len, Some(self.len))
+    }
+    #[inline]
+    fn last(self) -> Option<Self::Item> {
+        self.lv.back()
     }
 }
 
 impl<'a, T> DoubleEndedIterator for Iter<'a, T> {
     #[inline]
     fn next_back(&mut self) -> Option<Self::Item> {
-        let prev = self.lv.get_(self.hnode).prev;
-        if self.lv.get_(prev).next == BAD_HANDLE {
-            None
+        if self.len > 0 {
+            let hrev = self.hrev;
+            let node = self.lv.get_(hrev);
+            self.hrev = node.prev;
+            self.len -= 1;
+            self.lv.get(hrev)
         } else {
-            let hnode  = self.hnode;
-            self.hnode = prev;
-            self.lv.get(hnode)
+            None
         }
     }
 }
@@ -697,6 +717,8 @@ impl<'a, T> IntoIterator for &'a LinkedVector<T> {
     fn into_iter(self) -> Self::IntoIter {
         Iter {
             hnode : self.head,
+            hrev  : self.front_().map(|h| h.prev).unwrap_or(BAD_HANDLE),
+            len   : self.len(),
             lv    : self,
         }
     }
@@ -705,6 +727,8 @@ impl<'a, T> IntoIterator for &'a LinkedVector<T> {
 pub struct IterMut<'a, T> {
     lv    : &'a mut LinkedVector<T>,
     hnode : HNode,
+    hrev  : HNode,
+    len   : usize,
 }
 
 impl<'a, T> IterMut<'a, T> {
@@ -712,6 +736,8 @@ impl<'a, T> IterMut<'a, T> {
     pub fn new(lv: &'a mut LinkedVector<T>) -> Self {
         Self {
             hnode : lv.head,
+            hrev  : lv.front_().map(|h| h.prev).unwrap_or(BAD_HANDLE),
+            len   : lv.len(),
             lv,
         }
     }
@@ -721,18 +747,18 @@ impl<'a, T> Iterator for IterMut<'a, T> {
     type Item = &'a mut T;
     #[inline]
     fn next(&mut self) -> Option<Self::Item> {
-        if self.hnode == BAD_HANDLE {
-            None
-        } else {
-            let hnode  = self.hnode;
-            self.hnode = self.lv.get_(self.hnode).next;
+        if self.len > 0 {
+            let hnode = self.hnode;
+            self.hnode = self.lv.get_(hnode).next;
+            self.len -= 1;
             self.lv.get_mut(hnode).map(|p| unsafe { &mut *(p as *mut T) })
+        } else {
+            None
         }
     }
     #[inline]
     fn size_hint(&self) -> (usize, Option<usize>) {
-        let len = self.lv.len();
-        (len, Some(len))
+        (self.len, Some(self.len))
     }
     #[inline]
     fn last(self) -> Option<Self::Item> {
@@ -743,13 +769,14 @@ impl<'a, T> Iterator for IterMut<'a, T> {
 impl<'a, T> DoubleEndedIterator for IterMut<'a, T> {
     #[inline]
     fn next_back(&mut self) -> Option<Self::Item> {
-        let prev = self.lv.get_(self.hnode).prev;
-        if self.lv.get_(prev).next == BAD_HANDLE {
-            None
+        if self.len > 0 {
+            let hrev = self.hrev;
+            let node = self.lv.get_(hrev);
+            self.hrev = node.prev;
+            self.len -= 1;
+            self.lv.get_mut(hrev).map(|p| unsafe { &mut *(p as *mut T) })
         } else {
-            let hnode  = self.hnode;
-            self.hnode = prev;
-            self.lv.get_mut(hnode).map(|p| unsafe { &mut *(p as *mut T) })
+            None
         }
     }
 }
@@ -765,6 +792,8 @@ impl<'a, T> IntoIterator for &'a mut LinkedVector<T> {
     fn into_iter(self) -> Self::IntoIter {
         IterMut {
             hnode : self.head,
+            hrev  : self.front_().map(|h| h.prev).unwrap_or(BAD_HANDLE),
+            len   : self.len(),
             lv    : self,
         }
     }
@@ -786,6 +815,10 @@ impl<T> Iterator for IntoIter<T> {
     #[inline]
     fn next(&mut self) -> Option<Self::Item> {
         self.0.pop_front()
+    }
+    #[inline]
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        (self.0.len(), Some(self.0.len()))
     }
 }
 
