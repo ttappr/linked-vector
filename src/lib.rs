@@ -1,3 +1,6 @@
+
+#![doc = include_str!("../README.md")]
+
 use core::iter::{FromIterator, FusedIterator};
 use core::ops::{Index, IndexMut};
 pub use cursor::*;
