@@ -25,6 +25,7 @@ fn back() {
     lv1.push_back(2);
     lv1.push_back(3);
     assert_eq!(lv1.back(), Some(&3));
+    assert_eq!(lv1.len(), 3);
 }
 
 #[test]
@@ -35,6 +36,7 @@ fn back_mut() {
     lv1.push_back(3);
     *lv1.back_mut().unwrap() = 4;
     assert_eq!(lv1.back(), Some(&4));
+    assert_eq!(lv1.len(), 3);
 }
 
 #[test]
@@ -45,6 +47,7 @@ fn clear() {
     lv1.push_back(3);
     lv1.clear();
     assert_eq!(lv1.is_empty(), true);
+    assert_eq!(lv1.len(), 0);
 }
 
 #[test]
@@ -55,6 +58,7 @@ fn clone() {
     lv1.push_back(3);
     let lv2 = lv1.clone();
     assert_eq!(lv1, lv2); // Also tests PartialEq.
+    assert_eq!(lv1.len(), lv2.len());
 }
 
 #[test]
@@ -100,6 +104,7 @@ fn extend() {
 
     lv1.iter().zip(1..).for_each(|(a, b)| assert_eq!(a, &b));
     assert_eq!(lv2.is_empty(), false);
+    assert_eq!(lv1.len(), 6);
 }
 
 #[test]
@@ -115,12 +120,14 @@ fn test_drop() {
 fn from_array() {
     let lv1 = LinkedVector::from([1, 2, 3]);
     lv1.iter().zip(1..).for_each(|(a, b)| assert_eq!(a, &b));
+    assert_eq!(lv1.len(), 3);
 }
 
 #[test]
 fn from_iter() {
     let lv1 = LinkedVector::from_iter(1..4);
     lv1.iter().zip(1..).for_each(|(a, b)| assert_eq!(a, &b));
+    assert_eq!(lv1.len(), 3);
 }
 
 #[test]
@@ -140,6 +147,7 @@ fn front_mut() {
     lv1.push_back(3);
     *lv1.front_mut().unwrap() = 4;
     assert_eq!(lv1.front(), Some(&4));
+    assert_eq!(lv1.len(), 3);
 }
 
 #[test]
@@ -151,6 +159,7 @@ fn get() {
     assert_eq!(lv1.get(h1), Some(&1));
     assert_eq!(lv1.get(h2), Some(&2));
     assert_eq!(lv1.get(h3), Some(&3));
+    assert_eq!(lv1.len(), 3);
 }
 
 #[test]
@@ -199,6 +208,7 @@ fn index_mut() {
     assert_eq!(lv1[h1], 4);
     assert_eq!(lv1[h2], 5);
     assert_eq!(lv1[h3], 6);
+    assert_eq!(lv1.len(), 3);
 }
 
 #[test]
@@ -213,6 +223,7 @@ fn insert_after() {
     assert_eq!(lv1.get_(h1).next, h4);
     assert_eq!(lv1.get_(h4).next, h2);
     assert_eq!(lv1.get_(h4).prev, h1);
+    assert_eq!(lv1.len(), 4);
 }
 
 #[test]
@@ -225,6 +236,7 @@ fn insert_before() {
     assert_eq!(lv1.front(), Some(&1));
     assert_eq!(lv1.back(), Some(&3));
     assert_eq!(lv1.get_(h4).next, h3);
+    assert_eq!(lv1.len(), 4);
 }
 #[test]
 fn into_iter() {
@@ -366,6 +378,7 @@ fn pop_back() {
     assert_eq!(lv1.pop_back(), Some(2));
     assert_eq!(lv1.pop_back(), Some(1));
     assert_eq!(lv1.pop_back(), None);
+    assert_eq!(lv1.len(), 0);
 }
 
 #[test]
@@ -378,6 +391,7 @@ fn pop_front() {
     assert_eq!(lv1.pop_front(), Some(2));
     assert_eq!(lv1.pop_front(), Some(3));
     assert_eq!(lv1.pop_front(), None);
+    assert_eq!(lv1.len(), 0);
 }
 
 #[test]
@@ -388,6 +402,7 @@ fn push_back() {
     lv1.push_back(3);
     assert_eq!(lv1.front(), Some(&1));
     assert_eq!(lv1.back(), Some(&3));
+    assert_eq!(lv1.len(), 3);
 }
 
 #[test]
@@ -398,6 +413,7 @@ fn push_front() {
     lv1.push_front(3);
     assert_eq!(lv1.front(), Some(&3));
     assert_eq!(lv1.back(), Some(&1));
+    assert_eq!(lv1.len(), 3);
 }
 
 #[test]

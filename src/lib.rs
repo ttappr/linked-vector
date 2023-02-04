@@ -249,7 +249,7 @@ impl<T> LinkedVector<T> {
         if let Some(next) = self.get_next(node) {
             self.insert_(Some(next), value)
         } else {
-            self.push_back(value)
+            self.insert_(None, value)
         }
     }
 
