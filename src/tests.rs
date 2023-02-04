@@ -249,7 +249,7 @@ fn test_insertions_deletions_etc() {
     }
 
     for &h in hs.iter().step_by(2) {
-        lv1.remove(h);
+        lv1.remove_node(h);
     }
 
     for (&h1, h2) in hs.iter().skip(1).step_by(2).zip(lv1.handles()) {

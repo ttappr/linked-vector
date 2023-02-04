@@ -1,6 +1,3 @@
-
-#![doc = include_str!("../README.md")]
-
 use core::iter::{FromIterator, FusedIterator};
 use core::ops::{Index, IndexMut};
 pub use cursor::*;
@@ -500,6 +497,23 @@ impl<T> LinkedVector<T> {
         }
     }
 
+    /// Removes the first element with the indicated value. Returns the element
+    /// if it is found, or `None` otherwise. This operation completes in O(n)
+    /// time.
+    /// 
+    #[inline]
+    pub fn remove(&mut self, value: &T) -> Option<T> 
+    where 
+        T: PartialEq
+    {
+        for h in self.handles() {
+            if self.get_(h).value.as_ref() == Some(value) {
+                return self.remove_(Some(h));
+            }
+        }
+        None
+    }
+
     /// Removes the element indicated by the handle, `node`. Returns the element
     /// if the handle is valid, or `None` otherwise. This operation completes in
     /// O(1) time.
@@ -508,12 +522,12 @@ impl<T> LinkedVector<T> {
     /// let mut lv = LinkedVector::from([1, 2, 3]);
     /// let handles = lv.handles().collect::<Vec<_>>();
     /// 
-    /// lv.remove(handles[1]);
+    /// lv.remove_node(handles[1]);
     /// 
     /// assert_eq!(lv, LinkedVector::from([1, 3]));
     /// ```
     #[inline]
-    pub fn remove(&mut self, node: HNode) -> Option<T> {
+    pub fn remove_node(&mut self, node: HNode) -> Option<T> {
         self.remove_(Some(node))
     }
 
