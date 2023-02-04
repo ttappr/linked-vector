@@ -215,6 +215,22 @@ impl<T> LinkedVector<T> {
         self.get_mut_(node).value.as_mut()
     }
 
+    /// Returns a handle to the next node in the list, or `None` if the given
+    /// handle is the last node in the list. This operation completes in O(1)
+    /// 
+    #[inline]
+    pub fn get_next(&self, node: HNode) -> Option<HNode> {
+        #[cfg(debug_assertions)]
+        debug_assert!(self.handle_is_native(node), "Alien handle.");
+        debug_assert!(self.handle_is_valid(node), "Handle already removed.");
+        let next = self.get_(node).next;
+        if next == BAD_HANDLE {
+            None
+        } else {
+            Some(next)
+        }
+    }
+
     /// Returns an iterator over the handles of the vector. The handles will 
     /// reflect the order of the linked list. This operation completes in O(1) 
     /// time.
