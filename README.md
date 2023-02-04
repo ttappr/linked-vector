@@ -1,5 +1,7 @@
 # LinkedVector
 
+[Source Documentation](https://ttappr.github.io/linked-vector/)
+
 `LinkedVector` is a hybrid of a vector and linked list. Items are accessible
 directly in `O(1)` time, and insertions and deletions also operate in `O(1)`
 time. Internally, nodes exist within a contiguous vector, with each node holding 
