@@ -194,9 +194,6 @@ impl<T> LinkedVector<T> {
     /// 
     #[inline]
     pub fn get(&self, node: HNode) -> Option<&T> {
-        #[cfg(debug_assertions)]
-        debug_assert!(self.handle_is_native(node), "Alien handle.");
-        debug_assert!(self.handle_is_valid(node), "Handle already removed.");
         // TODO - Returning an Option is understood that None is returned on
         //        problem. But the implementation panics on debug builds.
         //        This is inconsistent. Needs fixing.
@@ -209,9 +206,6 @@ impl<T> LinkedVector<T> {
     /// 
     #[inline]
     pub fn get_mut(&mut self, node: HNode) -> Option<&mut T> {
-        #[cfg(debug_assertions)]
-        debug_assert!(self.handle_is_native(node), "Alien handle.");
-        debug_assert!(self.handle_is_valid(node), "Handle already removed.");
         self.get_mut_(node).value.as_mut()
     }
 
@@ -220,9 +214,6 @@ impl<T> LinkedVector<T> {
     /// 
     #[inline]
     pub fn get_next(&self, node: HNode) -> Option<HNode> {
-        #[cfg(debug_assertions)]
-        debug_assert!(self.handle_is_native(node), "Alien handle.");
-        debug_assert!(self.handle_is_valid(node), "Handle already removed.");
         let next = self.get_(node).next;
         if next == BAD_HANDLE {
             None
@@ -375,51 +366,12 @@ impl<T> LinkedVector<T> {
         }
     }
 
-    /// Returns true if the handle within the Option is valid; false otherwise.
-    /// 
-    #[allow(dead_code)]
-    #[inline]
-    fn handleopt_is_valid(&self, node: Option<HNode>) -> bool {
-        node.map_or(true, |h| self.get_(h).value.is_some())
-    }
-
-    /// Returns true if the handle within the Option belongs to this list; false 
-    /// otherwise. This check is only performed in debug builds.
-    /// 
-    #[allow(dead_code)]
-    #[cfg(debug_assertions)]
-    #[inline]
-    fn handleopt_is_native(&self, node: Option<HNode>) -> bool {
-        node.map_or(true, |n| n.1 == self.uuid)
-    }
-
-    /// Returns true if the handle is valid; false otherwise.
-    /// 
-    #[inline]
-    fn handle_is_valid(&self, node: HNode) -> bool {
-        self.get_(node).value.is_some()
-    }
-
-    /// Returns true if the handle belongs to this list; false otherwise. This
-    /// check is only performed in debug builds.
-    /// 
-    #[cfg(debug_assertions)]
-    #[inline(always)]
-    fn handle_is_native(&self, node: HNode) -> bool {
-        node.1 == self.uuid
-    }
-
     /// Inserts `value` before the element indicated by `node`. If `node` is
     /// `None`, the element is inserted at the end of the list. Returns a handle
     /// to the newly inserted element. This operation completes in O(1) time.
     /// 
     #[inline]
     fn insert_(&mut self, node: Option<HNode>, value: T) -> HNode {
-        #[cfg(debug_assertions)]
-        {
-            assert!(self.handleopt_is_native(node), "Handle is not native.");
-            assert!(self.handleopt_is_valid(node), "Handle is invalid.");
-        }
         if self.is_empty() {
             #[cfg(debug_assertions)]
             assert!(node.is_none(), "Empty list has no handles.");
@@ -435,6 +387,7 @@ impl<T> LinkedVector<T> {
                 self.get_mut_(hprev).next = hnew;
                 self.get_mut_(hnew).prev = hprev;
                 self.get_mut_(hnew).next = hnode;
+                self.get_mut_(hnode).prev = hnew;
                 if hnode == self.head {
                     self.head = hnew;
                 }
@@ -456,6 +409,7 @@ impl<T> LinkedVector<T> {
     #[inline]
     fn remove_(&mut self, node: Option<HNode>) -> Option<T> {
         if self.is_empty() {
+            #[cfg(debug_assertions)]
             assert!(node.is_none(), "Empty list has no handles.");
             None
         } else {
@@ -483,10 +437,8 @@ impl<T> LinkedVector<T> {
     #[inline(always)]
     fn get_(&self, node: HNode) -> &Node<T> {
         #[cfg(debug_assertions)]
-        {
-            assert!(self.handle_is_native(node), "Handle is not native.");
-            assert!(self.handle_is_valid(node), "Handle is invalid.");
-        }
+        { assert!(node.0 != BAD_HANDLE.0, "Handle is invalid.");
+          assert!(node.1 == self.uuid, "Handle is not native."); }
         &self.vec[node.0]
     }
 
@@ -496,10 +448,8 @@ impl<T> LinkedVector<T> {
     #[inline(always)]
     fn get_mut_(&mut self, node: HNode) -> &mut Node<T> {
         #[cfg(debug_assertions)]
-        {
-            assert!(self.handle_is_native(node), "Handle is not native.");
-            assert!(self.handle_is_valid(node), "Handle is invalid.");
-        }
+        { assert!(node.0 != BAD_HANDLE.0, "Handle is invalid.");
+          assert!(node.1 == self.uuid, "Handle is not native."); }
         &mut self.vec[node.0]
     }
 
