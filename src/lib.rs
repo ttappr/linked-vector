@@ -86,7 +86,17 @@ impl<T> LinkedVector<T> {
     }
     /// Moves all elements from `other` into `self`, leaving `other` empty.
     /// This operation completes in O(n) time where n is the length of `other`.
+    /// ```
+    /// use linked_vector::*;
     /// 
+    /// let mut lv1 = LinkedVector::new();
+    /// let mut lv2 = LinkedVector::from([1, 2, 3]);
+    /// 
+    /// lv1.append(&mut lv2);
+    /// 
+    /// assert_eq!(lv1.into_iter().collect::<Vec<_>>(), vec![1, 2, 3]);
+    /// assert_eq!(lv2.len(), 0);
+    /// ```
     #[inline]
     pub fn append(&mut self, other: &mut Self) {
         while let Some(value) = other.pop_front() {
@@ -94,9 +104,14 @@ impl<T> LinkedVector<T> {
         }
         other.clear();
     }
-    /// Gives a reference to the element back element, or `None` if the list is 
-    /// empty. This operation completes in O(1) time.
+    /// Gives a reference to the back element, or `None` if the list is  empty.
+    ///  This operation completes in O(1) time.
+    /// ```
+    /// use linked_vector::*;
     /// 
+    /// let mut lv = LinkedVector::from([1, 2, 3]);
+    /// assert_eq!(lv.back(), Some(&3));
+    /// ```
     #[inline]
     pub fn back(&self) -> Option<&T> {
         if self.is_empty() {
@@ -107,7 +122,13 @@ impl<T> LinkedVector<T> {
     }
     /// Gives a mutable reference to the element back element, or `None` if the
     /// list is empty. This operation completes in O(1) time.
+    /// ```
+    /// use linked_vector::*;
     /// 
+    /// let mut lv = LinkedVector::from([1, 2, 3]);
+    /// lv.back_mut().map(|v| *v = 42);
+    /// assert_eq!(lv.back_mut(), Some(&mut 42));
+    /// ```
     #[inline]
     pub fn back_mut(&mut self) -> Option<&mut T> {
         if self.is_empty() {
@@ -163,7 +184,15 @@ impl<T> LinkedVector<T> {
 
     /// Returns a handle to the first node in the list, or `None` if the list is
     /// empty. This operation completes in O(1) time.
+    /// ```
+    /// use linked_vector::*;
     /// 
+    /// let mut lv = LinkedVector::from([1, 2, 3]);
+    /// let hnode = lv.push_front(42);
+    /// 
+    /// assert_eq!(lv.front_node(), Some(hnode));
+    /// assert_eq!(lv.front_node().and_then(|h| lv.get(h)), Some(&42));
+    /// ```
     #[inline]
     pub fn front_node(&self) -> Option<HNode> {
         if self.len == 0 {
@@ -183,6 +212,14 @@ impl<T> LinkedVector<T> {
 
     /// Provides a reference to the element indicated by the given handle, or
     /// `None` if the handle is invalid. This operation completes in O(1) time.
+    /// ```
+    /// use linked_vector::*;
+    /// 
+    /// let mut lv = LinkedVector::from([1, 2, 3]);
+    /// let hnode = lv.push_front(42);
+    /// 
+    /// assert_eq!(lv.get(hnode), Some(&42));
+    /// ```
     /// 
     #[inline]
     pub fn get(&self, node: HNode) -> Option<&T> {
@@ -195,29 +232,36 @@ impl<T> LinkedVector<T> {
     /// Provides a mutable reference to the element indicated by the given
     /// handle, or `None` if the handle is invalid. This operation completes in
     /// O(1) time.
+    /// ```
+    /// use linked_vector::*;
     /// 
+    /// let mut lv = LinkedVector::new();
+    /// let hnode = lv.push_front(0);
+    /// 
+    /// *lv.get_mut(hnode).unwrap() = 42;
+    /// 
+    /// assert_eq!(lv.get(hnode), Some(&42));
+    /// ```
     #[inline]
     pub fn get_mut(&mut self, node: HNode) -> Option<&mut T> {
         self.get_mut_(node).value.as_mut()
     }
 
-    /// Returns a handle to the next node in the list, or `None` if the given
-    /// handle is the last node in the list. This operation completes in O(1)
-    /// 
-    #[inline]
-    pub fn get_next(&self, node: HNode) -> Option<HNode> {
-        let next = self.get_(node).next;
-        if next == BAD_HANDLE {
-            None
-        } else {
-            Some(next)
-        }
-    }
-
     /// Returns an iterator over the handles of the vector. The handles will 
     /// reflect the order of the linked list. This operation completes in O(1) 
     /// time.
+    /// ```
+    /// use linked_vector::*;
+    /// let mut lv = LinkedVector::new();
     /// 
+    /// let h1 = lv.push_back(42);
+    /// let h2 = lv.push_back(43);
+    /// let h3 = lv.push_back(44);
+    /// 
+    /// let iter = lv.handles();
+    /// 
+    /// assert_eq!(iter.collect::<Vec<_>>(), vec![h1, h2, h3]);
+    /// ```
     #[inline]
     pub fn handles(&self) -> Handles<T> {
         Handles::new(self)
@@ -226,10 +270,19 @@ impl<T> LinkedVector<T> {
     /// Inserts a new element after the one indicated by the handle, `node`.
     /// Returns a handle to the newly inserted element. This operation completes
     /// in O(1) time.
+    /// ```
+    /// use linked_vector::*;
+    /// let mut lv = LinkedVector::new();
     /// 
+    /// let h1 = lv.push_back(42);
+    /// let h2 = lv.insert_after(h1, 43);
+    /// 
+    /// assert_eq!(lv.next_node(h1), Some(h2));
+    /// assert_eq!(lv.get(h2), Some(&43));
+    /// ```
     #[inline]
     pub fn insert_after(&mut self, node: HNode, value: T) -> HNode {
-        if let Some(next) = self.get_next(node) {
+        if let Some(next) = self.next_node(node) {
             self.insert_(Some(next), value)
         } else {
             self.insert_(None, value)
@@ -239,7 +292,16 @@ impl<T> LinkedVector<T> {
     /// Inserts a new element before the one indicated by the handle, `node`.
     /// Returns a handle to the newly inserted element. This operation completes
     /// in O(1) time.
+    /// ```
+    /// use linked_vector::*;
+    /// let mut lv = LinkedVector::new();
     /// 
+    /// let h1 = lv.push_back(42);
+    /// let h2 = lv.insert_before(h1, 43);
+    /// 
+    /// assert_eq!(lv.next_node(h2), Some(h1));
+    /// assert_eq!(lv.get(h1), Some(&42));
+    /// ```
     #[inline]
     pub fn insert_before(&mut self, node: HNode, value: T) -> HNode {
         self.insert_(Some(node), value)
@@ -261,7 +323,14 @@ impl<T> LinkedVector<T> {
 
     /// Returns an iterator over the elements of the list. Renders mutable
     /// references to the elements.
+    /// ```
+    /// use linked_vector::*;
+    /// let mut lv = LinkedVector::from([1, 2, 3]);
     /// 
+    /// lv.iter_mut().for_each(|x| *x += 1);
+    /// 
+    /// assert_eq!(lv, LinkedVector::from([2, 3, 4]));
+    /// ```
     #[inline]
     pub fn iter_mut(&mut self) -> IterMut<T> {
         IterMut::new(self)
@@ -274,9 +343,36 @@ impl<T> LinkedVector<T> {
         self.len
     }
 
+    /// Returns a handle to the next node in the list, or `None` if the given
+    /// handle is the last node in the list. This operation completes in O(1)
+    /// ```
+    /// use linked_vector::*;
+    /// let mut lv = LinkedVector::new();
+    /// 
+    /// let h1 = lv.push_back(42);
+    /// let h2 = lv.push_back(43);
+    /// 
+    /// assert_eq!(lv.next_node(h1), Some(h2));
+    /// ```
+    #[inline]
+    pub fn next_node(&self, node: HNode) -> Option<HNode> {
+        // TODO - need prior_node().
+        let next = self.get_(node).next;
+        if next == BAD_HANDLE {
+            None
+        } else {
+            Some(next)
+        }
+    }    
+
     /// Pops the last element of the vector. Returns `None` if the vector is
     /// empty. This operation completes in O(1) time.
+    /// ```
+    /// use linked_vector::*;
+    /// let mut lv = LinkedVector::from([1, 2, 3]);
     /// 
+    /// assert_eq!(lv.pop_back(), Some(3));
+    /// ```
     #[inline]
     pub fn pop_back(&mut self) -> Option<T> {
         self.remove_(None)
@@ -284,7 +380,12 @@ impl<T> LinkedVector<T> {
 
     /// Pops the first element of the vector. Returns `None` if the vector is
     /// empty. This operation completes in O(1) time.
+    /// ```
+    /// use linked_vector::*;
+    /// let mut lv = LinkedVector::from([1, 2, 3]);
     /// 
+    /// assert_eq!(lv.pop_front(), Some(1));
+    /// ```
     #[inline]
     pub fn pop_front(&mut self) -> Option<T> {
         if self.is_empty() {
@@ -294,9 +395,38 @@ impl<T> LinkedVector<T> {
         }
     }
 
+    /// Returns a handle to the previous node in the list, or `None` if the 
+    /// given handle is the first node in the list. This operation completes in
+    /// O(1) time.
+    /// ```
+    /// use linked_vector::*;
+    /// let mut lv = LinkedVector::new();
+    /// 
+    /// let h1 = lv.push_back(42);
+    /// let h2 = lv.push_back(43);
+    /// 
+    /// assert_eq!(lv.prev_node(h2), Some(h1));
+    /// ```
+    pub fn prev_node(&self, node: HNode) -> Option<HNode> {
+        let prior = self.get_(node).prev;
+        if prior == BAD_HANDLE {
+            None
+        } else {
+            Some(prior)
+        }
+    }
+
     /// Pushes a new element to the back of the list. Returns a handle to the
     /// newly inserted element. This operation completes in O(1) time.
+    /// ```
+    /// use linked_vector::*;
+    /// let mut lv = LinkedVector::new();
     /// 
+    /// let h1 = lv.push_back(42);
+    /// let h2 = lv.push_back(43);
+    /// 
+    /// assert_eq!(lv.next_node(h1), Some(h2));
+    /// ```
     #[inline]
     pub fn push_back(&mut self, value: T) -> HNode {
         self.insert_(None, value)
@@ -304,7 +434,15 @@ impl<T> LinkedVector<T> {
 
     /// Pushes a new element to the front of the list. Returns a handle to the
     /// newly inserted element. This operation completes in O(1) time.
+    /// ```
+    /// use linked_vector::*;
+    /// let mut lv = LinkedVector::from([1, 2, 3]);
     /// 
+    /// let h1 = lv.front_node().unwrap();
+    /// let h2 = lv.push_front(42);
+    /// 
+    /// assert_eq!(lv.next_node(h2), Some(h1));
+    /// ```
     #[inline]
     pub fn push_front(&mut self, value: T) -> HNode {
         if self.is_empty() {
@@ -317,7 +455,15 @@ impl<T> LinkedVector<T> {
     /// Removes the element indicated by the handle, `node`. Returns the element
     /// if the handle is valid, or `None` otherwise. This operation completes in
     /// O(1) time.
+    /// ```
+    /// use linked_vector::*;
+    /// let mut lv = LinkedVector::from([1, 2, 3]);
+    /// let handles = lv.handles().collect::<Vec<_>>();
     /// 
+    /// lv.remove(handles[1]);
+    /// 
+    /// assert_eq!(lv, LinkedVector::from([1, 3]));
+    /// ```
     #[inline]
     pub fn remove(&mut self, node: HNode) -> Option<T> {
         self.remove_(Some(node))
@@ -325,7 +471,12 @@ impl<T> LinkedVector<T> {
 
     /// Returns a vector containing the elements of the list. This operation
     /// completes in O(n) time.
+    /// ```
+    /// use linked_vector::*;
+    /// let lv = LinkedVector::from([1, 2, 3]);
     /// 
+    /// assert_eq!(lv.to_vec(), vec![1, 2, 3]);
+    /// ```
     #[inline]
     pub fn to_vec(&self) -> Vec<T> 
     where
@@ -420,7 +571,7 @@ impl<T> LinkedVector<T> {
                 self.get_mut_(hprev).next = hnext;
             }
             self.len -= 1;
-            self.push_bin(hnode);
+            self.push_recyc(hnode);
             self.get_mut_(hnode).value.take()
         }
     }
@@ -452,7 +603,7 @@ impl<T> LinkedVector<T> {
     /// 
     #[inline]
     fn new_node(&mut self, value: T) -> HNode {
-        if let Some(hnode) = self.pop_bin() {
+        if let Some(hnode) = self.pop_recyc() {
             self.vec[hnode.0] = Node::new(value);
             hnode
         } else {
@@ -468,7 +619,7 @@ impl<T> LinkedVector<T> {
     /// bin. The node is removed from the bin.
     /// 
     #[inline]
-    fn pop_bin(&mut self) -> Option<HNode> {
+    fn pop_recyc(&mut self) -> Option<HNode> {
         if self.recyc == BAD_HANDLE {
             None
         } else {
@@ -483,7 +634,7 @@ impl<T> LinkedVector<T> {
     /// the recycle bin.
     /// 
     #[inline]
-    fn push_bin(&mut self, node: HNode) {
+    fn push_recyc(&mut self, node: HNode) {
         self.get_mut_(node).prev = BAD_HANDLE;
         if self.recyc == BAD_HANDLE {
             self.get_mut_(node).next = BAD_HANDLE;
