@@ -1,8 +1,10 @@
 use core::iter::{FromIterator, FusedIterator};
 use core::ops::{Index, IndexMut};
+pub use cursor::*;
 
 #[cfg(test)]
 mod tests;
+mod cursor;
 
 #[cfg(debug_assertions)]
 use uuid::{uuid, Uuid};
@@ -158,6 +160,53 @@ impl<T> LinkedVector<T> {
         self.iter().any(|v| v == value)
     }
 
+    /// Creates a cursor that can be used to traverse the list.
+    /// ```
+    /// use linked_vector::*;
+    /// 
+    /// let lv = LinkedVector::from([1, 2, 3]);
+    /// let mut cursor = lv.cursor(None);
+    /// 
+    /// assert_eq!(cursor.get(), Some(&1));
+    /// 
+    /// cursor.move_next();
+    /// 
+    /// assert_eq!(cursor.get(), Some(&2));
+    /// ```
+    /// 
+    pub fn cursor(&self, hnode: Option<HNode>) -> Cursor<T> {
+        if let Some(hnode) = hnode {
+            Cursor::new_at(self, hnode)
+        } else {
+            Cursor::new(self)
+        }
+    }
+
+    /// Creates a cursor that holds a mutable reference to the LinkedVector that 
+    /// can be used to traverse the list.
+    /// ```
+    /// use linked_vector::*;
+    /// 
+    /// let mut lv = LinkedVector::from([1, 2, 3, 4, 5, 6]);
+    /// let mut cursor = lv.cursor_mut(None);
+    /// 
+    /// cursor.forward(3);
+    /// 
+    /// assert_eq!(cursor.get(), Some(&4));
+    /// 
+    /// cursor.get_mut().map(|v| *v = 42);
+    /// 
+    /// assert_eq!(lv.to_vec(), vec![1, 2, 3, 42, 5, 6]);
+    /// 
+    /// ```
+    pub fn cursor_mut(&mut self, hnode: Option<HNode>) -> CursorMut<T> {
+        if let Some(hnode) = hnode {
+            CursorMut::new_at(self, hnode)
+        } else {
+            CursorMut::new(self)
+        }
+    }
+
     /// Gives a reference to the element front element, or `None` if the list is
     /// empty. This operation completes in O(1) time.
     /// 
@@ -220,12 +269,10 @@ impl<T> LinkedVector<T> {
     /// 
     /// assert_eq!(lv.get(hnode), Some(&42));
     /// ```
-    /// 
     #[inline]
     pub fn get(&self, node: HNode) -> Option<&T> {
-        // TODO - Returning an Option is understood as None is returned on
-        //        problem. But the implementation panics on debug builds.
-        //        This is inconsistent. Needs fixing.
+        // TODO - Consider implementing Deref<Target=[T]>. This might be
+        //        overkill though.
         self.get_(node).value.as_ref()
     }
 
