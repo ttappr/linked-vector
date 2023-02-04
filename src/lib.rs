@@ -1,13 +1,5 @@
 use core::iter::{FromIterator, FusedIterator};
 use core::ops::{Index, IndexMut};
-//  use core::mem;
-
-// TODO - Implement: Ord, Hash, Debug prints, Sync, Send...
-//      - Needs a README.md file.
-//      - Needs a LICENSE file.
-//      - Needs a CHANGELOG.md file.
-//      - Needs a CONTRIBUTING.md file. (?)
-//      - Header in this file describing what this is/does.
 
 #[cfg(test)]
 mod tests;
@@ -63,8 +55,8 @@ impl<T> Node<T> {
 pub struct LinkedVector<T> {
     vec   : Vec<Node<T>>,
     head  : HNode,
-    bin   : HNode,
-    len_  : usize,
+    recyc : HNode,
+    len   : usize,
 
     #[cfg(debug_assertions)]
     uuid  : Uuid,
@@ -78,18 +70,18 @@ impl<T> LinkedVector<T> {
     pub fn new() -> Self {
         #[cfg(debug_assertions)]
         { Self { 
-            vec  : Vec::new(), 
-            bin  : BAD_HANDLE, 
-            head : BAD_HANDLE, 
-            len_ : 0, 
-            uuid : uuid::Uuid::new_v4() 
+            vec   : Vec::new(), 
+            recyc : BAD_HANDLE, 
+            head  : BAD_HANDLE, 
+            len  : 0, 
+            uuid  : uuid::Uuid::new_v4() 
         } }
         #[cfg(not(debug_assertions))]
         { Self { 
-            vec  : Vec::new(), 
-            bin  : BAD_HANDLE, 
-            head : BAD_HANDLE, 
-            len_ : 0, 
+            vec   : Vec::new(), 
+            recyc : BAD_HANDLE, 
+            head  : BAD_HANDLE, 
+            len   : 0, 
         } }
     }
     /// Moves all elements from `other` into `self`, leaving `other` empty.
@@ -130,9 +122,9 @@ impl<T> LinkedVector<T> {
     #[inline]
     pub fn clear(&mut self) {
         self.vec.clear();
-        self.len_ = 0;
+        self.len = 0;
         self.head = BAD_HANDLE;
-        self.bin  = BAD_HANDLE;
+        self.recyc = BAD_HANDLE;
     }
     /// Returns `true` if the list contains an element with the given value.
     /// This operation completes in O(n) time where n is the length of the list.
@@ -174,7 +166,7 @@ impl<T> LinkedVector<T> {
     /// 
     #[inline]
     pub fn front_node(&self) -> Option<HNode> {
-        if self.len_ == 0 {
+        if self.len == 0 {
             None
         } else {
             Some(self.head)
@@ -194,7 +186,7 @@ impl<T> LinkedVector<T> {
     /// 
     #[inline]
     pub fn get(&self, node: HNode) -> Option<&T> {
-        // TODO - Returning an Option is understood that None is returned on
+        // TODO - Returning an Option is understood as None is returned on
         //        problem. But the implementation panics on debug builds.
         //        This is inconsistent. Needs fixing.
         self.get_(node).value.as_ref()
@@ -257,7 +249,7 @@ impl<T> LinkedVector<T> {
     /// 
     #[inline]
     pub fn is_empty(&self) -> bool {
-        self.len_ == 0
+        self.len == 0
     }
 
     /// Returns an iterator over the elements of the list.
@@ -279,7 +271,7 @@ impl<T> LinkedVector<T> {
     /// 
     #[inline]
     pub fn len(&self) -> usize {
-        self.len_
+        self.len
     }
 
     /// Pops the last element of the vector. Returns `None` if the vector is
@@ -378,7 +370,7 @@ impl<T> LinkedVector<T> {
             let hnew = self.new_node(value);
             self.head = hnew; 
             self.get_mut_(hnew).prev = hnew;
-            self.len_ += 1;
+            self.len += 1;
             hnew 
         } else {
             let hnew = self.new_node(value);
@@ -398,7 +390,7 @@ impl<T> LinkedVector<T> {
                 self.get_mut_(hnew).prev  = hnode;
                 self.get_mut_(self.head).prev = hnew;
             }
-            self.len_ += 1;
+            self.len += 1;
             hnew
         }
     }
@@ -427,7 +419,7 @@ impl<T> LinkedVector<T> {
             } else {
                 self.get_mut_(hprev).next = hnext;
             }
-            self.len_ -= 1;
+            self.len -= 1;
             self.push_bin(hnode);
             self.get_mut_(hnode).value.take()
         }
@@ -477,11 +469,11 @@ impl<T> LinkedVector<T> {
     /// 
     #[inline]
     fn pop_bin(&mut self) -> Option<HNode> {
-        if self.bin == BAD_HANDLE {
+        if self.recyc == BAD_HANDLE {
             None
         } else {
-            let hnode = self.bin;
-            self.bin = self.get_(hnode).next;
+            let hnode = self.recyc;
+            self.recyc = self.get_(hnode).next;
             self.get_mut_(hnode).next = BAD_HANDLE;
             Some(hnode)
         }
@@ -493,12 +485,12 @@ impl<T> LinkedVector<T> {
     #[inline]
     fn push_bin(&mut self, node: HNode) {
         self.get_mut_(node).prev = BAD_HANDLE;
-        if self.bin == BAD_HANDLE {
+        if self.recyc == BAD_HANDLE {
             self.get_mut_(node).next = BAD_HANDLE;
-            self.bin = node;
+            self.recyc = node;
         } else {
-            self.get_mut_(node).next = self.bin;
-            self.bin = node;
+            self.get_mut_(node).next = self.recyc;
+            self.recyc = node;
         }
     }
 }
@@ -523,30 +515,6 @@ impl<T> Default for LinkedVector<T> {
         Self::new()
     }
 }
-/*
-TODO - Find out if this imple is necessary. I think we can rely on the Vec's
-       Drop impl to handle the nodes.
-impl<T> Drop for LinkedVector<T> {
-// unsafe impl<#[may_dangle] T> Drop for LinkedVector<T> {
-    fn drop(&mut self) {
-        struct DropGuard<'a, T>(&'a mut LinkedVector<T>);
-
-        impl<'a, T> Drop for DropGuard<'a, T> {
-            fn drop(&mut self) {
-                // Continue the same loop we do below. This only runs when a 
-                // destructor has panicked. If another one panics this will 
-                // abort.
-                while self.0.pop_front().is_some() {}
-            }
-        }
-
-        while let Some(node) = self.pop_front() {
-            let guard = DropGuard(self);
-            drop(node);
-            mem::forget(guard);
-        }
-    }
-}*/
 
 impl<T: Eq> Eq for LinkedVector<T> {}
 
