@@ -455,11 +455,6 @@ impl<T> LinkedVector<T> {
     /// 
     #[inline]
     fn remove_(&mut self, node: Option<HNode>) -> Option<T> {
-        #[cfg(debug_assertions)]
-        {
-            assert!(self.handleopt_is_native(node), "Handle is not native.");
-            assert!(self.handleopt_is_valid(node), "Handle is invalid.");
-        }
         if self.is_empty() {
             assert!(node.is_none(), "Empty list has no handles.");
             None
@@ -487,6 +482,11 @@ impl<T> LinkedVector<T> {
     /// 
     #[inline(always)]
     fn get_(&self, node: HNode) -> &Node<T> {
+        #[cfg(debug_assertions)]
+        {
+            assert!(self.handle_is_native(node), "Handle is not native.");
+            assert!(self.handle_is_valid(node), "Handle is invalid.");
+        }
         &self.vec[node.0]
     }
 
@@ -495,6 +495,11 @@ impl<T> LinkedVector<T> {
     /// 
     #[inline(always)]
     fn get_mut_(&mut self, node: HNode) -> &mut Node<T> {
+        #[cfg(debug_assertions)]
+        {
+            assert!(self.handle_is_native(node), "Handle is not native.");
+            assert!(self.handle_is_valid(node), "Handle is invalid.");
+        }
         &mut self.vec[node.0]
     }
 
