@@ -1,6 +1,6 @@
 # LinkedVector
 
-[Documentation](https://ttappr.github.io/linked-vector)
+[Documentation](https://ttappr.github.io/linked-vector/doc/linked_vector/index.html)
 
 
 Syntax highlighted code block
