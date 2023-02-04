@@ -75,7 +75,7 @@ impl<T> LinkedVector<T> {
             vec   : Vec::new(), 
             recyc : BAD_HANDLE, 
             head  : BAD_HANDLE, 
-            len  : 0, 
+            len   : 0, 
             uuid  : uuid::Uuid::new_v4() 
         } }
         #[cfg(not(debug_assertions))]

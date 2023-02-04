@@ -1,6 +1,10 @@
 
 use crate::*;
 
+/// A cursor is a position within a linked vector. It can be used to traverse
+/// the list in either direction, and to access the element at the current
+/// position.
+/// 
 pub trait CursorBase<T> {
     /// Returns a reference to the element at the cursor's current position.
     /// 
@@ -50,6 +54,8 @@ pub trait CursorBase<T> {
     fn backward(&mut self, n: usize) -> Result<HNode, HNode>;
 }
 
+/// A cursor which can only read the elements of the list.
+/// 
 pub struct Cursor<'a, T> {
     lvec   : &'a LinkedVector<T>,
     handle : HNode,
@@ -139,6 +145,8 @@ impl<'a, T> CursorBase<T> for Cursor<'a, T> {
     }
 }
 
+/// A cursor which can read and write the elements of the list.
+/// 
 pub struct CursorMut<'a, T> {
     lvec   : &'a mut LinkedVector<T>,
     handle : HNode,

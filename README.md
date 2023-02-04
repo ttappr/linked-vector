@@ -48,7 +48,7 @@ it isn't moved in the vector - its next and previous fields are updated to link
 it into the recycling list.
 
 # Examples
-## Accessing Items Using Handles
+## Handles
 
 Operations that alter the `LinkedVector` return handles that can be saved for
 later use. These provide direct access to items in `O(1)` time.
@@ -72,7 +72,7 @@ assert_eq!(lv.to_vec(), vec![4, 2, 42, 3]);
 
 ```
 
-## Traversal With Cursors
+## Cursors
 
 A cursor can be requested from the `LinkedVector` to facilitate traversal of 
 nodes. Using a handle to specify starting position, cursors can be set to the

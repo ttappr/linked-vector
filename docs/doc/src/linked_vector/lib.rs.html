@@ -1056,10 +1056,10 @@
 <a href="#1056" id="1056">1056</a>
 <a href="#1057" id="1057">1057</a>
 <a href="#1058" id="1058">1058</a>
-</pre><pre class="rust"><code>
-<span class="attr">#![doc = <span class="macro">include_str!</span>(<span class="string">&quot;../README.md&quot;</span>)]
-
-</span><span class="kw">use </span>core::iter::{FromIterator, FusedIterator};
+<a href="#1059" id="1059">1059</a>
+<a href="#1060" id="1060">1060</a>
+<a href="#1061" id="1061">1061</a>
+</pre><pre class="rust"><code><span class="kw">use </span>core::iter::{FromIterator, FusedIterator};
 <span class="kw">use </span>core::ops::{Index, IndexMut};
 <span class="kw">pub use </span>cursor::<span class="kw-2">*</span>;
 
@@ -1136,7 +1136,7 @@
             vec   : Vec::new(), 
             recyc : BAD_HANDLE, 
             head  : BAD_HANDLE, 
-            len  : <span class="number">0</span>, 
+            len   : <span class="number">0</span>, 
             uuid  : uuid::Uuid::new_v4() 
         } }
         <span class="attr">#[cfg(not(debug_assertions))]
@@ -1462,8 +1462,7 @@
     /// ```
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>next_node(<span class="kw-2">&amp;</span><span class="self">self</span>, node: HNode) -&gt; <span class="prelude-ty">Option</span>&lt;HNode&gt; {
-        <span class="comment">// TODO - need prior_node().
-        </span><span class="kw">let </span>next = <span class="self">self</span>.get_(node).next;
+        <span class="kw">let </span>next = <span class="self">self</span>.get_(node).next;
         <span class="kw">if </span>next == BAD_HANDLE {
             <span class="prelude-val">None
         </span>} <span class="kw">else </span>{
@@ -1513,6 +1512,7 @@
     /// 
     /// assert_eq!(lv.prev_node(h2), Some(h1));
     /// ```
+    </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>prev_node(<span class="kw-2">&amp;</span><span class="self">self</span>, node: HNode) -&gt; <span class="prelude-ty">Option</span>&lt;HNode&gt; {
         <span class="kw">let </span>prior = <span class="self">self</span>.get_(node).prev;
         <span class="kw">if </span>prior == BAD_HANDLE {
@@ -1561,14 +1561,20 @@
     <span class="doccomment">/// Removes the first element with the indicated value. Returns the element
     /// if it is found, or `None` otherwise. This operation completes in O(n)
     /// time.
+    /// ```
+    /// use linked_vector::*;
+    /// let mut lv = LinkedVector::from([1, 2, 3]);
     /// 
+    /// assert_eq!(lv.remove(&amp;2), Some(2));
+    /// assert_eq!(lv, LinkedVector::from([1, 3]));
+    /// ```
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>remove(<span class="kw-2">&amp;mut </span><span class="self">self</span>, value: <span class="kw-2">&amp;</span>T) -&gt; <span class="prelude-ty">Option</span>&lt;T&gt; 
     <span class="kw">where 
         </span>T: PartialEq
     {
-        <span class="kw">for </span>h <span class="kw">in </span><span class="self">self</span>.handles() {
-            <span class="kw">if </span><span class="self">self</span>.get_(h).value.as_ref() == <span class="prelude-val">Some</span>(value) {
+        <span class="kw">for </span>(h, v) <span class="kw">in </span><span class="self">self</span>.handles().zip(<span class="self">self</span>.iter()) {
+            <span class="kw">if </span>v == value {
                 <span class="kw">return </span><span class="self">self</span>.remove_(<span class="prelude-val">Some</span>(h));
             }
         }
