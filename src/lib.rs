@@ -1,4 +1,5 @@
 use core::iter::{FromIterator, FusedIterator};
+use std::ops::{Index, IndexMut};
 //  use core::mem;
 
 // TODO - Implement: Ord, Hash, Debug prints, Sync, Send...
@@ -610,6 +611,22 @@ impl<T> FromIterator<T> for LinkedVector<T> {
             lv.push_back(v);
         }
         lv
+    }
+}
+
+impl<T> Index<HNode> for LinkedVector<T> {
+    type Output = T;
+
+    #[inline]
+    fn index(&self, handle: HNode) -> &Self::Output {
+        self.get(handle).expect("Invalid handle")
+    }
+}
+
+impl<T> IndexMut<HNode> for LinkedVector<T> {
+    #[inline]
+    fn index_mut(&mut self, handle: HNode) -> &mut Self::Output {
+        self.get_mut(handle).expect("Invalid handle")
     }
 }
 
