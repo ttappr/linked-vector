@@ -1,6 +1,13 @@
 use core::iter::{FromIterator, FusedIterator};
 //  use core::mem;
 
+// TODO - Implement: Ord, Hash, Debug prints, Sync, Send...
+//      - Needs a README.md file.
+//      - Needs a LICENSE file.
+//      - Needs a CHANGELOG.md file.
+//      - Needs a CONTRIBUTING.md file. (?)
+//      - Header in this file describing what this is/does.
+
 #[cfg(test)]
 mod tests;
 
@@ -22,6 +29,13 @@ pub struct HNode(usize);
 #[cfg(debug_assertions)]
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct HNode(usize, Uuid);
+
+impl Default for HNode {
+    #[inline]
+    fn default() -> Self {
+        BAD_HANDLE
+    }
+}
 
 #[derive(Debug)]
 struct Node<T> {
