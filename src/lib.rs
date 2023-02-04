@@ -415,7 +415,13 @@ impl<T> LinkedVector<T> {
     /// 
     #[inline]
     fn insert_(&mut self, node: Option<HNode>, value: T) -> HNode {
+        #[cfg(debug_assertions)]
+        {
+            assert!(self.handleopt_is_native(node), "Handle is not native.");
+            assert!(self.handleopt_is_valid(node), "Handle is invalid.");
+        }
         if self.is_empty() {
+            #[cfg(debug_assertions)]
             assert!(node.is_none(), "Empty list has no handles.");
             let hnew = self.new_node(value);
             self.head = hnew; 
