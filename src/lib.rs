@@ -1,5 +1,5 @@
 use core::iter::{FromIterator, FusedIterator};
-use std::ops::{Index, IndexMut};
+use core::ops::{Index, IndexMut};
 //  use core::mem;
 
 // TODO - Implement: Ord, Hash, Debug prints, Sync, Send...
