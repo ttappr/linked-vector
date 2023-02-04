@@ -401,7 +401,6 @@ impl<T> LinkedVector<T> {
     /// ```
     #[inline]
     pub fn next_node(&self, node: HNode) -> Option<HNode> {
-        // TODO - need prior_node().
         let next = self.get_(node).next;
         if next == BAD_HANDLE {
             None
@@ -452,6 +451,7 @@ impl<T> LinkedVector<T> {
     /// 
     /// assert_eq!(lv.prev_node(h2), Some(h1));
     /// ```
+    #[inline]
     pub fn prev_node(&self, node: HNode) -> Option<HNode> {
         let prior = self.get_(node).prev;
         if prior == BAD_HANDLE {
@@ -500,14 +500,20 @@ impl<T> LinkedVector<T> {
     /// Removes the first element with the indicated value. Returns the element
     /// if it is found, or `None` otherwise. This operation completes in O(n)
     /// time.
+    /// ```
+    /// use linked_vector::*;
+    /// let mut lv = LinkedVector::from([1, 2, 3]);
     /// 
+    /// assert_eq!(lv.remove(&2), Some(2));
+    /// assert_eq!(lv, LinkedVector::from([1, 3]));
+    /// ```
     #[inline]
     pub fn remove(&mut self, value: &T) -> Option<T> 
     where 
         T: PartialEq
     {
-        for h in self.handles() {
-            if self.get_(h).value.as_ref() == Some(value) {
+        for (h, v) in self.handles().zip(self.iter()) {
+            if v == value {
                 return self.remove_(Some(h));
             }
         }
