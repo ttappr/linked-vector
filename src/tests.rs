@@ -238,6 +238,25 @@ fn insert_before() {
     assert_eq!(lv1.get_(h4).next, h3);
     assert_eq!(lv1.len(), 4);
 }
+
+#[test]
+fn test_insertions_deletions_etc() {
+    let mut lv1 = LinkedVector::new();
+    let mut hs  = vec![];
+
+    for i in 0..100 {
+        hs.push(lv1.push_back(i));
+    }
+
+    for &h in hs.iter().step_by(2) {
+        lv1.remove(h);
+    }
+
+    for (&h1, h2) in hs.iter().skip(1).step_by(2).zip(lv1.handles()) {
+        assert_eq!(h1, h2);
+    }
+}
+
 #[test]
 fn into_iter() {
     let mut lv1 = LinkedVector::new();

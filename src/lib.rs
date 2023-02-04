@@ -384,18 +384,22 @@ impl<T> LinkedVector<T> {
             let hnew = self.new_node(value);
             if let Some(hnode) = node {
                 let hprev = self.get_(hnode).prev;
-                self.get_mut_(hprev).next = hnew;
                 self.get_mut_(hnew).prev = hprev;
                 self.get_mut_(hnew).next = hnode;
                 self.get_mut_(hnode).prev = hnew;
                 if hnode == self.head {
                     self.head = hnew;
+                } else {
+                    self.get_mut_(hprev).next = hnew;
                 }
             } else {
                 let hnode = self.get_(self.head).prev;
                 self.get_mut_(hnode).next = hnew;
                 self.get_mut_(hnew).prev  = hnode;
                 self.get_mut_(self.head).prev = hnew;
+            }
+            if let Some(errors) = self.invariants() {
+                panic!("List invariants violated: {:?}", errors);
             }
             self.len_ += 1;
             hnew
@@ -416,7 +420,6 @@ impl<T> LinkedVector<T> {
             let hnode = node.unwrap_or(self.get_(self.head).prev);
             let hprev = self.get_(hnode).prev;
             let hnext = self.get_(hnode).next;
-            self.get_mut_(hprev).next = hnext;
             if hnext == BAD_HANDLE {
                 self.get_mut_(self.head).prev = hprev;
             } else {
@@ -424,10 +427,42 @@ impl<T> LinkedVector<T> {
             }
             if hnode == self.head {
                 self.head = hnext;
+            } else {
+                self.get_mut_(hprev).next = hnext;
             }
             self.len_ -= 1;
             self.push_bin(hnode);
+
+            if let Some(errors) = self.invariants() {
+                panic!("List invariants violated: {:?}", errors);
+            }
             self.get_mut_(hnode).value.take()
+        }
+    }
+
+    fn invariants(&self) -> Option<Vec<&str>> {
+        let mut errors = Vec::new();
+        if self.is_empty() {
+            if self.head != BAD_HANDLE {
+                errors.push("Empty list has no head.");
+            }
+        } else {
+            if self.head == BAD_HANDLE {
+                errors.push("Non-empty list has no head.");
+            }
+            let head = self.head;
+            let prev = self.get_(head).prev;
+            if prev == BAD_HANDLE {
+                errors.push("Head's next field isn't the end node.");
+            }
+            if self.get_(prev).next != BAD_HANDLE {
+                errors.push("End node's next field isn't BAD_HANDLE.");
+            }
+        }
+        if errors.is_empty() {
+            None
+        } else {
+            Some(errors)
         }
     }
 
