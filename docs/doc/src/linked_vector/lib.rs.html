@@ -1079,7 +1079,6 @@
 <a href="#1079" id="1079">1079</a>
 <a href="#1080" id="1080">1080</a>
 <a href="#1081" id="1081">1081</a>
-<a href="#1082" id="1082">1082</a>
 </pre><pre class="rust"><code>
 <span class="attr">#![doc = <span class="macro">include_str!</span>(<span class="string">&quot;../README.md&quot;</span>)]
 
@@ -1544,12 +1543,11 @@
     /// ```
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>prev_node(<span class="kw-2">&amp;</span><span class="self">self</span>, node: HNode) -&gt; <span class="prelude-ty">Option</span>&lt;HNode&gt; {
-        <span class="kw">let </span>prior = <span class="self">self</span>.get_(node).prev;
-        <span class="kw">if </span>prior == <span class="self">self</span>.get_(<span class="self">self</span>.head).prev {
+        <span class="kw">if </span>node != <span class="self">self</span>.head {
+            <span class="prelude-val">Some</span>(<span class="self">self</span>.get_(node).prev)
+        } <span class="kw">else </span>{
             <span class="prelude-val">None
-        </span>} <span class="kw">else </span>{
-            <span class="prelude-val">Some</span>(prior)
-        }
+        </span>}
     }
 
     <span class="doccomment">/// Pushes a new element to the back of the list. Returns a handle to the
