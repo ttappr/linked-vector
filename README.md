@@ -10,7 +10,7 @@ items are inserted or removed.
 
 ## Usage
 
-```
+```rust, ignore
 [dependencies]
 linked-vector = { git = "https://github.com/ttappr/linked-vector.git" }
 ```
@@ -28,7 +28,7 @@ to the `LinkedVector` they're passed to when calling its methods. This can help
 catch errors in unit tests. This checking is not done when built in release 
 mode.
 
-```rust
+```rust, ignore
 use LinkedVector::*;
 
 let mut lv = LinkedVector::new();
@@ -54,7 +54,7 @@ Operations that alter the `LinkedVector` return handles that can be saved for
 later use. These provide direct access to items in `O(1)` time.
 
 
-```rust
+```rust, ignore
 use LinkedVector::*;
 
 let mut lv = LinkedVector::new();
@@ -79,7 +79,8 @@ nodes. Using a handle to specify starting position, cursors can be set to the
 location within the vector accordingly. They can move one position at a time, 
 or several via `forward(n_times)` and `backward(n_ntimes)`.
 
-```rust
+```rust, ignore
+
 use linked_vector::*;
 
 let lv = LinkedVector::from([1, 2, 3]);
@@ -97,7 +98,7 @@ assert_eq!(cursor.get(), Some(&2));
 `LinkedVector` implements the standard set of double-ended iterators. The can
 be instantiated directly vie methods such as `iter()`, or implicitly.
 
-```rust
+```rust, ignore
 let mut lv1 = LinkedVector::new();
 lv1.push_back(1);
 lv1.push_back(2);
