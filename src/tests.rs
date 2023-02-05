@@ -128,6 +128,9 @@ fn from_iter() {
     let lv1 = LinkedVector::from_iter(1..4);
     lv1.iter().zip(1..).for_each(|(a, b)| assert_eq!(a, &b));
     assert_eq!(lv1.len(), 3);
+
+    let lv2 : LinkedVector<_> = (1..4).collect();
+    lv2.iter().zip(1..).for_each(|(a, b)| assert_eq!(a, &b));
 }
 
 #[test]

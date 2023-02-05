@@ -30,9 +30,8 @@ to the `LinkedVector` they're passed to when calling its methods. This can help
 catch errors in unit tests. This checking is not done when built in release 
 mode.
 
-```rust, ignore
-use LinkedVector::*;
-
+```rust
+use linked_vector::*;
 let mut lv = LinkedVector::new();
 
 let handle_1 = lv.push_back(1);
@@ -56,9 +55,8 @@ Operations that alter the `LinkedVector` return handles that can be saved for
 later use. These provide direct access to items in `O(1)` time.
 
 
-```rust, ignore
-use LinkedVector::*;
-
+```rust
+use linked_vector::*;
 let mut lv = LinkedVector::new();
 
 let h1 = lv.push_back(1);
@@ -67,9 +65,9 @@ let h3 = lv.push_back(3);
 let h4 = lv.insert_after(h1, 4);
 
 lv.insert_after(h2, 42);
-lv.remove(h1);
+lv.remove_node(h1);
 
-assert_eq!(lv.front(), Some(&2));
+assert_eq!(lv.front(), Some(&4));
 assert_eq!(lv.to_vec(), vec![4, 2, 42, 3]);
 
 ```
@@ -81,10 +79,8 @@ nodes. Using a handle to specify starting position, cursors can be set to the
 location within the vector accordingly. They can move one position at a time, 
 or several via `forward(n_times)` and `backward(n_ntimes)`.
 
-```rust, ignore
-
+```rust
 use linked_vector::*;
-
 let lv = LinkedVector::from([1, 2, 3]);
 let mut cursor = lv.cursor(None);
 
@@ -100,7 +96,8 @@ assert_eq!(cursor.get(), Some(&2));
 `LinkedVector` implements the standard set of double-ended iterators. They can
 be instantiated directly vie methods such as `iter()`, or implicitly.
 
-```rust, ignore
+```rust
+use linked_vector::*;
 let mut lv1 = LinkedVector::new();
 lv1.push_back(1);
 lv1.push_back(2);

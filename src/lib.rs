@@ -176,7 +176,6 @@ impl<T> LinkedVector<T> {
     /// Creates a cursor that can be used to traverse the list.
     /// ```
     /// use linked_vector::*;
-    /// 
     /// let lv = LinkedVector::from([1, 2, 3]);
     /// let mut cursor = lv.cursor(None);
     /// 
@@ -198,7 +197,6 @@ impl<T> LinkedVector<T> {
     /// can be used to traverse the list.
     /// ```
     /// use linked_vector::*;
-    /// 
     /// let mut lv = LinkedVector::from([1, 2, 3, 4, 5, 6]);
     /// let mut cursor = lv.cursor_mut(None);
     /// 
