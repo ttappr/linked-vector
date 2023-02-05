@@ -209,8 +209,17 @@ impl<T> LinkedVector<T> {
     }
 
     /// Creates a cursor that can be used to traverse the list starting at the
-    /// given node.
+    /// given node. This operation completes in O(1) time.
+    /// ```
+    /// use linked_vector::*;
+    /// let lv = LinkedVector::from([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+    /// let h  = lv.find_node(&3).unwrap();
+    /// let mut cursor = lv.cursor_at(h);
     /// 
+    /// cursor.forward(3);
+    /// 
+    /// assert_eq!(cursor.get(), Some(&6));
+    /// ```
     pub fn cursor_at(&self, hnode: HNode) -> Cursor<T> {
         Cursor::new_at(self, hnode)
     }

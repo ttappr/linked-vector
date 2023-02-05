@@ -1107,6 +1107,15 @@
 <a href="#1107" id="1107">1107</a>
 <a href="#1108" id="1108">1108</a>
 <a href="#1109" id="1109">1109</a>
+<a href="#1110" id="1110">1110</a>
+<a href="#1111" id="1111">1111</a>
+<a href="#1112" id="1112">1112</a>
+<a href="#1113" id="1113">1113</a>
+<a href="#1114" id="1114">1114</a>
+<a href="#1115" id="1115">1115</a>
+<a href="#1116" id="1116">1116</a>
+<a href="#1117" id="1117">1117</a>
+<a href="#1118" id="1118">1118</a>
 </pre><pre class="rust"><code>
 <span class="attr">#![doc = <span class="macro">include_str!</span>(<span class="string">&quot;../README.md&quot;</span>)]
 
@@ -1318,8 +1327,17 @@
     }
 
     <span class="doccomment">/// Creates a cursor that can be used to traverse the list starting at the
-    /// given node.
+    /// given node. This operation completes in O(1) time.
+    /// ```
+    /// use linked_vector::*;
+    /// let lv = LinkedVector::from([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+    /// let h  = lv.find_node(&amp;3).unwrap();
+    /// let mut cursor = lv.cursor_at(h);
     /// 
+    /// cursor.forward(3);
+    /// 
+    /// assert_eq!(cursor.get(), Some(&amp;6));
+    /// ```
     </span><span class="kw">pub fn </span>cursor_at(<span class="kw-2">&amp;</span><span class="self">self</span>, hnode: HNode) -&gt; Cursor&lt;T&gt; {
         Cursor::new_at(<span class="self">self</span>, hnode)
     }
