@@ -90,6 +90,13 @@ cursor.move_next();
 
 assert_eq!(cursor.get(), Some(&2));
 
+let hend = cursor.move_to_end().unwrap();
+let hbeg = cursor.backward(2).unwrap();
+
+assert_eq!(cursor.get(), Some(&1));
+assert_eq!(lv.get(hend), Some(&3));
+assert_eq!(lv.get(hbeg), Some(&1));
+
 ```
 ## Iterators
 

@@ -73,6 +73,13 @@ or several via <code>forward(n_times)</code> and <code>backward(n_ntimes)</code>
 cursor.move_next();
 
 <span class="macro">assert_eq!</span>(cursor.get(), <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="number">2</span>));
+
+<span class="kw">let </span>hend = cursor.move_to_end().unwrap();
+<span class="kw">let </span>hbeg = cursor.backward(<span class="number">2</span>).unwrap();
+
+<span class="macro">assert_eq!</span>(cursor.get(), <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="number">1</span>));
+<span class="macro">assert_eq!</span>(lv.get(hend), <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="number">3</span>));
+<span class="macro">assert_eq!</span>(lv.get(hbeg), <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="number">1</span>));
 </code></pre></div>
 <h3 id="iterators"><a href="#iterators">Iterators</a></h3>
 <p><code>LinkedVector</code> implements the standard set of double-ended iterators. They can
