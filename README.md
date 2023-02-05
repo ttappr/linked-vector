@@ -95,7 +95,7 @@ assert_eq!(cursor.get(), Some(&2));
 ```
 ## Iterators
 
-`LinkedVector` implements the standard set of double-ended iterators. The can
+`LinkedVector` implements the standard set of double-ended iterators. They can
 be instantiated directly vie methods such as `iter()`, or implicitly.
 
 ```rust, ignore
