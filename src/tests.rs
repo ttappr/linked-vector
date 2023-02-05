@@ -95,6 +95,11 @@ fn cursor() {
         Ok(handle) => panic!("Should move to beginning on overshoot."),
         Err(handle) => assert_eq!(lv.get(handle), Some(&1)),
     }
+
+    match cursor.forward(20) {
+        Ok(handle) => panic!("Should move to end on overshoot."),
+        Err(handle) => assert_eq!(lv.get(handle), Some(&7)),
+    }
 }
 
 #[test]
