@@ -138,9 +138,10 @@ impl<T> LinkedVector<T> {
     /// list is empty. This operation completes in O(1) time.
     /// ```
     /// use linked_vector::*;
-    /// 
     /// let mut lv = LinkedVector::from([1, 2, 3]);
-    /// lv.back_mut().map(|v| *v = 42);
+    /// 
+    /// *lv.back_mut().unwrap() = 42;
+    /// 
     /// assert_eq!(lv.back_mut(), Some(&mut 42));
     /// ```
     #[inline]
@@ -205,7 +206,7 @@ impl<T> LinkedVector<T> {
     /// 
     /// assert_eq!(cursor.get(), Some(&4));
     /// 
-    /// cursor.get_mut().map(|v| *v = 42);
+    /// *cursor.get_mut().unwrap() = 42;
     /// 
     /// assert_eq!(lv.to_vec(), vec![1, 2, 3, 42, 5, 6]);
     /// ```
@@ -217,8 +218,8 @@ impl<T> LinkedVector<T> {
         }
     }
 
-    /// Gives a reference to the element front element, or `None` if the list is
-    /// empty. This operation completes in O(1) time.
+    /// Gives a reference to the element at the front of the vector, or `None` 
+    /// if the list is empty. This operation completes in O(1) time.
     /// 
     #[inline]
     pub fn front(&self) -> Option<&T> {
@@ -229,8 +230,8 @@ impl<T> LinkedVector<T> {
         }
     }
 
-    /// Gives a mutable reference to the element front element, or `None` if the
-    /// list is empty. This operation completes in O(1) time.
+    /// Gives a mutable reference to the element at the front of the vector,
+    ///  or `None` if the list is empty. This operation completes in O(1) time.
     /// 
     #[inline]
     pub fn front_mut(&mut self) -> Option<&mut T> {
@@ -281,8 +282,6 @@ impl<T> LinkedVector<T> {
     /// ```
     #[inline]
     pub fn get(&self, node: HNode) -> Option<&T> {
-        // TODO - Consider implementing Deref<Target=[T]>. This might be
-        //        overkill though.
         self.get_(node).value.as_ref()
     }
 

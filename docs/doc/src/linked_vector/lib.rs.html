@@ -1082,7 +1082,6 @@
 <a href="#1082" id="1082">1082</a>
 <a href="#1083" id="1083">1083</a>
 <a href="#1084" id="1084">1084</a>
-<a href="#1085" id="1085">1085</a>
 </pre><pre class="rust"><code>
 <span class="attr">#![doc = <span class="macro">include_str!</span>(<span class="string">&quot;../README.md&quot;</span>)]
 
@@ -1223,9 +1222,10 @@
     /// list is empty. This operation completes in O(1) time.
     /// ```
     /// use linked_vector::*;
-    /// 
     /// let mut lv = LinkedVector::from([1, 2, 3]);
-    /// lv.back_mut().map(|v| *v = 42);
+    /// 
+    /// *lv.back_mut().unwrap() = 42;
+    /// 
     /// assert_eq!(lv.back_mut(), Some(&amp;mut 42));
     /// ```
     </span><span class="attr">#[inline]
@@ -1290,7 +1290,7 @@
     /// 
     /// assert_eq!(cursor.get(), Some(&amp;4));
     /// 
-    /// cursor.get_mut().map(|v| *v = 42);
+    /// *cursor.get_mut().unwrap() = 42;
     /// 
     /// assert_eq!(lv.to_vec(), vec![1, 2, 3, 42, 5, 6]);
     /// ```
@@ -1302,8 +1302,8 @@
         }
     }
 
-    <span class="doccomment">/// Gives a reference to the element front element, or `None` if the list is
-    /// empty. This operation completes in O(1) time.
+    <span class="doccomment">/// Gives a reference to the element at the front of the vector, or `None` 
+    /// if the list is empty. This operation completes in O(1) time.
     /// 
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>front(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>T&gt; {
@@ -1314,8 +1314,8 @@
         }
     }
 
-    <span class="doccomment">/// Gives a mutable reference to the element front element, or `None` if the
-    /// list is empty. This operation completes in O(1) time.
+    <span class="doccomment">/// Gives a mutable reference to the element at the front of the vector,
+    ///  or `None` if the list is empty. This operation completes in O(1) time.
     /// 
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>front_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;mut </span>T&gt; {
@@ -1366,9 +1366,7 @@
     /// ```
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, node: HNode) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>T&gt; {
-        <span class="comment">// TODO - Consider implementing Deref&lt;Target=[T]&gt;. This might be
-        //        overkill though.
-        </span><span class="self">self</span>.get_(node).value.as_ref()
+        <span class="self">self</span>.get_(node).value.as_ref()
     }
 
     <span class="doccomment">/// Provides a mutable reference to the element indicated by the given
