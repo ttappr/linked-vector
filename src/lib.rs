@@ -16,11 +16,17 @@ const BAD_HANDLE : HNode = HNode(usize::MAX);
 const BAD_HANDLE : HNode = 
         HNode(usize::MAX, uuid!("deadbeef-dead-beef-dead-beefdeadbeef"));
 
+/// A handle to a node within a `LinkedVector`. Internally, it holds an index
+/// into the vector holding the LinkedVector's nodes.
+/// 
 #[cfg(not(debug_assertions))]
 #[repr(transparent)]
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct HNode(usize);
 
+/// A handle to a node within a `LinkedVector`. Internally, it holds an index
+/// into the vector holding the LinkedVector's nodes.
+/// 
 #[cfg(debug_assertions)]
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct HNode(usize, Uuid);
@@ -32,6 +38,9 @@ impl Default for HNode {
     }
 }
 
+/// The node type used by `LinkedVector`. It holds a value of type `T`, and 
+/// handles to the next and previous nodes in the list.
+/// 
 #[derive(Debug)]
 struct Node<T> {
     value : Option<T>,
@@ -815,6 +824,9 @@ where
     }
 }
 
+/// An iterator over the elements of a `LinkedVector`. Yields the handles of
+/// each element.
+/// 
 pub struct Handles<'a, T> {
     lv    : &'a LinkedVector<T>,
     hnode : HNode,
@@ -876,6 +888,9 @@ impl<T> ExactSizeIterator for Handles<'_, T> {}
 
 impl<T> FusedIterator for Handles<'_, T> {}
 
+/// The basic iterator class of `LinkedVector`. Yields references to the 
+/// elements of the vector.
+/// 
 pub struct Iter<'a, T> {
     lv    : &'a LinkedVector<T>,
     hnode : HNode,
@@ -950,6 +965,9 @@ impl<'a, T> IntoIterator for &'a LinkedVector<T> {
     }
 }
 
+/// The basic iterator class of `LinkedVector`. Yields mutable references to
+/// the elements of the vector.
+/// 
 pub struct IterMut<'a, T> {
     lv    : &'a mut LinkedVector<T>,
     hnode : HNode,
@@ -1025,6 +1043,9 @@ impl<'a, T> IntoIterator for &'a mut LinkedVector<T> {
     }
 }
 
+/// The consuming iterator class of `LinkedVector`. Yields owned elements of the
+/// vector.
+/// 
 pub struct IntoIter<T>(LinkedVector<T>);
 
 impl<T> IntoIterator for LinkedVector<T> {
