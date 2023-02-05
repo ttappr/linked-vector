@@ -1079,6 +1079,12 @@
 <a href="#1079" id="1079">1079</a>
 <a href="#1080" id="1080">1080</a>
 <a href="#1081" id="1081">1081</a>
+<a href="#1082" id="1082">1082</a>
+<a href="#1083" id="1083">1083</a>
+<a href="#1084" id="1084">1084</a>
+<a href="#1085" id="1085">1085</a>
+<a href="#1086" id="1086">1086</a>
+<a href="#1087" id="1087">1087</a>
 </pre><pre class="rust"><code>
 <span class="attr">#![doc = <span class="macro">include_str!</span>(<span class="string">&quot;../README.md&quot;</span>)]
 
@@ -1289,11 +1295,17 @@
         CursorMut::new(<span class="self">self</span>)
     }
 
-    <span class="kw">pub fn </span>cursor_at(<span class="kw-2">&amp;</span><span class="self">self</span>, hnode: HNode) -&gt; Cursor&lt;T&gt; {
+    <span class="doccomment">/// Creates a cursor that can be used to traverse the list starting at the
+    /// given node.
+    /// 
+    </span><span class="kw">pub fn </span>cursor_at(<span class="kw-2">&amp;</span><span class="self">self</span>, hnode: HNode) -&gt; Cursor&lt;T&gt; {
         Cursor::new_at(<span class="self">self</span>, hnode)
     }
 
-    <span class="kw">pub fn </span>cursor_at_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>, hnode: HNode) -&gt; CursorMut&lt;T&gt; {
+    <span class="doccomment">/// Creates a cursor that holds a mutable reference to the LinkedVector that
+    /// can be used to traverse the list starting at the given node.
+    /// 
+    </span><span class="kw">pub fn </span>cursor_at_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>, hnode: HNode) -&gt; CursorMut&lt;T&gt; {
         CursorMut::new_at(<span class="self">self</span>, hnode)
     }
 

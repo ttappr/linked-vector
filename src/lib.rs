@@ -208,10 +208,16 @@ impl<T> LinkedVector<T> {
         CursorMut::new(self)
     }
 
+    /// Creates a cursor that can be used to traverse the list starting at the
+    /// given node.
+    /// 
     pub fn cursor_at(&self, hnode: HNode) -> Cursor<T> {
         Cursor::new_at(self, hnode)
     }
 
+    /// Creates a cursor that holds a mutable reference to the LinkedVector that
+    /// can be used to traverse the list starting at the given node.
+    /// 
     pub fn cursor_at_mut(&mut self, hnode: HNode) -> CursorMut<T> {
         CursorMut::new_at(self, hnode)
     }
