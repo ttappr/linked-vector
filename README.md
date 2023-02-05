@@ -6,9 +6,9 @@
 
 `LinkedVector` is a hybrid of a vector and linked list. Items are accessible
 directly in `O(1)` time, and insertions and deletions also operate in `O(1)`
-time. Internally, nodes exist within a contiguous vector, with each node holding 
-handles to its previous and next neighbors. So there's no shifting of data when
-items are inserted or removed.
+time. Internally, nodes exist within a vector, with each node holding handles 
+to its previous and next neighbors. So there's no shifting of data when items 
+are inserted or removed.
 
 ## Usage
 

@@ -34,6 +34,17 @@ pub struct HNode(usize);
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct HNode(usize, Uuid);
 
+impl HNode {
+    #[cfg(debug_assertions)]
+    fn new(index: usize, uuid: Uuid) -> Self {
+        Self(index, uuid)
+    }
+    #[cfg(not(debug_assertions))]
+    fn new(index: usize) -> Self {
+        Self(index)
+    }
+}
+
 impl Default for HNode {
     #[inline]
     fn default() -> Self {
@@ -82,21 +93,15 @@ impl<T> LinkedVector<T> {
     #[inline]
     #[must_use]
     pub fn new() -> Self {
-        #[cfg(debug_assertions)]
-        { Self { 
+        Self { 
             vec   : Vec::new(), 
             recyc : BAD_HANDLE, 
             head  : BAD_HANDLE, 
             len   : 0, 
+
+            #[cfg(debug_assertions)]
             uuid  : uuid::Uuid::new_v4() 
-        } }
-        #[cfg(not(debug_assertions))]
-        { Self { 
-            vec   : Vec::new(), 
-            recyc : BAD_HANDLE, 
-            head  : BAD_HANDLE, 
-            len   : 0, 
-        } }
+        }
     }
     /// Moves all elements from `other` into `self`, leaving `other` empty.
     /// This operation completes in O(n) time where n is the length of `other`.
@@ -580,6 +585,53 @@ impl<T> LinkedVector<T> {
     #[inline]
     pub fn remove_node(&mut self, node: HNode) -> Option<T> {
         self.remove_(Some(node))
+    }
+
+    /// Sorts the elemements in place by their value. This operation will 
+    /// invalidate all previously held handles, and they should be discarded. 
+    /// If required, a set of new handles can be obtained by calling 
+    /// `handles()`. This operation completes in `O(n log n)` time.
+    /// 
+    #[inline]
+    pub fn sort_unstable(&mut self) 
+    where
+        T: Ord
+    {
+        if self.len > 1 {
+            self.vec.sort_unstable_by(|a, b| {
+                if a.prev == BAD_HANDLE || b.prev == BAD_HANDLE {
+                    a.prev.0.cmp(&b.prev.0)
+                } else {
+                    a.value.cmp(&b.value)
+                }
+            });
+            let get_handle = {
+                #[cfg(debug_assertions)]
+                { |i| HNode::new(i, self.uuid) }
+                #[cfg(not(debug_assertions))]
+                { |i| HNode::new(i) }
+            };
+            self.head = get_handle(0); 
+            let mut h = 0;
+            let     n = self.vec.len();
+            while self.vec[h].prev != BAD_HANDLE && h < n - 1 {
+                self.vec[h    ].next = get_handle(h + 1);
+                self.vec[h + 1].prev = get_handle(h);
+                h += 1;
+            }
+            self.vec[h].next = BAD_HANDLE;
+            self.vec[0].prev = get_handle(h);
+
+            if self.recyc != BAD_HANDLE {
+                h += 1;
+                self.recyc = get_handle(h);
+
+                while h < n - 1 {
+                    self.vec[h].next = get_handle(h + 1);
+                    h += 1;
+                }
+            }
+        }
     }
 
     /// Returns a vector containing the elements of the list. This operation

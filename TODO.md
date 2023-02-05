@@ -7,3 +7,6 @@ Current To Do Items
 - Needs a CHANGELOG.md file.
 - Needs a CONTRIBUTING.md file. (?)
 - Header in this file describing what this is/does.
+
+
+Command to build documentation: cargo doc --no-deps --target-dir .\docs

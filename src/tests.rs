@@ -480,7 +480,14 @@ fn push_front() {
 }
 
 #[test]
-fn  iinsert() {
+fn sort_unstable() {
+    let mut lv1 = LinkedVector::from([3, 1, 4, 1, 5, 9]);
+    lv1.sort_unstable();
+    assert_eq!(lv1.to_vec(), vec![1, 1, 3, 4, 5, 9]);
+}
+
+#[test]
+fn  insert_() {
     let mut lv1 = LinkedVector::new();
 
     let h1 = lv1.insert_(None, 1);
