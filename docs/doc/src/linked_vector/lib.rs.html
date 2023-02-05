@@ -1085,6 +1085,28 @@
 <a href="#1085" id="1085">1085</a>
 <a href="#1086" id="1086">1086</a>
 <a href="#1087" id="1087">1087</a>
+<a href="#1088" id="1088">1088</a>
+<a href="#1089" id="1089">1089</a>
+<a href="#1090" id="1090">1090</a>
+<a href="#1091" id="1091">1091</a>
+<a href="#1092" id="1092">1092</a>
+<a href="#1093" id="1093">1093</a>
+<a href="#1094" id="1094">1094</a>
+<a href="#1095" id="1095">1095</a>
+<a href="#1096" id="1096">1096</a>
+<a href="#1097" id="1097">1097</a>
+<a href="#1098" id="1098">1098</a>
+<a href="#1099" id="1099">1099</a>
+<a href="#1100" id="1100">1100</a>
+<a href="#1101" id="1101">1101</a>
+<a href="#1102" id="1102">1102</a>
+<a href="#1103" id="1103">1103</a>
+<a href="#1104" id="1104">1104</a>
+<a href="#1105" id="1105">1105</a>
+<a href="#1106" id="1106">1106</a>
+<a href="#1107" id="1107">1107</a>
+<a href="#1108" id="1108">1108</a>
+<a href="#1109" id="1109">1109</a>
 </pre><pre class="rust"><code>
 <span class="attr">#![doc = <span class="macro">include_str!</span>(<span class="string">&quot;../README.md&quot;</span>)]
 
@@ -1308,6 +1330,28 @@
     </span><span class="kw">pub fn </span>cursor_at_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>, hnode: HNode) -&gt; CursorMut&lt;T&gt; {
         CursorMut::new_at(<span class="self">self</span>, hnode)
     }
+
+    <span class="doccomment">/// Returns the handle to the first node with the given value. If no such
+    /// node exists, `None` is returned. This operation completes in O(n) time.
+    /// ```
+    /// use linked_vector::*;
+    /// let lv = LinkedVector::from([1, 2, 3, 4, 5, 6]);
+    /// let h  = lv.find_node(&amp;3).unwrap();
+    /// 
+    /// assert_eq!(lv.get(h), Some(&amp;3));
+    /// assert_eq!(lv.find_node(&amp;42), None);
+    /// ```
+    </span><span class="kw">pub fn </span>find_node(<span class="kw-2">&amp;</span><span class="self">self</span>, value: <span class="kw-2">&amp;</span>T) -&gt; <span class="prelude-ty">Option</span>&lt;HNode&gt;
+    <span class="kw">where
+        </span>T: PartialEq
+    {
+        <span class="kw">for </span>(h, v) <span class="kw">in </span><span class="self">self</span>.handles().zip(<span class="self">self</span>.iter()) {
+            <span class="kw">if </span>v == value {
+                <span class="kw">return </span><span class="prelude-val">Some</span>(h);
+            }
+        }
+        <span class="prelude-val">None
+    </span>}
 
     <span class="doccomment">/// Gives a reference to the element at the front of the vector, or `None` 
     /// if the list is empty. This operation completes in O(1) time.
