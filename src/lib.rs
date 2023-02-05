@@ -463,7 +463,7 @@ impl<T> LinkedVector<T> {
     #[inline]
     pub fn prev_node(&self, node: HNode) -> Option<HNode> {
         let prior = self.get_(node).prev;
-        if prior == BAD_HANDLE {
+        if prior == self.get_(self.head).prev {
             None
         } else {
             Some(prior)

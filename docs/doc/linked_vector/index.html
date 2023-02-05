@@ -65,7 +65,7 @@ location within the vector accordingly. They can move one position at a time,
 or several via <code>forward(n_times)</code> and <code>backward(n_ntimes)</code>.</p>
 
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>linked_vector::<span class="kw-2">*</span>;
-<span class="kw">let </span>lv = LinkedVector::from([<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>]);
+<span class="kw">let </span>lv = LinkedVector::from([<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>]);
 <span class="kw">let </span><span class="kw-2">mut </span>cursor = lv.cursor(<span class="prelude-val">None</span>);
 
 <span class="macro">assert_eq!</span>(cursor.get(), <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="number">1</span>));
@@ -75,21 +75,18 @@ cursor.move_next();
 <span class="macro">assert_eq!</span>(cursor.get(), <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="number">2</span>));
 
 <span class="kw">let </span>hend = cursor.move_to_end().unwrap();
-<span class="kw">let </span>hbeg = cursor.backward(<span class="number">2</span>).unwrap();
+<span class="kw">let </span>hbak = cursor.backward(<span class="number">3</span>).unwrap();
 
-<span class="macro">assert_eq!</span>(cursor.get(), <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="number">1</span>));
-<span class="macro">assert_eq!</span>(lv.get(hend), <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="number">3</span>));
-<span class="macro">assert_eq!</span>(lv.get(hbeg), <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="number">1</span>));
-</code></pre></div>
+<span class="macro">assert_eq!</span>(cursor.get(), <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="number">4</span>));
+<span class="macro">assert_eq!</span>(lv.get(hend), <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="number">7</span>));
+<span class="macro">assert_eq!</span>(lv.get(hbak), <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="number">4</span>));</code></pre></div>
 <h3 id="iterators"><a href="#iterators">Iterators</a></h3>
 <p><code>LinkedVector</code> implements the standard set of double-ended iterators. They can
 be instantiated directly vie methods such as <code>iter()</code>, or implicitly.</p>
 
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>linked_vector::<span class="kw-2">*</span>;
-<span class="kw">let </span><span class="kw-2">mut </span>lv1 = LinkedVector::new();
-lv1.push_back(<span class="number">1</span>);
-lv1.push_back(<span class="number">2</span>);
-lv1.push_back(<span class="number">3</span>);
+<span class="kw">let </span><span class="kw-2">mut </span>lv1 = LinkedVector::from([<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>]);
+
 lv1.iter_mut().zip(<span class="number">7</span>..).for_each(|(a, b)| <span class="kw-2">*</span>a = b);
 lv1.iter().zip(<span class="number">7</span>..).for_each(|(a, b)| <span class="macro">assert_eq!</span>(a, <span class="kw-2">&amp;</span>b));
 

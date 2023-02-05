@@ -1545,7 +1545,7 @@
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>prev_node(<span class="kw-2">&amp;</span><span class="self">self</span>, node: HNode) -&gt; <span class="prelude-ty">Option</span>&lt;HNode&gt; {
         <span class="kw">let </span>prior = <span class="self">self</span>.get_(node).prev;
-        <span class="kw">if </span>prior == BAD_HANDLE {
+        <span class="kw">if </span>prior == <span class="self">self</span>.get_(<span class="self">self</span>.head).prev {
             <span class="prelude-val">None
         </span>} <span class="kw">else </span>{
             <span class="prelude-val">Some</span>(prior)

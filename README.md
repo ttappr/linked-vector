@@ -81,7 +81,7 @@ or several via `forward(n_times)` and `backward(n_ntimes)`.
 
 ```rust
 use linked_vector::*;
-let lv = LinkedVector::from([1, 2, 3]);
+let lv = LinkedVector::from([1, 2, 3, 4, 5, 6, 7]);
 let mut cursor = lv.cursor(None);
 
 assert_eq!(cursor.get(), Some(&1));
@@ -91,12 +91,11 @@ cursor.move_next();
 assert_eq!(cursor.get(), Some(&2));
 
 let hend = cursor.move_to_end().unwrap();
-let hbeg = cursor.backward(2).unwrap();
+let hbak = cursor.backward(3).unwrap();
 
-assert_eq!(cursor.get(), Some(&1));
-assert_eq!(lv.get(hend), Some(&3));
-assert_eq!(lv.get(hbeg), Some(&1));
-
+assert_eq!(cursor.get(), Some(&4));
+assert_eq!(lv.get(hend), Some(&7));
+assert_eq!(lv.get(hbak), Some(&4));
 ```
 ## Iterators
 
@@ -105,10 +104,8 @@ be instantiated directly vie methods such as `iter()`, or implicitly.
 
 ```rust
 use linked_vector::*;
-let mut lv1 = LinkedVector::new();
-lv1.push_back(1);
-lv1.push_back(2);
-lv1.push_back(3);
+let mut lv1 = LinkedVector::from([1, 2, 3]);
+
 lv1.iter_mut().zip(7..).for_each(|(a, b)| *a = b);
 lv1.iter().zip(7..).for_each(|(a, b)| assert_eq!(a, &b));
 

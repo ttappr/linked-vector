@@ -72,6 +72,32 @@ fn contains() {
 }
 
 #[test]
+fn cursor() {
+    let lv = LinkedVector::from([1, 2, 3, 4, 5, 6, 7]);
+    let mut cursor = lv.cursor(None);
+    
+    assert_eq!(cursor.get(), Some(&1));
+    
+    cursor.move_next();
+    
+    assert_eq!(cursor.get(), Some(&2));
+    
+    let hend = cursor.move_to_end().unwrap();
+    let hbak = cursor.backward(2).unwrap();
+    
+    assert_eq!(cursor.get(), Some(&5));
+    assert_eq!(lv.get(hend), Some(&7));
+    assert_eq!(lv.get(hbak), Some(&5));
+    
+    let mut cursor = lv.cursor(Some(hbak));
+    
+    match cursor.backward(20) {
+        Ok(handle) => panic!("Should move to beginning on overshoot."),
+        Err(handle) => assert_eq!(lv.get(handle), Some(&1)),
+    }
+}
+
+#[test]
 fn default() {
     let lv1 = LinkedVector::<i32>::default();
     assert_eq!(lv1.is_empty(), true);
