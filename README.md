@@ -82,7 +82,7 @@ or several via `forward(n_times)` and `backward(n_ntimes)`.
 ```rust
 use linked_vector::*;
 let lv = LinkedVector::from([1, 2, 3, 4, 5, 6, 7]);
-let mut cursor = lv.cursor(None);
+let mut cursor = lv.cursor();
 
 assert_eq!(cursor.get(), Some(&1));
 

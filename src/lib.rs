@@ -177,7 +177,7 @@ impl<T> LinkedVector<T> {
     /// ```
     /// use linked_vector::*;
     /// let lv = LinkedVector::from([1, 2, 3]);
-    /// let mut cursor = lv.cursor(None);
+    /// let mut cursor = lv.cursor();
     /// 
     /// assert_eq!(cursor.get(), Some(&1));
     /// 
@@ -185,12 +185,8 @@ impl<T> LinkedVector<T> {
     /// 
     /// assert_eq!(cursor.get(), Some(&2));
     /// ```
-    pub fn cursor(&self, hnode: Option<HNode>) -> Cursor<T> {
-        if let Some(hnode) = hnode {
-            Cursor::new_at(self, hnode)
-        } else {
-            Cursor::new(self)
-        }
+    pub fn cursor(&self) -> Cursor<T> {
+        Cursor::new(self)
     }
 
     /// Creates a cursor that holds a mutable reference to the LinkedVector that 
@@ -198,7 +194,7 @@ impl<T> LinkedVector<T> {
     /// ```
     /// use linked_vector::*;
     /// let mut lv = LinkedVector::from([1, 2, 3, 4, 5, 6]);
-    /// let mut cursor = lv.cursor_mut(None);
+    /// let mut cursor = lv.cursor_mut();
     /// 
     /// cursor.forward(3);
     /// 
@@ -208,12 +204,16 @@ impl<T> LinkedVector<T> {
     /// 
     /// assert_eq!(lv.to_vec(), vec![1, 2, 3, 42, 5, 6]);
     /// ```
-    pub fn cursor_mut(&mut self, hnode: Option<HNode>) -> CursorMut<T> {
-        if let Some(hnode) = hnode {
-            CursorMut::new_at(self, hnode)
-        } else {
-            CursorMut::new(self)
-        }
+    pub fn cursor_mut(&mut self) -> CursorMut<T> {
+        CursorMut::new(self)
+    }
+
+    pub fn cursor_at(&self, hnode: HNode) -> Cursor<T> {
+        Cursor::new_at(self, hnode)
+    }
+
+    pub fn cursor_at_mut(&mut self, hnode: HNode) -> CursorMut<T> {
+        CursorMut::new_at(self, hnode)
     }
 
     /// Gives a reference to the element at the front of the vector, or `None` 

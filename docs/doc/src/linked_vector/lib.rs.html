@@ -1258,7 +1258,7 @@
     /// ```
     /// use linked_vector::*;
     /// let lv = LinkedVector::from([1, 2, 3]);
-    /// let mut cursor = lv.cursor(None);
+    /// let mut cursor = lv.cursor();
     /// 
     /// assert_eq!(cursor.get(), Some(&amp;1));
     /// 
@@ -1266,12 +1266,8 @@
     /// 
     /// assert_eq!(cursor.get(), Some(&amp;2));
     /// ```
-    </span><span class="kw">pub fn </span>cursor(<span class="kw-2">&amp;</span><span class="self">self</span>, hnode: <span class="prelude-ty">Option</span>&lt;HNode&gt;) -&gt; Cursor&lt;T&gt; {
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(hnode) = hnode {
-            Cursor::new_at(<span class="self">self</span>, hnode)
-        } <span class="kw">else </span>{
-            Cursor::new(<span class="self">self</span>)
-        }
+    </span><span class="kw">pub fn </span>cursor(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Cursor&lt;T&gt; {
+        Cursor::new(<span class="self">self</span>)
     }
 
     <span class="doccomment">/// Creates a cursor that holds a mutable reference to the LinkedVector that 
@@ -1279,7 +1275,7 @@
     /// ```
     /// use linked_vector::*;
     /// let mut lv = LinkedVector::from([1, 2, 3, 4, 5, 6]);
-    /// let mut cursor = lv.cursor_mut(None);
+    /// let mut cursor = lv.cursor_mut();
     /// 
     /// cursor.forward(3);
     /// 
@@ -1289,12 +1285,16 @@
     /// 
     /// assert_eq!(lv.to_vec(), vec![1, 2, 3, 42, 5, 6]);
     /// ```
-    </span><span class="kw">pub fn </span>cursor_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>, hnode: <span class="prelude-ty">Option</span>&lt;HNode&gt;) -&gt; CursorMut&lt;T&gt; {
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(hnode) = hnode {
-            CursorMut::new_at(<span class="self">self</span>, hnode)
-        } <span class="kw">else </span>{
-            CursorMut::new(<span class="self">self</span>)
-        }
+    </span><span class="kw">pub fn </span>cursor_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; CursorMut&lt;T&gt; {
+        CursorMut::new(<span class="self">self</span>)
+    }
+
+    <span class="kw">pub fn </span>cursor_at(<span class="kw-2">&amp;</span><span class="self">self</span>, hnode: HNode) -&gt; Cursor&lt;T&gt; {
+        Cursor::new_at(<span class="self">self</span>, hnode)
+    }
+
+    <span class="kw">pub fn </span>cursor_at_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>, hnode: HNode) -&gt; CursorMut&lt;T&gt; {
+        CursorMut::new_at(<span class="self">self</span>, hnode)
     }
 
     <span class="doccomment">/// Gives a reference to the element at the front of the vector, or `None` 

@@ -74,7 +74,7 @@ fn contains() {
 #[test]
 fn cursor() {
     let lv = LinkedVector::from([1, 2, 3, 4, 5, 6, 7]);
-    let mut cursor = lv.cursor(None);
+    let mut cursor = lv.cursor();
     
     assert_eq!(cursor.get(), Some(&1));
     
@@ -89,7 +89,7 @@ fn cursor() {
     assert_eq!(lv.get(hend), Some(&7));
     assert_eq!(lv.get(hbak), Some(&5));
     
-    let mut cursor = lv.cursor(Some(hbak));
+    let mut cursor = lv.cursor_at(hbak);
     
     match cursor.backward(20) {
         Ok(handle) => panic!("Should move to beginning on overshoot."),

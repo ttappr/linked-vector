@@ -66,7 +66,7 @@ or several via <code>forward(n_times)</code> and <code>backward(n_ntimes)</code>
 
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>linked_vector::<span class="kw-2">*</span>;
 <span class="kw">let </span>lv = LinkedVector::from([<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>]);
-<span class="kw">let </span><span class="kw-2">mut </span>cursor = lv.cursor(<span class="prelude-val">None</span>);
+<span class="kw">let </span><span class="kw-2">mut </span>cursor = lv.cursor();
 
 <span class="macro">assert_eq!</span>(cursor.get(), <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="number">1</span>));
 
