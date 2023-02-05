@@ -1,3 +1,0 @@
-(function() {var implementors = {
-"uuid":[["impl <a class=\"trait\" href=\"https://doc.rust-lang.org/1.67.0/core/convert/trait.TryFrom.html\" title=\"trait core::convert::TryFrom\">TryFrom</a>&lt;&amp;<a class=\"primitive\" href=\"https://doc.rust-lang.org/1.67.0/std/primitive.str.html\">str</a>&gt; for <a class=\"struct\" href=\"uuid/struct.Uuid.html\" title=\"struct uuid::Uuid\">Uuid</a>"]]
-};if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

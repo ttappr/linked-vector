@@ -1,1 +1,1 @@
-window.ALL_CRATES = ["cfg_if","getrandom","linked_vector","ppv_lite86","proc_macro2","quote","rand","rand_chacha","rand_core","syn","unicode_ident","uuid","uuid_macro_internal"];
+window.ALL_CRATES = ["linked_vector"];
