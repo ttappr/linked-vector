@@ -630,6 +630,7 @@ impl<T> LinkedVector<T> {
                     self.vec[h].next = get_handle(h + 1);
                     h += 1;
                 }
+                self.vec[h].next = BAD_HANDLE;
             }
         }
     }
