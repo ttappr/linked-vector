@@ -1,3 +1,0 @@
-(function() {var implementors = {
-"linked_vector":[["impl&lt;T, const N:&nbsp;<a class=\"primitive\" href=\"https://doc.rust-lang.org/1.67.0/std/primitive.usize.html\">usize</a>&gt; <a class=\"trait\" href=\"https://doc.rust-lang.org/1.67.0/core/convert/trait.From.html\" title=\"trait core::convert::From\">From</a>&lt;<a class=\"primitive\" href=\"https://doc.rust-lang.org/1.67.0/std/primitive.array.html\">[T; N]</a>&gt; for <a class=\"struct\" href=\"linked_vector/struct.LinkedVector.html\" title=\"struct linked_vector::LinkedVector\">LinkedVector</a>&lt;T&gt;"]]
-};if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()
