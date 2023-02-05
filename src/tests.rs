@@ -148,6 +148,16 @@ fn test_drop() {
 }
 
 #[test]
+fn find_node() {
+    let mut lv1 = LinkedVector::new();
+    let _h1 = lv1.push_back(1);
+    let  h2 = lv1.push_back(2);
+    let _h3 = lv1.push_back(3);
+    assert_eq!(lv1.find_node(&2), Some(h2));
+    assert_eq!(lv1.find_node(&4), None);
+}
+
+#[test]
 fn from_array() {
     let lv1 = LinkedVector::from([1, 2, 3]);
     lv1.iter().zip(1..).for_each(|(a, b)| assert_eq!(a, &b));

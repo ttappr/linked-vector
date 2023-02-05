@@ -24,11 +24,16 @@ are returned by operations such as insert or push operations. If direct access
 is required to any specific items, their handles can be stored for later use.
 
 Internally, a handle is an index into the vector that holds the nodes. Care 
-should be taken to avoid using the handles from one `LinkedVector` with another
+should be taken to avoid using the handles from one `LinkedVector` with another 
 instance. For the debug builds, handles are checked to ensure they are "native"
-to the `LinkedVector` they're passed to when calling its methods. This can help
+to the `LinkedVector` they're passed to when calling its methods. This can help 
 catch errors in unit tests. This checking is not done when built in release 
-mode.
+node.
+
+For debug builds handles have a UUID field used to ensure the `LinkedVector` 
+they're used with belong to it. For release build, the UUID field is not present
+and this checking isn't done. For release, handles are transparent `usize`
+indexes.
 
 ```rust
 use linked_vector::*;
