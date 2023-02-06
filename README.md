@@ -53,6 +53,27 @@ the vector with dead vector cells. When a node is added to the recycling list,
 it isn't moved in the vector - its next and previous fields are updated to link
 it into the recycling list.
 
+## Economy
+
+`LinkedVector`'s struct is implemented in a minimalistic manner. It contains
+only 4 fields: one for the internal vector, another that holds a handle to the
+head node, another with a handle to the recycling list, and lastly the length
+field. 
+
+There are no dummy nodes in the vector - all active nodes are data, and there's
+no field in the `LinkedVector` struct for a tail handle, although the vector
+does indeed have a tial node.
+
+## Other Features
+
+- **Cursors**:   The Cursor interface facilitates traversing the vector from any 
+                 point.
+- **Indexing**:  Items can be indexed as with a vector using the handles.
+- **Iterators**: The standard assortment of double-ended iterators are 
+                 implemented.
+- **Sorting**:   In-place sorting of elements is supported in `O(n log n)` time.
+
+
 # Examples
 ## Handles
 

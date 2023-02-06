@@ -44,6 +44,23 @@ be used for the next insert or push operation. This strategy avoids segmenting
 the vector with dead vector cells. When a node is added to the recycling list, 
 it isn’t moved in the vector - its next and previous fields are updated to link
 it into the recycling list.</p>
+<h3 id="economy"><a href="#economy">Economy</a></h3>
+<p><code>LinkedVector</code>’s struct is implemented in a minimalistic manner. It contains
+only 4 fields: one for the internal vector, another that holds a handle to the
+head node, another with a handle to the recycling list, and lastly the length
+field. </p>
+<p>There are no dummy nodes in the vector - all active nodes are data, and there’s
+no field in the <code>LinkedVector</code> struct for a tail handle, although the vector
+does indeed have a tial node.</p>
+<h3 id="other-features"><a href="#other-features">Other Features</a></h3>
+<ul>
+<li><strong>Cursors</strong>:   The Cursor interface facilitates traversing the vector from any 
+point.</li>
+<li><strong>Indexing</strong>:  Items can be indexed as with a vector using the handles.</li>
+<li><strong>Iterators</strong>: The standard assortment of double-ended iterators are 
+implemented.</li>
+<li><strong>Sorting</strong>:   In-place sorting of elements is supported in <code>O(n log n)</code> time.</li>
+</ul>
 <h2 id="examples"><a href="#examples">Examples</a></h2><h3 id="handles-1"><a href="#handles-1">Handles</a></h3>
 <p>Operations that alter the <code>LinkedVector</code> return handles that can be saved for
 later use. These provide direct access to items in <code>O(1)</code> time.</p>
