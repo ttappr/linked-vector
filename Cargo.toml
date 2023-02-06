@@ -2,9 +2,15 @@
 name = "linked-vector"
 version = "0.1.0"
 edition = "2021"
-exclude = ["docs"]
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+license = "license"
+authors = ["tmtappr@gmail.com"]
+description = "A hybrid linked list and vector data structure"
+documentation = "https://ttappr.github.io/linked-vector/doc/linked_vector/index.html"
+repository = "https://github.com/ttappr/linked-vector"
+readme = "README.md"
+exclude = ["docs", "TODO.md"]
+keywords = ["linked", "list", "vector"]
+categories = ["data-structures"]
 
 [dependencies]
 
@@ -15,3 +21,5 @@ features = [
     "fast-rng",          # Use a faster (but still sufficiently random) RNG
     "macro-diagnostics", # Enable better diagnostics for compile-time UUIDs
 ]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
