@@ -612,25 +612,22 @@ impl<T> LinkedVector<T> {
                 { |i| HNode::new(i) }
             };
             self.head = get_handle(0); 
-            let mut h = 0;
-            let     n = self.vec.len();
-            while self.vec[h].prev != BAD_HANDLE && h < n - 1 {
+            let m = self.len;
+            let n = self.vec.len();
+            for h in 0..m - 1 {
                 self.vec[h    ].next = get_handle(h + 1);
                 self.vec[h + 1].prev = get_handle(h);
-                h += 1;
             }
-            self.vec[h].next = BAD_HANDLE;
-            self.vec[0].prev = get_handle(h);
+            self.vec[m - 1].next = BAD_HANDLE;
+            self.vec[0    ].prev = get_handle(m - 1);
 
             if self.recyc != BAD_HANDLE {
-                h += 1;
-                self.recyc = get_handle(h);
+                self.recyc = get_handle(self.len);
 
-                while h < n - 1 {
+                for h in m..n {
                     self.vec[h].next = get_handle(h + 1);
-                    h += 1;
                 }
-                self.vec[h].next = BAD_HANDLE;
+                self.vec[n - 1].next = BAD_HANDLE;
             }
         }
     }
