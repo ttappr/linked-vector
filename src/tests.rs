@@ -484,6 +484,20 @@ fn sort_unstable() {
     let mut lv1 = LinkedVector::from([3, 1, 4, 1, 5, 9]);
     lv1.sort_unstable();
     assert_eq!(lv1.to_vec(), vec![1, 1, 3, 4, 5, 9]);
+
+    lv1.pop_back();
+    lv1.pop_back();
+    lv1.pop_back();
+
+    assert_eq!(lv1.to_vec(), vec![1, 1, 3]);
+
+    lv1.sort_unstable();
+
+    lv1.push_back(4);
+    let h = lv1.push_front(5);
+    lv1.insert_after(h, 6);
+
+    assert_eq!(lv1.to_vec(), vec![5, 6, 1, 1, 3, 4]);
 }
 
 #[test]
