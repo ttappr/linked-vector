@@ -1166,8 +1166,6 @@
 <a href="#1166" id="1166">1166</a>
 <a href="#1167" id="1167">1167</a>
 <a href="#1168" id="1168">1168</a>
-<a href="#1169" id="1169">1169</a>
-<a href="#1170" id="1170">1170</a>
 </pre><pre class="rust"><code>
 <span class="attr">#![doc = <span class="macro">include_str!</span>(<span class="string">&quot;../README.md&quot;</span>)]
 
@@ -1782,24 +1780,22 @@
                 </span>{ |i| HNode::new(i) }
             };
             <span class="self">self</span>.head = get_handle(<span class="number">0</span>); 
-            <span class="kw">let </span><span class="kw-2">mut </span>h = <span class="number">0</span>;
-            <span class="kw">let     </span>n = <span class="self">self</span>.vec.len();
-            <span class="kw">while </span><span class="self">self</span>.vec[h].prev != BAD_HANDLE &amp;&amp; h &lt; n - <span class="number">1 </span>{
+            <span class="kw">let </span>m = <span class="self">self</span>.len;
+            <span class="kw">let </span>n = <span class="self">self</span>.vec.len();
+            <span class="kw">for </span>h <span class="kw">in </span><span class="number">0</span>..m - <span class="number">1 </span>{
                 <span class="self">self</span>.vec[h    ].next = get_handle(h + <span class="number">1</span>);
                 <span class="self">self</span>.vec[h + <span class="number">1</span>].prev = get_handle(h);
-                h += <span class="number">1</span>;
             }
-            <span class="self">self</span>.vec[h].next = BAD_HANDLE;
-            <span class="self">self</span>.vec[<span class="number">0</span>].prev = get_handle(h);
+            <span class="self">self</span>.vec[m - <span class="number">1</span>].next = BAD_HANDLE;
+            <span class="self">self</span>.vec[<span class="number">0    </span>].prev = get_handle(m - <span class="number">1</span>);
 
             <span class="kw">if </span><span class="self">self</span>.recyc != BAD_HANDLE {
-                h += <span class="number">1</span>;
-                <span class="self">self</span>.recyc = get_handle(h);
+                <span class="self">self</span>.recyc = get_handle(<span class="self">self</span>.len);
 
-                <span class="kw">while </span>h &lt; n - <span class="number">1 </span>{
+                <span class="kw">for </span>h <span class="kw">in </span>m..n {
                     <span class="self">self</span>.vec[h].next = get_handle(h + <span class="number">1</span>);
-                    h += <span class="number">1</span>;
                 }
+                <span class="self">self</span>.vec[n - <span class="number">1</span>].next = BAD_HANDLE;
             }
         }
     }
