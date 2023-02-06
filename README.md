@@ -14,7 +14,7 @@ are inserted or removed.
 
 ```rust, ignore
 [dependencies]
-linked-vector = { git = "https://github.com/ttappr/linked-vector.git" }
+linked-vector = "0.1"
 ```
 
 ## Handles
