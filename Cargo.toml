@@ -2,7 +2,7 @@
 name = "linked-vector"
 version = "0.1.0"
 edition = "2021"
-license = "license"
+license = "MIT"
 authors = ["tmtappr@gmail.com"]
 description = "A hybrid linked list and vector data structure"
 documentation = "https://ttappr.github.io/linked-vector/doc/linked_vector/index.html"
