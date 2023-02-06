@@ -43,6 +43,11 @@ let handle_1 = lv.push_back(1);
 let handle_2 = lv.push_back(2);
 
 *lv.get_mut(handle_1).unwrap() = 42;
+lv[handle_2] = 99;
+
+assert_eq!(lv[handle_1], 42);
+assert_eq!(lv[handle_2], 99);
+
 ```
 ## Recycling
 

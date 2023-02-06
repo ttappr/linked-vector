@@ -36,7 +36,12 @@ indexes.</p>
 <span class="kw">let </span>handle_1 = lv.push_back(<span class="number">1</span>);
 <span class="kw">let </span>handle_2 = lv.push_back(<span class="number">2</span>);
 
-<span class="kw-2">*</span>lv.get_mut(handle_1).unwrap() = <span class="number">42</span>;</code></pre></div>
+<span class="kw-2">*</span>lv.get_mut(handle_1).unwrap() = <span class="number">42</span>;
+lv[handle_2] = <span class="number">99</span>;
+
+<span class="macro">assert_eq!</span>(lv[handle_1], <span class="number">42</span>);
+<span class="macro">assert_eq!</span>(lv[handle_2], <span class="number">99</span>);
+</code></pre></div>
 <h3 id="recycling"><a href="#recycling">Recycling</a></h3>
 <p>Nodes within <code>LinkedVector</code> are added to a recycling list when they’re popped,
 or otherwise removed. If a <code>LinkedVector</code> has any nodes in this list, one will 
