@@ -1,7 +1,7 @@
 # LinkedVector
 
 - [Source Documentation](https://ttappr.github.io/linked-vector/doc/linked_vector/index.html)
-    - [Primary Class](https://ttappr.github.io/linked-vector/doc/linked_vector/struct.LinkedVector.html)
+    - [Primary Class (LinkedVector)](https://ttappr.github.io/linked-vector/doc/linked_vector/struct.LinkedVector.html)
 - [GitHub Project](https://github.com/ttappr/linked-vector.git)
 
 `LinkedVector` is a hybrid of a vector and linked list. Items are accessible

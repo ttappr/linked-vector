@@ -40,6 +40,7 @@ impl HNode {
         Self(index, uuid)
     }
     #[cfg(not(debug_assertions))]
+    #[inline(always)]
     fn new(index: usize) -> Self {
         Self(index)
     }
@@ -103,11 +104,26 @@ impl<T> LinkedVector<T> {
             uuid  : uuid::Uuid::new_v4() 
         }
     }
+
+    /// Creates a new, empty `LinkedVector` with the specified capacity.
+    /// 
+    #[inline]
+    pub fn with_capacity(size: usize) -> Self {
+        Self { 
+            vec   : Vec::with_capacity(size), 
+            recyc : BAD_HANDLE, 
+            head  : BAD_HANDLE, 
+            len   : 0, 
+
+            #[cfg(debug_assertions)]
+            uuid  : uuid::Uuid::new_v4() 
+        }
+    }
+
     /// Moves all elements from `other` into `self`, leaving `other` empty.
     /// This operation completes in O(n) time where n is the length of `other`.
     /// ```
     /// use linked_vector::*;
-    /// 
     /// let mut lv1 = LinkedVector::new();
     /// let mut lv2 = LinkedVector::from([1, 2, 3]);
     /// 
@@ -123,11 +139,11 @@ impl<T> LinkedVector<T> {
         }
         other.clear();
     }
+
     /// Gives a reference to the back element, or `None` if the list is  empty.
     ///  This operation completes in O(1) time.
     /// ```
     /// use linked_vector::*;
-    /// 
     /// let mut lv = LinkedVector::from([1, 2, 3]);
     /// assert_eq!(lv.back(), Some(&3));
     /// ```
@@ -139,6 +155,7 @@ impl<T> LinkedVector<T> {
             self.back_().unwrap().value.as_ref()
         }
     }
+
     /// Gives a mutable reference to the element back element, or `None` if the
     /// list is empty. This operation completes in O(1) time.
     /// ```
@@ -158,6 +175,14 @@ impl<T> LinkedVector<T> {
         }
     }
 
+    /// Returns the total number of elements the vector can hold without 
+    /// reallocating.
+    /// 
+    #[inline]
+    pub fn capacity(&self) -> usize {
+        self.vec.capacity()
+    }
+
     /// Removes all elements from the list.
     /// 
     #[inline]
@@ -167,6 +192,7 @@ impl<T> LinkedVector<T> {
         self.head = BAD_HANDLE;
         self.recyc = BAD_HANDLE;
     }
+    
     /// Returns `true` if the list contains an element with the given value.
     /// This operation completes in O(n) time where n is the length of the list.
     /// 
@@ -246,6 +272,7 @@ impl<T> LinkedVector<T> {
     /// assert_eq!(lv.get(h), Some(&3));
     /// assert_eq!(lv.find_node(&42), None);
     /// ```
+    #[inline]
     pub fn find_node(&self, value: &T) -> Option<HNode>
     where
         T: PartialEq
@@ -286,7 +313,6 @@ impl<T> LinkedVector<T> {
     /// empty. This operation completes in O(1) time.
     /// ```
     /// use linked_vector::*;
-    /// 
     /// let mut lv = LinkedVector::from([1, 2, 3]);
     /// let hnode = lv.push_front(42);
     /// 
@@ -314,7 +340,6 @@ impl<T> LinkedVector<T> {
     /// `None` if the handle is invalid. This operation completes in O(1) time.
     /// ```
     /// use linked_vector::*;
-    /// 
     /// let mut lv = LinkedVector::from([1, 2, 3]);
     /// let hnode = lv.push_front(42);
     /// 
@@ -330,7 +355,6 @@ impl<T> LinkedVector<T> {
     /// O(1) time.
     /// ```
     /// use linked_vector::*;
-    /// 
     /// let mut lv = LinkedVector::new();
     /// let hnode = lv.push_front(0);
     /// 
@@ -592,7 +616,6 @@ impl<T> LinkedVector<T> {
     /// If required, a set of new handles can be obtained by calling 
     /// `handles()`. This operation completes in `O(n log n)` time.
     /// 
-    #[inline]
     pub fn sort_unstable(&mut self) 
     where
         T: Ord
