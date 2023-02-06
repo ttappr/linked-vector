@@ -56,7 +56,7 @@ head node, another with a handle to the recycling list, and lastly the length
 field. </p>
 <p>There are no dummy nodes in the vector - all active nodes are data, and there’s
 no field in the <code>LinkedVector</code> struct for a tail handle, although the vector
-does indeed have a tial node.</p>
+does indeed have a tial node accessible in <code>O(1)</code> time.</p>
 <h3 id="other-features"><a href="#other-features">Other Features</a></h3>
 <ul>
 <li><strong>Cursors</strong>:   The Cursor interface facilitates traversing the vector from any 

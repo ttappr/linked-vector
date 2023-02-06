@@ -67,7 +67,7 @@ field.
 
 There are no dummy nodes in the vector - all active nodes are data, and there's
 no field in the `LinkedVector` struct for a tail handle, although the vector
-does indeed have a tial node.
+does indeed have a tial node accessible in `O(1)` time.
 
 ## Other Features
 
