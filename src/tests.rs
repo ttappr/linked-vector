@@ -103,6 +103,22 @@ fn cursor() {
 }
 
 #[test]
+fn cursor_at() {
+    let lv = LinkedVector::from([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+    let h5 = lv.find_node(&5).unwrap();
+    let mut cursor = lv.cursor_at(h5);
+
+    assert_eq!(cursor.get(), Some(&5));
+    
+    let h6 = cursor.move_next().unwrap();
+
+    assert_eq!(lv[h6], 6);
+
+    cursor.forward(2).expect("Should move forward 2.");
+    assert_eq!(cursor.get(), Some(&8));
+}
+
+#[test]
 fn default() {
     let lv1 = LinkedVector::<i32>::default();
     assert_eq!(lv1.is_empty(), true);
@@ -253,6 +269,22 @@ fn index_mut() {
     assert_eq!(lv1[h2], 5);
     assert_eq!(lv1[h3], 6);
     assert_eq!(lv1.len(), 3);
+}
+
+#[test]
+fn  insert_() {
+    let mut lv1 = LinkedVector::new();
+
+    let h1 = lv1.insert_(None, 1);
+    let h2 = lv1.insert_(Some(h1), 2);
+
+    assert_eq!(lv1.front(), Some(&2));
+    assert_eq!(lv1.back(), Some(&1));
+
+    let h3 = lv1.insert_(None, 3);
+
+    assert_eq!(lv1.back(), Some(&3));
+    assert_eq!(lv1.front(), Some(&2));
 }
 
 #[test]
@@ -480,6 +512,21 @@ fn push_front() {
 }
 
 #[test]
+fn remove() {
+    let mut lv1 = LinkedVector::from([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+    assert_eq!(lv1.remove(&7), Some(7));
+    assert_eq!(lv1.to_vec(), vec![1, 2, 3, 4, 5, 6, 8, 9]);
+}
+
+#[test]
+fn remove_node() {
+    let mut lv1 = LinkedVector::from([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+    let h = lv1.find_node(&7).unwrap();
+    assert_eq!(lv1.remove_node(h), Some(7));
+    assert_eq!(lv1.to_vec(), vec![1, 2, 3, 4, 5, 6, 8, 9]);
+}
+
+#[test]
 fn sort_unstable() {
     let mut lv1 = LinkedVector::from([3, 1, 4, 1, 5, 9]);
     lv1.sort_unstable();
@@ -501,17 +548,21 @@ fn sort_unstable() {
 }
 
 #[test]
-fn  insert_() {
+fn to_vec() {
     let mut lv1 = LinkedVector::new();
+    lv1.push_back(1);
+    lv1.push_back(2);
+    lv1.push_back(3);
+    assert_eq!(lv1.to_vec(), vec![1, 2, 3]);
+}
 
-    let h1 = lv1.insert_(None, 1);
-    let h2 = lv1.insert_(Some(h1), 2);
-
-    assert_eq!(lv1.front(), Some(&2));
-    assert_eq!(lv1.back(), Some(&1));
-
-    let h3 = lv1.insert_(None, 3);
-
-    assert_eq!(lv1.back(), Some(&3));
-    assert_eq!(lv1.front(), Some(&2));
+#[test]
+fn with_capacity() {
+    let mut lv1 = LinkedVector::with_capacity(10);
+    assert_eq!(lv1.capacity(), 10);
+    lv1.push_back(1);
+    lv1.push_back(2);
+    lv1.push_back(3);
+    assert_eq!(lv1.capacity(), 10);
+    assert_eq!(lv1.len(), 3);
 }
