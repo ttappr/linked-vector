@@ -364,6 +364,7 @@ impl<T> LinkedVector<T> {
     /// let h3 = lv.push_front(3);
     /// 
     /// assert_eq!(lv.get_handle(1), Some(h2));
+    /// assert_eq!(lv.get_handle(3), None);
     /// ```
     #[inline]
     pub fn get_handle(&self, index: usize) -> Option<HNode> {
@@ -417,6 +418,7 @@ impl<T> LinkedVector<T> {
     /// 
     /// let h = lv.insert(4, 42);
     /// 
+    /// assert_eq!(lv[h], 42);
     /// assert_eq!(lv.to_vec(), vec![1, 2, 3, 4, 42, 5, 6, 7, 8]);
     /// ```
     #[inline]
@@ -621,11 +623,15 @@ impl<T> LinkedVector<T> {
     /// use linked_vector::*;
     /// let mut lv = LinkedVector::from([1, 2, 3]);
     /// 
-    /// assert_eq!(lv.remove(1), 2);
+    /// assert_eq!(lv.remove(1), Some(2));
     /// ```
     #[inline]
-    pub fn remove(&mut self, index: usize) -> T {
-        self.remove_(self.get_handle(index)).unwrap()
+    pub fn remove(&mut self, index: usize) -> Option<T> {
+        if index < self.len() {
+            self.remove_(self.get_handle(index))
+        } else {
+            None
+        }
     }
 
     /// Removes the first element with the indicated value. Returns the element

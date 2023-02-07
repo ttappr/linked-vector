@@ -1377,6 +1377,12 @@
 <a href="#1377" id="1377">1377</a>
 <a href="#1378" id="1378">1378</a>
 <a href="#1379" id="1379">1379</a>
+<a href="#1380" id="1380">1380</a>
+<a href="#1381" id="1381">1381</a>
+<a href="#1382" id="1382">1382</a>
+<a href="#1383" id="1383">1383</a>
+<a href="#1384" id="1384">1384</a>
+<a href="#1385" id="1385">1385</a>
 </pre><pre class="rust"><code>
 <span class="attr">#![doc = <span class="macro">include_str!</span>(<span class="string">&quot;../README.md&quot;</span>)]
 
@@ -1743,6 +1749,7 @@
     /// let h3 = lv.push_front(3);
     /// 
     /// assert_eq!(lv.get_handle(1), Some(h2));
+    /// assert_eq!(lv.get_handle(3), None);
     /// ```
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>get_handle(<span class="kw-2">&amp;</span><span class="self">self</span>, index: usize) -&gt; <span class="prelude-ty">Option</span>&lt;HNode&gt; {
@@ -1796,6 +1803,7 @@
     /// 
     /// let h = lv.insert(4, 42);
     /// 
+    /// assert_eq!(lv[h], 42);
     /// assert_eq!(lv.to_vec(), vec![1, 2, 3, 4, 42, 5, 6, 7, 8]);
     /// ```
     </span><span class="attr">#[inline]
@@ -2000,11 +2008,15 @@
     /// use linked_vector::*;
     /// let mut lv = LinkedVector::from([1, 2, 3]);
     /// 
-    /// assert_eq!(lv.remove(1), 2);
+    /// assert_eq!(lv.remove(1), Some(2));
     /// ```
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>remove(<span class="kw-2">&amp;mut </span><span class="self">self</span>, index: usize) -&gt; T {
-        <span class="self">self</span>.remove_(<span class="self">self</span>.get_handle(index)).unwrap()
+    </span><span class="kw">pub fn </span>remove(<span class="kw-2">&amp;mut </span><span class="self">self</span>, index: usize) -&gt; <span class="prelude-ty">Option</span>&lt;T&gt; {
+        <span class="kw">if </span>index &lt; <span class="self">self</span>.len() {
+            <span class="self">self</span>.remove_(<span class="self">self</span>.get_handle(index))
+        } <span class="kw">else </span>{
+            <span class="prelude-val">None
+        </span>}
     }
 
     <span class="doccomment">/// Removes the first element with the indicated value. Returns the element

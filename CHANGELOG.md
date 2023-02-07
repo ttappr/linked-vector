@@ -8,7 +8,7 @@
 - A `remove()` that takes the index of the item to remove.
 - An `insert()` that takes the index of the position to insert to, and the value
   to insert.
-- `get_hande()`, which returns the handle of the `index`'th item.
+- `get_handle()`, which returns the handle of the `index`'th item.
 
 ### Changed
 

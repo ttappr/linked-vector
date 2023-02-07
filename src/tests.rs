@@ -225,6 +225,18 @@ fn get() {
 }
 
 #[test]
+fn get_handle() {
+    let mut lv1 = LinkedVector::new();
+    let h1 = lv1.push_back(1);
+    let h2 = lv1.push_back(2);
+    let h3 = lv1.push_back(3);
+    assert_eq!(lv1.get_handle(0), Some(h1));
+    assert_eq!(lv1.get_handle(1), Some(h2));
+    assert_eq!(lv1.get_handle(2), Some(h3));
+    assert_eq!(lv1.get_handle(3), None);
+}
+
+#[test]
 fn handles() {
     let mut lv1 = LinkedVector::new();
     let h1 = lv1.push_back(1);
@@ -245,6 +257,15 @@ fn handles() {
     assert_eq!(it.next(), Some(h2));
     assert_eq!(it.next(), Some(h1));
     assert!(it.next().is_none());
+}
+
+#[test]
+fn insert() {
+    let mut lv1 = LinkedVector::from([1, 2, 3, 4, 5]);
+    let h4 = lv1.insert(2, 42);
+
+    assert_eq!(lv1.len(), 6);
+    assert_eq!(lv1.to_vec(), vec![1, 2, 42, 3, 4, 5]);
 }
 
 #[test]
@@ -515,6 +536,16 @@ fn push_front() {
 
 #[test]
 fn remove() {
+    let mut lv = LinkedVector::from([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+
+    assert_eq!(lv.remove(0), Some(1));
+    assert_eq!(lv.remove(7), Some(9));
+    assert_eq!(lv.remove(3), Some(5));
+    assert_eq!(lv.remove(11), None);
+}
+
+#[test]
+fn remove_value() {
     let mut lv1 = LinkedVector::from([1, 2, 3, 4, 5, 6, 7, 8, 9]);
     assert_eq!(lv1.remove_value(&7), Some(7));
     assert_eq!(lv1.to_vec(), vec![1, 2, 3, 4, 5, 6, 8, 9]);
