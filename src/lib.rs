@@ -655,7 +655,7 @@ impl<T> LinkedVector<T> {
     where
         F: FnMut(&T, &T) -> Ordering,
     {
-        use Ordering::*;
+        use Ordering::Less;
         if self.len < 2 { return; }
         if let (Some(lo), Some(hi)) = (self.front_node(), self.back_node()) {
             let mut stack = vec![(lo, hi)];
@@ -917,7 +917,14 @@ impl<T> LinkedVector<T> {
     fn new_node(&mut self, value: T) -> HNode {
         if let Some(hnode) = self.pop_recyc() {
             self.vec[hnode.0] = Node::new(value);
-            hnode
+            #[cfg(debug_assertions)]
+            {
+                let mut hnode = hnode;
+                hnode.1 = self.vec[hnode.0].gen;
+                hnode 
+            }
+            #[cfg(not(debug_assertions))]
+            { hnode }
         } else {
             self.vec.push(Node::new(value));
             #[cfg(debug_assertions)]
@@ -938,16 +945,7 @@ impl<T> LinkedVector<T> {
             let hnode = self.recyc;
             self.recyc = self.vec[hnode.0].next;
             self.vec[hnode.0].next = BAD_HANDLE;
-            #[cfg(debug_assertions)]
-            {   
-                let mut hnode = hnode;
-                hnode.1 = self.vec[hnode.0].gen; 
-                Some(hnode)
-            }
-            #[cfg(not(debug_assertions))]
-            { 
-                Some(hnode) 
-            }
+            Some(hnode) 
         }
     }
 
