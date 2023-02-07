@@ -22,21 +22,11 @@ linked-vector = "0.1"
 
 ## Handles
 
-Items in a `LinkedVector` are directly accessible via the `HNode` struct. These
-are returned by operations such as insert or push operations. If direct access
-is required to any specific items, their handles can be stored for later use.
-
-Internally, a handle is an index into the vector that holds the nodes. Care 
-should be taken to avoid using the handles from one `LinkedVector` with another 
-instance. For the debug builds, handles are checked to ensure they are "native"
-to the `LinkedVector` they're passed to when calling its methods. This can help 
-catch errors in unit tests. This checking is not done when built in release 
-mode.
-
-For debug builds handles have a UUID field used to ensure the `LinkedVector` 
-they're used with belong to it. For release build, the UUID field is not present
-and this checking isn't done. For release, handles are transparent `usize`
-indexes.
+Items in a `LinkedVector` are directly accessible via handles. These are 
+instances of the `HNode` struct. They're returned by operations such as insert, 
+push, and getters. If direct access is required to any specific items, their 
+handles can be stored for later use. These handles lack the performance overhead
+of smart pointers, while providing a flexible reference model.
 
 ```rust
 use linked_vector::*;
@@ -60,6 +50,22 @@ be used for the next insert or push operation. This strategy avoids segmenting
 the vector with dead vector cells. When a node is added to the recycling list, 
 it isn't moved in the vector - its next and previous fields are updated to link
 it into the recycling list.
+
+## Debug Features
+
+For release builds, the checks described in this section are excluded to ensure 
+fast performance. In release, handles are simply transparent `usize` indexes 
+into the `LinkedVector`'s internal vector.
+
+When run with the debug build, handles have additional fields added: a UUID 
+field, and a generation ID. The UUID field is used to verify handles are native 
+to the `LinkedVector` they're passed to. And the generation ID is used to detect
+expired handles. 
+
+These features should help ensure that projects that use this crate don't have 
+elusive bugs in scenarios such as passing an old handle to a vector for a node 
+that had been popped earlier, or obtaining a handle from one vector and 
+accidentally passing it to another.
 
 ## Economy
 
