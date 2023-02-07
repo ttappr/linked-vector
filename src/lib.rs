@@ -701,7 +701,7 @@ impl<T> LinkedVector<T> {
         self.sort_unstable_by(|a, b| key(a).cmp(&key(b)));
     }
 
-    /// Swaps the elements indicated by the handles, `hdode1` and `hdone2`. Only
+    /// Swaps the elements indicated by the handles, `hdode1` and `hnode2`. Only
     /// the next and prev fields of nodes are altered. `hnode1` and `hnode2` 
     /// will be updated to reference the swapped values. This operation 
     /// completes in O(1) time.
