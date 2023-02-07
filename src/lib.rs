@@ -618,7 +618,20 @@ impl<T> LinkedVector<T> {
     /// same values) as before.  Quicksort is used with the Lomuto partition 
     /// scheme. Only the `next` and `prev` fields of the nodes are modified in 
     /// the list. This operation completes in `O(n log n)` time.
+    /// ```
+    /// use linked_vector::*;
+    /// let mut lv = LinkedVector::new();
+    /// let h1 = lv.push_back(3);
+    /// let h2 = lv.push_back(2);
+    /// let h3 = lv.push_back(1);
     /// 
+    /// lv.sort_unstable();
+    /// 
+    /// assert_eq!(lv.to_vec(), vec![1, 2, 3]);
+    /// assert_eq!(lv.get(h1), Some(&3));
+    /// assert_eq!(lv.get(h2), Some(&2));
+    /// assert_eq!(lv.get(h3), Some(&1));
+    /// ```
     pub fn sort_unstable(&mut self) 
     where
         T: Ord
@@ -664,7 +677,25 @@ impl<T> LinkedVector<T> {
     /// next and prev fields of nodes are altered. `h1` and `h2` will be 
     /// updated to reference the swapped values. This operation completes in 
     /// O(1) time.
+    /// ```
+    /// use linked_vector::*;
+    /// let mut lv = LinkedVector::new();
     /// 
+    /// let mut h1 = lv.push_back(42);
+    /// let mut h2 = lv.push_back(43);
+    /// 
+    /// let h1_bak = h1;
+    /// let h2_bak = h2;
+    /// 
+    /// lv.swap(&mut h1, &mut h2);
+    /// 
+    /// assert_eq!(lv[h1], 43);
+    /// assert_eq!(lv[h2], 42);
+    /// assert_eq!(lv.next_node(h1), Some(h2));
+    /// assert_eq!(lv.next_node(h2_bak), Some(h1_bak));
+    /// assert_eq!(lv.get(h1_bak), Some(&42));
+    /// assert_eq!(lv.get(h2_bak), Some(&43));
+    /// ```
     #[inline]
     pub fn swap(&mut self, hnode1: &mut HNode, hnode2: &mut HNode) {
         let h1 = *hnode1;
