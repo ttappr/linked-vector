@@ -19,7 +19,9 @@ const BAD_HANDLE : HNode = HNode(usize::MAX);
 
 #[cfg(debug_assertions)]
 const BAD_HANDLE : HNode = 
-        HNode(usize::MAX, uuid!("deadbeef-dead-beef-dead-beefdeadbeef"));
+        HNode(usize::MAX, 
+              usize::MAX, 
+              uuid!("deadbeef-dead-beef-dead-beefdeadbeef"));
 
 /// A handle to a node within a `LinkedVector`. Internally, it holds an index
 /// into the vector holding the LinkedVector's nodes.
@@ -34,20 +36,7 @@ pub struct HNode(usize);
 /// 
 #[cfg(debug_assertions)]
 #[derive(Debug, Clone, Copy, PartialEq)]
-pub struct HNode(usize, Uuid);
-
-impl HNode {
-    #[allow(dead_code)]
-    #[cfg(debug_assertions)]
-    fn new(index: usize, uuid: Uuid) -> Self {
-        Self(index, uuid)
-    }
-    #[cfg(not(debug_assertions))]
-    #[inline(always)]
-    fn new(index: usize) -> Self {
-        Self(index)
-    }
-}
+pub struct HNode(usize, usize, Uuid);
 
 impl Default for HNode {
     #[inline]
@@ -64,6 +53,9 @@ struct Node<T> {
     value : Option<T>,
     next  : HNode,
     prev  : HNode,
+
+    #[cfg(debug_assertions)]
+    gen   : usize,
 }
 impl<T> Node<T> {
     #[inline]
@@ -72,6 +64,9 @@ impl<T> Node<T> {
             value : Some(value), 
             next  : BAD_HANDLE, 
             prev  : BAD_HANDLE, 
+
+            #[cfg(debug_assertions)]
+            gen   : 0,
         }
     }
 }
@@ -850,21 +845,24 @@ impl<T> LinkedVector<T> {
             None
         } else {
             let hnode = node.unwrap_or(self.get_(self.head).prev);
-            let hprev = self.get_(hnode).prev;
-            let hnext = self.get_(hnode).next;
-            if hnext == BAD_HANDLE {
-                self.get_mut_(self.head).prev = hprev;
-            } else {
-                self.get_mut_(hnext).prev = hprev;
-            }
-            if hnode == self.head {
-                self.head = hnext;
-            } else {
-                self.get_mut_(hprev).next = hnext;
+            if self.len > 1 {
+                let hprev = self.get_(hnode).prev;
+                let hnext = self.get_(hnode).next;
+                if hnext == BAD_HANDLE {
+                    self.get_mut_(self.head).prev = hprev;
+                } else {
+                    self.get_mut_(hnext).prev = hprev;
+                }
+                if hnode == self.head {
+                    self.head = hnext;
+                } else {
+                    self.get_mut_(hprev).next = hnext;
+                }
             }
             self.len -= 1;
+            let value = self.get_mut_(hnode).value.take();
             self.push_recyc(hnode);
-            self.get_mut_(hnode).value.take()
+            value
         }
     }
 
@@ -875,7 +873,8 @@ impl<T> LinkedVector<T> {
     fn get_(&self, node: HNode) -> &Node<T> {
         #[cfg(debug_assertions)]
         { assert!(node.0 != BAD_HANDLE.0, "Handle is invalid.");
-          assert!(node.1 == self.uuid, "Handle is not native."); }
+          assert!(node.2 == self.uuid, "Handle is not native.");
+          assert!(node.1 == self.vec[node.0].gen, "Handle is expired."); }
         &self.vec[node.0]
     }
 
@@ -886,7 +885,8 @@ impl<T> LinkedVector<T> {
     fn get_mut_(&mut self, node: HNode) -> &mut Node<T> {
         #[cfg(debug_assertions)]
         { assert!(node.0 != BAD_HANDLE.0, "Handle is invalid.");
-          assert!(node.1 == self.uuid, "Handle is not native."); }
+          assert!(node.2 == self.uuid, "Handle is not native."); 
+          assert!(node.1 == self.vec[node.0].gen, "Handle is expired."); }
         &mut self.vec[node.0]
     }
 
@@ -897,11 +897,18 @@ impl<T> LinkedVector<T> {
     fn new_node(&mut self, value: T) -> HNode {
         if let Some(hnode) = self.pop_recyc() {
             self.vec[hnode.0] = Node::new(value);
-            hnode
+
+            #[cfg(debug_assertions)]
+            {   let mut hnode = hnode;
+                hnode.1 = self.vec[hnode.0].gen; 
+                hnode
+            }
+            #[cfg(not(debug_assertions))]
+            { hnode }
         } else {
             self.vec.push(Node::new(value));
             #[cfg(debug_assertions)]
-            { HNode(self.vec.len() - 1, self.uuid) }
+            { HNode(self.vec.len() - 1, 0, self.uuid) }
             #[cfg(not(debug_assertions))]
             { HNode(self.vec.len() - 1) }
         }
@@ -935,6 +942,8 @@ impl<T> LinkedVector<T> {
             self.get_mut_(node).next = self.recyc;
             self.recyc = node;
         }
+        #[cfg(debug_assertions)]
+        { self.get_mut_(node).gen += 1; }
     }
 }
 
