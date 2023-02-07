@@ -368,7 +368,7 @@ impl<T> LinkedVector<T> {
     /// ```
     #[inline]
     pub fn get_handle(&self, index: usize) -> Option<HNode> {
-        self.handles().skip(index).next()
+        self.handles().nth(index)
     }
 
     /// Provides a mutable reference to the element indicated by the given
@@ -428,7 +428,7 @@ impl<T> LinkedVector<T> {
         } else if index >= self.len {
             self.push_back(value)
         } else {
-            let node = self.handles().skip(index).next().unwrap();
+            let node = self.handles().nth(index).unwrap();
             self.insert_(Some(node), value)
         }
     }
