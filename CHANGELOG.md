@@ -2,10 +2,7 @@
 
 ## Upcoming
 
-- When the interface to `LinkedVector` has no more immediate changes needed,
-  the first major release `v1.0.0` will follow. This should happen soon. The
-  SemVer version numbering conventions will be more closely adhered to 
-  thereafter.
+- First major release `v1.0.0` coming soon.
 
 ## v0.2.0 - ??
 

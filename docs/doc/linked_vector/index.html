@@ -7,18 +7,19 @@
 </li>
 <li><a href="https://github.com/ttappr/linked-vector.git">GitHub Project</a></li>
 </ul>
-<p><code>LinkedVector</code> is a hybrid of a vector and linked list. Items are accessible
-directly in <code>O(1)</code> time, and insertions and deletions also operate in <code>O(1)</code>
-time. Internally, nodes exist within a vector, with each node holding handles 
-to its previous and next neighbors. So there’s no shifting of data when items 
-are inserted or removed.</p>
+<p><code>LinkedVector</code> is a feature packed hybrid of a vector and linked list. Items are
+accessible directly in <code>O(1)</code> time, and insertions and deletions also operate in
+<code>O(1)</code> time. Internally, nodes exist within a vector, with each node holding 
+handles to its previous and next neighbors. So there’s no shifting of data when 
+items are inserted or removed.</p>
 <h3 id="usage"><a href="#usage">Usage</a></h3>
-<p>In your Cargo.toml file under <code>[dependencies]</code> include the crate name and 
-version number:</p>
+<p>Edit your Cargo.toml file to include:</p>
 
 <div class="example-wrap ignore"><div class='tooltip'>ⓘ</div><pre class="rust rust-example-rendered"><code>[dependencies]
 linked-vector = <span class="string">&quot;0.1&quot;</span></code></pre></div>
-<h3 id="handles"><a href="#handles">Handles</a></h3>
+<p>Or run:</p>
+<div class="example-wrap"><pre class="language-console, ignore"><code>cargo add linked-vector
+</code></pre></div><h3 id="handles"><a href="#handles">Handles</a></h3>
 <p>Items in a <code>LinkedVector</code> are directly accessible via handles. These are 
 instances of the <code>HNode</code> struct. They’re returned by operations such as insert, 
 push, and getters. If direct access is required to any specific items, their 

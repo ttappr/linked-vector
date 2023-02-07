@@ -4,20 +4,24 @@
     - [Primary Class (LinkedVector)](https://ttappr.github.io/linked-vector/doc/linked_vector/struct.LinkedVector.html)
 - [GitHub Project](https://github.com/ttappr/linked-vector.git)
 
-`LinkedVector` is a hybrid of a vector and linked list. Items are accessible
-directly in `O(1)` time, and insertions and deletions also operate in `O(1)`
-time. Internally, nodes exist within a vector, with each node holding handles 
-to its previous and next neighbors. So there's no shifting of data when items 
-are inserted or removed.
+`LinkedVector` is a feature packed hybrid of a vector and linked list. Items are
+accessible directly in `O(1)` time, and insertions and deletions also operate in
+`O(1)` time. Internally, nodes exist within a vector, with each node holding 
+handles to its previous and next neighbors. So there's no shifting of data when 
+items are inserted or removed.
 
 ## Usage
 
-In your Cargo.toml file under `[dependencies]` include the crate name and 
-version number:
+Edit your Cargo.toml file to include:
 
 ```rust, ignore
 [dependencies]
 linked-vector = "0.1"
+```
+Or run:
+
+```console, ignore
+cargo add linked-vector
 ```
 
 ## Handles
