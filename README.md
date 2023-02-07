@@ -12,6 +12,9 @@ are inserted or removed.
 
 ## Usage
 
+In your Cargo.toml file under `[dependencies]` include the crate name and 
+version number:
+
 ```rust, ignore
 [dependencies]
 linked-vector = "0.1"
@@ -28,7 +31,7 @@ should be taken to avoid using the handles from one `LinkedVector` with another
 instance. For the debug builds, handles are checked to ensure they are "native"
 to the `LinkedVector` they're passed to when calling its methods. This can help 
 catch errors in unit tests. This checking is not done when built in release 
-node.
+mode.
 
 For debug builds handles have a UUID field used to ensure the `LinkedVector` 
 they're used with belong to it. For release build, the UUID field is not present
@@ -131,7 +134,7 @@ assert_eq!(lv.get(hbak), Some(&4));
 ## Iterators
 
 `LinkedVector` implements the standard set of double-ended iterators. They can
-be instantiated directly vie methods such as `iter()`, or implicitly.
+be instantiated directly via methods such as `iter()`, or implicitly.
 
 ```rust
 use linked_vector::*;

@@ -3,6 +3,7 @@
 
 use core::iter::{FromIterator, FusedIterator};
 use core::ops::{Index, IndexMut};
+use std::mem::swap;
 pub use cursor::*;
 
 #[cfg(test)]
@@ -35,6 +36,7 @@ pub struct HNode(usize);
 pub struct HNode(usize, Uuid);
 
 impl HNode {
+    #[allow(dead_code)]
     #[cfg(debug_assertions)]
     fn new(index: usize, uuid: Uuid) -> Self {
         Self(index, uuid)
@@ -611,48 +613,93 @@ impl<T> LinkedVector<T> {
         self.remove_(Some(node))
     }
 
-    /// Sorts the elemements in place by their value. This operation will 
-    /// invalidate all previously held handles, and they should be discarded. 
-    /// If required, a set of new handles can be obtained by calling 
-    /// `handles()`. This operation completes in `O(n log n)` time.
+    /// Sorts the elemements in place in ascending order. Previously held 
+    /// handles will still be valid and reference the same elements (with the 
+    /// same values) as before.  Quicksort is used with the Lomuto partition 
+    /// scheme. Only the `next` and `prev` fields of the nodes are modified in 
+    /// the list. This operation completes in `O(n log n)` time.
     /// 
     pub fn sort_unstable(&mut self) 
     where
         T: Ord
     {
-        if self.len > 1 {
-            self.vec.sort_unstable_by(|a, b| {
-                if a.prev == BAD_HANDLE || b.prev == BAD_HANDLE {
-                    a.prev.0.cmp(&b.prev.0)
+        if self.len < 2 { return; }
+        if let (Some(lo), Some(hi)) = (self.front_node(), self.back_node()) {
+            let mut stack = vec![(lo, hi)];
+
+            while let Some((mut lo, mut hi)) = stack.pop() {
+                let     p = hi;
+                let mut i = lo;
+                let mut j = lo;
+
+                while j != hi {
+                    if self.vec[j.0].value <= self.vec[p.0].value {
+                        let b = i == lo;
+                        self.swap(&mut i, &mut j);
+                        if b { lo = i; }
+                        i = self.vec[i.0].next;
+                    }
+                    j = self.vec[j.0].next;
+                }
+                if i == lo { 
+                    self.swap(&mut i, &mut hi);
+                    lo = i;
                 } else {
-                    a.value.cmp(&b.value)
+                    self.swap(&mut i, &mut hi);
                 }
-            });
-            let get_handle = {
-                #[cfg(debug_assertions)]
-                { |i| HNode::new(i, self.uuid) }
-                #[cfg(not(debug_assertions))]
-                { |i| HNode::new(i) }
-            };
-            self.head = get_handle(0); 
-            let m = self.len;
-            let n = self.vec.len();
-            for h in 0..m - 1 {
-                self.vec[h    ].next = get_handle(h + 1);
-                self.vec[h + 1].prev = get_handle(h);
-            }
-            self.vec[m - 1].next = BAD_HANDLE;
-            self.vec[0    ].prev = get_handle(m - 1);
 
-            if self.recyc != BAD_HANDLE {
-                self.recyc = get_handle(self.len);
-
-                for h in m..n {
-                    self.vec[h].next = get_handle(h + 1);
+                if lo != hi {
+                    if i != lo {
+                        stack.push((lo, self.vec[i.0].prev));
+                    }
+                    if i != hi {
+                        stack.push((self.vec[i.0].next, hi));
+                    }
                 }
-                self.vec[n - 1].next = BAD_HANDLE;
             }
         }
+    }
+
+    /// Swaps the elements indicated by the handles, `h1` and `h2`. Only the 
+    /// next and prev fields of nodes are altered. `h1` and `h2` will be 
+    /// updated to point to the swapped values. This operation completes in 
+    /// O(1) time.
+    /// 
+    #[inline]
+    pub fn swap(&mut self, hnode1: &mut HNode, hnode2: &mut HNode) {
+        let h1 = *hnode1;
+        let h2 = *hnode2;
+        let prev1 = self.get_(h1).prev;
+        let next1 = self.get_(h1).next;
+
+        let prev2 = self.get_(h2).prev;
+        let next2 = self.get_(h2).next;
+        
+        self.get_mut_(prev1).next = h2;
+        self.get_mut_(prev2).next = h1;
+
+        if next1 != BAD_HANDLE {
+            self.get_mut_(next1).prev = h2;
+        }
+        if next2 != BAD_HANDLE {
+            self.get_mut_(next2).prev = h1;
+        }
+        if prev1 == h2 { self.get_mut_(h2).prev = h1;    }
+        else           { self.get_mut_(h2).prev = prev1; }
+        if prev2 == h1 { self.get_mut_(h1).prev = h2;    }
+        else           { self.get_mut_(h1).prev = prev2; }
+        if next1 == h2 { self.get_mut_(h2).next = h1;    }
+        else           { self.get_mut_(h2).next = next1; }
+        if next2 == h1 { self.get_mut_(h1).next = h2;    }
+        else           { self.get_mut_(h1).next = next2; }
+
+        if      self.head == h1 { self.head = h2; } 
+        else if self.head == h2 { self.head = h1; }
+
+        if      next1 == BAD_HANDLE { self.get_mut_(self.head).prev = h2; }
+        else if next2 == BAD_HANDLE { self.get_mut_(self.head).prev = h1; }
+
+        swap(hnode1, hnode2);
     }
 
     /// Returns a vector containing the elements of the list. This operation
