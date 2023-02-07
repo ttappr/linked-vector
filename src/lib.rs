@@ -54,6 +54,10 @@ struct Node<T> {
     next  : HNode,
     prev  : HNode,
 
+    // This field is used to detect expired handles. In debug mode if
+    // a handle's 2nd field doesn't match this, it's expried. When
+    // a node is added to the recycle list via. `push_recyc()`, this 
+    // number is incremented.
     #[cfg(debug_assertions)]
     gen   : usize,
 }
@@ -82,6 +86,8 @@ pub struct LinkedVector<T> {
     recyc : HNode,
     len   : usize,
 
+    // This field is used to detect foreign handles. If a handle's
+    // 3rd field doesn't match this, it's foreign.
     #[cfg(debug_assertions)]
     uuid  : Uuid,
 }
@@ -637,7 +643,14 @@ impl<T> LinkedVector<T> {
 
     /// Sorts the elemements in place in using the provided comparison function.
     /// See [LinkedVector::sort_unstable()] for more details.
+    /// ```
+    /// use linked_vector::*;
+    /// let mut lv = LinkedVector::from([1, 2, 3, 4, 5]);
     /// 
+    /// lv.sort_unstable_by(|a, b| b.cmp(a));
+    /// 
+    /// assert_eq!(lv.to_vec(), vec![5, 4, 3, 2, 1]);
+    /// ```
     pub fn sort_unstable_by<F>(&mut self, mut compare: F) 
     where
         F: FnMut(&T, &T) -> Ordering,
@@ -687,7 +700,14 @@ impl<T> LinkedVector<T> {
 
     /// Sorts the elemements in place in using the provided key extraction
     /// function. See [LinkedVector::sort_unstable()] for more details.
+    /// ```
+    /// use linked_vector::*;
+    /// let mut lv = LinkedVector::from([1, 2, 3, 4, 5]);
     /// 
+    /// lv.sort_unstable_by_key(|k| -k);
+    /// 
+    /// assert_eq!(lv.to_vec(), vec![5, 4, 3, 2, 1]);
+    /// ```
     pub fn sort_unstable_by_key<K, F>(&mut self, mut key: F) 
     where
         K: Ord,

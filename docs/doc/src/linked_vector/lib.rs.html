@@ -1304,6 +1304,28 @@
 <a href="#1304" id="1304">1304</a>
 <a href="#1305" id="1305">1305</a>
 <a href="#1306" id="1306">1306</a>
+<a href="#1307" id="1307">1307</a>
+<a href="#1308" id="1308">1308</a>
+<a href="#1309" id="1309">1309</a>
+<a href="#1310" id="1310">1310</a>
+<a href="#1311" id="1311">1311</a>
+<a href="#1312" id="1312">1312</a>
+<a href="#1313" id="1313">1313</a>
+<a href="#1314" id="1314">1314</a>
+<a href="#1315" id="1315">1315</a>
+<a href="#1316" id="1316">1316</a>
+<a href="#1317" id="1317">1317</a>
+<a href="#1318" id="1318">1318</a>
+<a href="#1319" id="1319">1319</a>
+<a href="#1320" id="1320">1320</a>
+<a href="#1321" id="1321">1321</a>
+<a href="#1322" id="1322">1322</a>
+<a href="#1323" id="1323">1323</a>
+<a href="#1324" id="1324">1324</a>
+<a href="#1325" id="1325">1325</a>
+<a href="#1326" id="1326">1326</a>
+<a href="#1327" id="1327">1327</a>
+<a href="#1328" id="1328">1328</a>
 </pre><pre class="rust"><code>
 <span class="attr">#![doc = <span class="macro">include_str!</span>(<span class="string">&quot;../README.md&quot;</span>)]
 
@@ -1360,7 +1382,11 @@
     next  : HNode,
     prev  : HNode,
 
-    <span class="attr">#[cfg(debug_assertions)]
+    <span class="comment">// This field is used to detect expired handles. In debug mode if
+    // a handle&#39;s 2nd field doesn&#39;t match this, it&#39;s expried. When
+    // a node is added to the recycle list via. `push_recyc()`, this 
+    // number is incremented.
+    </span><span class="attr">#[cfg(debug_assertions)]
     </span>gen   : usize,
 }
 <span class="kw">impl</span>&lt;T&gt; Node&lt;T&gt; {
@@ -1388,7 +1414,9 @@
     recyc : HNode,
     len   : usize,
 
-    <span class="attr">#[cfg(debug_assertions)]
+    <span class="comment">// This field is used to detect foreign handles. If a handle&#39;s
+    // 3rd field doesn&#39;t match this, it&#39;s foreign.
+    </span><span class="attr">#[cfg(debug_assertions)]
     </span>uuid  : Uuid,
 }
 
@@ -1943,7 +1971,14 @@
 
     <span class="doccomment">/// Sorts the elemements in place in using the provided comparison function.
     /// See [LinkedVector::sort_unstable()] for more details.
+    /// ```
+    /// use linked_vector::*;
+    /// let mut lv = LinkedVector::from([1, 2, 3, 4, 5]);
     /// 
+    /// lv.sort_unstable_by(|a, b| b.cmp(a));
+    /// 
+    /// assert_eq!(lv.to_vec(), vec![5, 4, 3, 2, 1]);
+    /// ```
     </span><span class="kw">pub fn </span>sort_unstable_by&lt;F&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw-2">mut </span>compare: F) 
     <span class="kw">where
         </span>F: FnMut(<span class="kw-2">&amp;</span>T, <span class="kw-2">&amp;</span>T) -&gt; Ordering,
@@ -1993,7 +2028,14 @@
 
     <span class="doccomment">/// Sorts the elemements in place in using the provided key extraction
     /// function. See [LinkedVector::sort_unstable()] for more details.
+    /// ```
+    /// use linked_vector::*;
+    /// let mut lv = LinkedVector::from([1, 2, 3, 4, 5]);
     /// 
+    /// lv.sort_unstable_by_key(|k| -k);
+    /// 
+    /// assert_eq!(lv.to_vec(), vec![5, 4, 3, 2, 1]);
+    /// ```
     </span><span class="kw">pub fn </span>sort_unstable_by_key&lt;K, F&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw-2">mut </span>key: F) 
     <span class="kw">where
         </span>K: Ord,
@@ -2203,14 +2245,7 @@
     </span><span class="kw">fn </span>new_node(<span class="kw-2">&amp;mut </span><span class="self">self</span>, value: T) -&gt; HNode {
         <span class="kw">if let </span><span class="prelude-val">Some</span>(hnode) = <span class="self">self</span>.pop_recyc() {
             <span class="self">self</span>.vec[hnode.<span class="number">0</span>] = Node::new(value);
-
-            <span class="attr">#[cfg(debug_assertions)]
-            </span>{   <span class="kw">let </span><span class="kw-2">mut </span>hnode = hnode;
-                hnode.<span class="number">1 </span>= <span class="self">self</span>.vec[hnode.<span class="number">0</span>].gen; 
-                hnode
-            }
-            <span class="attr">#[cfg(not(debug_assertions))]
-            </span>{ hnode }
+            hnode
         } <span class="kw">else </span>{
             <span class="self">self</span>.vec.push(Node::new(value));
             <span class="attr">#[cfg(debug_assertions)]
@@ -2229,9 +2264,18 @@
             <span class="prelude-val">None
         </span>} <span class="kw">else </span>{
             <span class="kw">let </span>hnode = <span class="self">self</span>.recyc;
-            <span class="self">self</span>.recyc = <span class="self">self</span>.get_(hnode).next;
-            <span class="self">self</span>.get_mut_(hnode).next = BAD_HANDLE;
-            <span class="prelude-val">Some</span>(hnode)
+            <span class="self">self</span>.recyc = <span class="self">self</span>.vec[hnode.<span class="number">0</span>].next;
+            <span class="self">self</span>.vec[hnode.<span class="number">0</span>].next = BAD_HANDLE;
+            <span class="attr">#[cfg(debug_assertions)]
+            </span>{   
+                <span class="kw">let </span><span class="kw-2">mut </span>hnode = hnode;
+                hnode.<span class="number">1 </span>= <span class="self">self</span>.vec[hnode.<span class="number">0</span>].gen; 
+                <span class="prelude-val">Some</span>(hnode)
+            }
+            <span class="attr">#[cfg(not(debug_assertions))]
+            </span>{ 
+                <span class="prelude-val">Some</span>(hnode) 
+            }
         }
     }
 
@@ -2242,14 +2286,14 @@
     </span><span class="kw">fn </span>push_recyc(<span class="kw-2">&amp;mut </span><span class="self">self</span>, node: HNode) {
         <span class="self">self</span>.get_mut_(node).prev = BAD_HANDLE;
         <span class="kw">if </span><span class="self">self</span>.recyc == BAD_HANDLE {
-            <span class="self">self</span>.get_mut_(node).next = BAD_HANDLE;
+            <span class="self">self</span>.vec[node.<span class="number">0</span>].next = BAD_HANDLE;
             <span class="self">self</span>.recyc = node;
         } <span class="kw">else </span>{
-            <span class="self">self</span>.get_mut_(node).next = <span class="self">self</span>.recyc;
+            <span class="self">self</span>.vec[node.<span class="number">0</span>].next = <span class="self">self</span>.recyc;
             <span class="self">self</span>.recyc = node;
         }
         <span class="attr">#[cfg(debug_assertions)]
-        </span>{ <span class="self">self</span>.get_mut_(node).gen += <span class="number">1</span>; }
+        </span>{ <span class="self">self</span>.vec[node.<span class="number">0</span>].gen += <span class="number">1</span>; }
     }
 }
 
