@@ -662,7 +662,7 @@ impl<T> LinkedVector<T> {
 
     /// Swaps the elements indicated by the handles, `h1` and `h2`. Only the 
     /// next and prev fields of nodes are altered. `h1` and `h2` will be 
-    /// updated to point to the swapped values. This operation completes in 
+    /// updated to reference the swapped values. This operation completes in 
     /// O(1) time.
     /// 
     #[inline]
