@@ -19,19 +19,11 @@ version number:</p>
 <div class="example-wrap ignore"><div class='tooltip'>ⓘ</div><pre class="rust rust-example-rendered"><code>[dependencies]
 linked-vector = <span class="string">&quot;0.1&quot;</span></code></pre></div>
 <h3 id="handles"><a href="#handles">Handles</a></h3>
-<p>Items in a <code>LinkedVector</code> are directly accessible via the <code>HNode</code> struct. These
-are returned by operations such as insert or push operations. If direct access
-is required to any specific items, their handles can be stored for later use.</p>
-<p>Internally, a handle is an index into the vector that holds the nodes. Care 
-should be taken to avoid using the handles from one <code>LinkedVector</code> with another 
-instance. For the debug builds, handles are checked to ensure they are “native”
-to the <code>LinkedVector</code> they’re passed to when calling its methods. This can help 
-catch errors in unit tests. This checking is not done when built in release 
-mode.</p>
-<p>For debug builds handles have a UUID field used to ensure the <code>LinkedVector</code> 
-they’re used with belong to it. For release build, the UUID field is not present
-and this checking isn’t done. For release, handles are transparent <code>usize</code>
-indexes.</p>
+<p>Items in a <code>LinkedVector</code> are directly accessible via handles. These are 
+instances of the <code>HNode</code> struct. They’re returned by operations such as insert, 
+push, and getters. If direct access is required to any specific items, their 
+handles can be stored for later use. These handles lack the performance overhead
+of smart pointers, while providing a flexible reference model.</p>
 
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>linked_vector::<span class="kw-2">*</span>;
 <span class="kw">let </span><span class="kw-2">mut </span>lv = LinkedVector::new();
@@ -52,6 +44,18 @@ be used for the next insert or push operation. This strategy avoids segmenting
 the vector with dead vector cells. When a node is added to the recycling list, 
 it isn’t moved in the vector - its next and previous fields are updated to link
 it into the recycling list.</p>
+<h3 id="debug-features"><a href="#debug-features">Debug Features</a></h3>
+<p>For release builds, the checks described in this section are excluded to ensure 
+fast performance. In release, handles are simply transparent <code>usize</code> indexes 
+into the <code>LinkedVector</code>’s internal vector.</p>
+<p>When run with the debug build, handles have additional fields added: a UUID 
+field, and a generation ID. The UUID field is used to verify handles are native 
+to the <code>LinkedVector</code> they’re passed to. And the generation ID is used to detect
+expired handles. </p>
+<p>These features should help ensure that projects that use this crate don’t have 
+elusive bugs in scenarios such as passing an old handle to a vector for a node 
+that had been popped earlier, or obtaining a handle from one vector and 
+accidentally passing it to another.</p>
 <h3 id="economy"><a href="#economy">Economy</a></h3>
 <p><code>LinkedVector</code>’s struct is implemented in a minimalistic manner. It contains
 only 4 fields: one for the internal vector, another that holds a handle to the
