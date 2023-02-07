@@ -660,11 +660,13 @@ impl<T> LinkedVector<T> {
                 while j != hi {
                     if compare(self.vec[j.0].value.as_ref().unwrap(), 
                                self.vec[p.0].value.as_ref().unwrap()) == Less {
-                        if i == lo {
-                            self.swap(&mut i, &mut j);
-                            lo = i;
-                        } else {
-                            self.swap(&mut i, &mut j);
+                        if i != j {
+                            if i == lo {
+                                self.swap(&mut i, &mut j);
+                                lo = i;
+                            } else {
+                                self.swap(&mut i, &mut j);
+                            }
                         }
                         i = self.vec[i.0].next;
                     }
@@ -699,10 +701,10 @@ impl<T> LinkedVector<T> {
         self.sort_unstable_by(|a, b| key(a).cmp(&key(b)));
     }
 
-    /// Swaps the elements indicated by the handles, `h1` and `h2`. Only the 
-    /// next and prev fields of nodes are altered. `h1` and `h2` will be 
-    /// updated to reference the swapped values. This operation completes in 
-    /// O(1) time.
+    /// Swaps the elements indicated by the handles, `hdode1` and `hdone2`. Only
+    /// the next and prev fields of nodes are altered. `hnode1` and `hnode2` 
+    /// will be updated to reference the swapped values. This operation 
+    /// completes in O(1) time.
     /// ```
     /// use linked_vector::*;
     /// let mut lv = LinkedVector::new();
