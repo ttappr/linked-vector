@@ -354,6 +354,22 @@ impl<T> LinkedVector<T> {
         self.get_(node).value.as_ref()
     }
 
+    /// Returns the handle to the node at the given index, or `None` if the
+    /// index is out of bounds. This operation completes in O(n) time.
+    /// ```
+    /// use linked_vector::*;
+    /// let mut lv = LinkedVector::new();
+    /// let h1 = lv.push_front(1);
+    /// let h2 = lv.push_front(2);
+    /// let h3 = lv.push_front(3);
+    /// 
+    /// assert_eq!(lv.get_handle(1), Some(h2));
+    /// ```
+    #[inline]
+    pub fn get_handle(&self, index: usize) -> Option<HNode> {
+        self.handles().skip(index).next()
+    }
+
     /// Provides a mutable reference to the element indicated by the given
     /// handle, or `None` if the handle is invalid. This operation completes in
     /// O(1) time.
@@ -389,6 +405,30 @@ impl<T> LinkedVector<T> {
     #[inline]
     pub fn handles(&self) -> Handles<T> {
         Handles::new(self)
+    }
+
+    /// Inserts `value` in the `index`th position of the vector. Returns a 
+    /// handle to the newly inserted element. If `index` goes beyond the end, 
+    /// the new value will be placed on the end. This operation completes in 
+    /// O(n) time.
+    /// ```
+    /// use linked_vector::*;
+    /// let mut lv = LinkedVector::from([1, 2, 3, 4, 5, 6, 7, 8]);
+    /// 
+    /// let h = lv.insert(4, 42);
+    /// 
+    /// assert_eq!(lv.to_vec(), vec![1, 2, 3, 4, 42, 5, 6, 7, 8]);
+    /// ```
+    #[inline]
+    pub fn insert(&mut self, index: usize, value: T) -> HNode {
+        if index == 0 {
+            self.push_front(value)
+        } else if index >= self.len {
+            self.push_back(value)
+        } else {
+            let node = self.handles().skip(index).next().unwrap();
+            self.insert_(Some(node), value)
+        }
     }
 
     /// Inserts a new element after the one indicated by the handle, `node`.
@@ -575,6 +615,19 @@ impl<T> LinkedVector<T> {
         }
     }
 
+    /// Removes the element at the given index. Returns the element if the index
+    /// is valid, or `None` otherwise. This operation completes in O(n) time.
+    /// ```
+    /// use linked_vector::*;
+    /// let mut lv = LinkedVector::from([1, 2, 3]);
+    /// 
+    /// assert_eq!(lv.remove(1), 2);
+    /// ```
+    #[inline]
+    pub fn remove(&mut self, index: usize) -> T {
+        self.remove_(self.get_handle(index)).unwrap()
+    }
+
     /// Removes the first element with the indicated value. Returns the element
     /// if it is found, or `None` otherwise. This operation completes in O(n)
     /// time.
@@ -582,11 +635,11 @@ impl<T> LinkedVector<T> {
     /// use linked_vector::*;
     /// let mut lv = LinkedVector::from([1, 2, 3]);
     /// 
-    /// assert_eq!(lv.remove(&2), Some(2));
+    /// assert_eq!(lv.remove_value(&2), Some(2));
     /// assert_eq!(lv, LinkedVector::from([1, 3]));
     /// ```
     #[inline]
-    pub fn remove(&mut self, value: &T) -> Option<T> 
+    pub fn remove_value(&mut self, value: &T) -> Option<T> 
     where 
         T: PartialEq
     {
@@ -641,7 +694,7 @@ impl<T> LinkedVector<T> {
         self.sort_unstable_by(|a, b| a.cmp(b));
     }
 
-    /// Sorts the elemements in place in using the provided comparison function.
+    /// Sorts the elemements in place using the provided comparison function.
     /// See [LinkedVector::sort_unstable()] for more details.
     /// ```
     /// use linked_vector::*;

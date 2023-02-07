@@ -516,7 +516,7 @@ fn push_front() {
 #[test]
 fn remove() {
     let mut lv1 = LinkedVector::from([1, 2, 3, 4, 5, 6, 7, 8, 9]);
-    assert_eq!(lv1.remove(&7), Some(7));
+    assert_eq!(lv1.remove_value(&7), Some(7));
     assert_eq!(lv1.to_vec(), vec![1, 2, 3, 4, 5, 6, 8, 9]);
 }
 
