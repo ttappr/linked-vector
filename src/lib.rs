@@ -3,6 +3,7 @@
 
 use core::iter::{FromIterator, FusedIterator};
 use core::ops::{Index, IndexMut};
+use std::cmp::Ordering;
 use std::mem::swap;
 pub use cursor::*;
 
@@ -636,6 +637,17 @@ impl<T> LinkedVector<T> {
     where
         T: Ord
     {
+        self.sort_unstable_by(|a, b| a.cmp(b));
+    }
+
+    /// Sorts the elemements in place in using the provided comparison function.
+    /// See [LinkedVector::sort_unstable()] for more details.
+    /// 
+    pub fn sort_unstable_by<F>(&mut self, mut compare: F) 
+    where
+        F: FnMut(&T, &T) -> Ordering,
+    {
+        use Ordering::*;
         if self.len < 2 { return; }
         if let (Some(lo), Some(hi)) = (self.front_node(), self.back_node()) {
             let mut stack = vec![(lo, hi)];
@@ -646,10 +658,14 @@ impl<T> LinkedVector<T> {
                 let mut j = lo;
 
                 while j != hi {
-                    if self.vec[j.0].value <= self.vec[p.0].value {
-                        let b = i == lo;
-                        self.swap(&mut i, &mut j);
-                        if b { lo = i; }
+                    if compare(self.vec[j.0].value.as_ref().unwrap(), 
+                               self.vec[p.0].value.as_ref().unwrap()) == Less {
+                        if i == lo {
+                            self.swap(&mut i, &mut j);
+                            lo = i;
+                        } else {
+                            self.swap(&mut i, &mut j);
+                        }
                         i = self.vec[i.0].next;
                     }
                     j = self.vec[j.0].next;
@@ -660,7 +676,6 @@ impl<T> LinkedVector<T> {
                 } else {
                     self.swap(&mut i, &mut hi);
                 }
-
                 if lo != hi {
                     if i != lo {
                         stack.push((lo, self.vec[i.0].prev));
@@ -671,6 +686,17 @@ impl<T> LinkedVector<T> {
                 }
             }
         }
+    }
+
+    /// Sorts the elemements in place in using the provided key extraction
+    /// function. See [LinkedVector::sort_unstable()] for more details.
+    /// 
+    pub fn sort_unstable_by_key<K, F>(&mut self, mut key: F) 
+    where
+        K: Ord,
+        F: FnMut(&T) -> K,
+    {
+        self.sort_unstable_by(|a, b| key(a).cmp(&key(b)));
     }
 
     /// Swaps the elements indicated by the handles, `h1` and `h2`. Only the 
