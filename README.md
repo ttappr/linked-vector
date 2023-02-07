@@ -16,9 +16,9 @@ Edit your Cargo.toml file to include:
 
 ```rust, ignore
 [dependencies]
-linked-vector = "0.1"
+linked-vector = "0.2"
 ```
-Or run:
+Or run this in the commandline from your project folder:
 
 ```console, ignore
 cargo add linked-vector
