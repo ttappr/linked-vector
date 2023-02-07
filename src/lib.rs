@@ -923,8 +923,8 @@ impl<T> LinkedVector<T> {
             None
         } else {
             let hnode = self.recyc;
-            self.recyc = self.get_(hnode).next;
-            self.get_mut_(hnode).next = BAD_HANDLE;
+            self.recyc = self.vec[hnode.0].next;
+            self.vec[hnode.0].next = BAD_HANDLE;
             Some(hnode)
         }
     }
@@ -936,14 +936,14 @@ impl<T> LinkedVector<T> {
     fn push_recyc(&mut self, node: HNode) {
         self.get_mut_(node).prev = BAD_HANDLE;
         if self.recyc == BAD_HANDLE {
-            self.get_mut_(node).next = BAD_HANDLE;
+            self.vec[node.0].next = BAD_HANDLE;
             self.recyc = node;
         } else {
-            self.get_mut_(node).next = self.recyc;
+            self.vec[node.0].next = self.recyc;
             self.recyc = node;
         }
         #[cfg(debug_assertions)]
-        { self.get_mut_(node).gen += 1; }
+        { self.vec[node.0].gen += 1; }
     }
 }
 
