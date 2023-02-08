@@ -208,28 +208,28 @@ impl<T> LinkedVector<T> {
         self.iter().any(|v| v == value)
     }
 
-    /// Creates a cursor that can be used to traverse the list.
+    /// Creates a cursor that can be used to traverse the list starting at the
+    /// given node. This operation completes in O(1) time.
     /// ```
     /// use linked_vector::*;
-    /// let lv = LinkedVector::from([1, 2, 3]);
-    /// let mut cursor = lv.cursor();
+    /// let lv = LinkedVector::from([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+    /// let h  = lv.find_node(&3).unwrap();
+    /// let mut cursor = lv.cursor(h);
     /// 
-    /// assert_eq!(cursor.get(), Some(&1));
+    /// cursor.forward(3);
     /// 
-    /// cursor.move_next();
-    /// 
-    /// assert_eq!(cursor.get(), Some(&2));
+    /// assert_eq!(cursor.get(), Some(&6));
     /// ```
-    pub fn cursor(&self) -> Cursor<T> {
-        Cursor::new(self)
+    pub fn cursor(&self, hnode: HNode) -> Cursor<T> {
+        Cursor::new(self, hnode)
     }
 
-    /// Creates a cursor that holds a mutable reference to the LinkedVector that 
-    /// can be used to traverse the list.
+    /// Creates a cursor that holds a mutable reference to the LinkedVector that
+    /// can be used to traverse the list starting at the given node.
     /// ```
     /// use linked_vector::*;
     /// let mut lv = LinkedVector::from([1, 2, 3, 4, 5, 6]);
-    /// let mut cursor = lv.cursor_mut();
+    /// let mut cursor = lv.cursor_mut(lv.front_node().unwrap());
     /// 
     /// cursor.forward(3);
     /// 
@@ -239,31 +239,8 @@ impl<T> LinkedVector<T> {
     /// 
     /// assert_eq!(lv.to_vec(), vec![1, 2, 3, 42, 5, 6]);
     /// ```
-    pub fn cursor_mut(&mut self) -> CursorMut<T> {
-        CursorMut::new(self)
-    }
-
-    /// Creates a cursor that can be used to traverse the list starting at the
-    /// given node. This operation completes in O(1) time.
-    /// ```
-    /// use linked_vector::*;
-    /// let lv = LinkedVector::from([1, 2, 3, 4, 5, 6, 7, 8, 9]);
-    /// let h  = lv.find_node(&3).unwrap();
-    /// let mut cursor = lv.cursor_at(h);
-    /// 
-    /// cursor.forward(3);
-    /// 
-    /// assert_eq!(cursor.get(), Some(&6));
-    /// ```
-    pub fn cursor_at(&self, hnode: HNode) -> Cursor<T> {
-        Cursor::new_at(self, hnode)
-    }
-
-    /// Creates a cursor that holds a mutable reference to the LinkedVector that
-    /// can be used to traverse the list starting at the given node.
-    /// 
-    pub fn cursor_at_mut(&mut self, hnode: HNode) -> CursorMut<T> {
-        CursorMut::new_at(self, hnode)
+    pub fn cursor_mut(&mut self, hnode: HNode) -> CursorMut<T> {
+        CursorMut::new(self, hnode)
     }
 
     /// Returns the handle to the first node with the given value. If no such
@@ -364,12 +341,12 @@ impl<T> LinkedVector<T> {
     /// let h2 = lv.push_front(2);
     /// let h3 = lv.push_front(3);
     /// 
-    /// assert_eq!(lv.get_handle(1), Some(h2));
-    /// assert_eq!(lv.get_handle(3), None);
-    /// assert_eq!(lv.get_handle(2), Some(h1));
+    /// assert_eq!(lv.handle(1), Some(h2));
+    /// assert_eq!(lv.handle(3), None);
+    /// assert_eq!(lv.handle(2), Some(h1));
     /// ```
     #[inline]
-    pub fn get_handle(&self, index: usize) -> Option<HNode> {
+    pub fn handle(&self, index: usize) -> Option<HNode> {
         if index <= self.len / 2 {
             self.handles().nth(index)
         } else if index >= self.len {
@@ -416,28 +393,6 @@ impl<T> LinkedVector<T> {
         Handles::new(self)
     }
 
-    /// Inserts `value` in the `index`th position of the vector. Returns a 
-    /// handle to the newly inserted element. If `index > self.len / 2`, the
-    /// positional search starts from the back of the list.  This operation 
-    /// completes in  O(n) time.
-    /// ```
-    /// use linked_vector::*;
-    /// let mut lv = LinkedVector::from([1, 2, 3, 4, 5, 6, 7, 8]);
-    /// 
-    /// let h = lv.insert(4, 42);
-    /// 
-    /// assert_eq!(lv[h], 42);
-    /// assert_eq!(lv.to_vec(), vec![1, 2, 3, 4, 42, 5, 6, 7, 8]);
-    /// ```
-    #[inline]
-    pub fn insert(&mut self, index: usize, value: T) -> HNode {
-        if let Some(handle) = self.get_handle(index) {
-            self.insert_(Some(handle), value)
-        } else {
-            self.insert_(None, value)
-        }
-    }
-
     /// Inserts a new element after the one indicated by the handle, `node`.
     /// Returns a handle to the newly inserted element. This operation completes
     /// in O(1) time.
@@ -460,7 +415,7 @@ impl<T> LinkedVector<T> {
         }
     }
 
-    /// Inserts a new element before the one indicated by the handle, `node`.
+    /// Inserts a new element at the position indicated by the handle, `node`.
     /// Returns a handle to the newly inserted element. This operation completes
     /// in O(1) time.
     /// ```
@@ -468,13 +423,13 @@ impl<T> LinkedVector<T> {
     /// let mut lv = LinkedVector::new();
     /// 
     /// let h1 = lv.push_back(42);
-    /// let h2 = lv.insert_before(h1, 43);
+    /// let h2 = lv.insert(h1, 43);
     /// 
     /// assert_eq!(lv.next_node(h2), Some(h1));
     /// assert_eq!(lv.get(h1), Some(&42));
     /// ```
     #[inline]
-    pub fn insert_before(&mut self, node: HNode, value: T) -> HNode {
+    pub fn insert(&mut self, node: HNode, value: T) -> HNode {
         self.insert_(Some(node), value)
     }
 
@@ -622,46 +577,6 @@ impl<T> LinkedVector<T> {
         }
     }
 
-    /// Removes the element at the given index. Returns the element if the index
-    /// is valid, or `None` otherwise. This operation completes in O(n) time.
-    /// ```
-    /// use linked_vector::*;
-    /// let mut lv = LinkedVector::from([1, 2, 3]);
-    /// 
-    /// assert_eq!(lv.remove(1), Some(2));
-    /// ```
-    #[inline]
-    pub fn remove(&mut self, index: usize) -> Option<T> {
-        if let Some(handle) = self.get_handle(index) {
-            self.remove_(Some(handle))
-        } else {
-            None
-        }
-    }
-
-    /// Removes the first element with the indicated value. Returns the element
-    /// if it is found, or `None` otherwise. This operation completes in O(n)
-    /// time.
-    /// ```
-    /// use linked_vector::*;
-    /// let mut lv = LinkedVector::from([1, 2, 3]);
-    /// 
-    /// assert_eq!(lv.remove_value(&2), Some(2));
-    /// assert_eq!(lv, LinkedVector::from([1, 3]));
-    /// ```
-    #[inline]
-    pub fn remove_value(&mut self, value: &T) -> Option<T> 
-    where 
-        T: PartialEq
-    {
-        for (h, v) in self.handles().zip(self.iter()) {
-            if v == value {
-                return self.remove_(Some(h));
-            }
-        }
-        None
-    }
-
     /// Removes the element indicated by the handle, `node`. Returns the element
     /// if the handle is valid, or `None` otherwise. This operation completes in
     /// O(1) time.
@@ -670,12 +585,12 @@ impl<T> LinkedVector<T> {
     /// let mut lv = LinkedVector::from([1, 2, 3]);
     /// let handles = lv.handles().collect::<Vec<_>>();
     /// 
-    /// lv.remove_node(handles[1]);
+    /// lv.remove(handles[1]);
     /// 
     /// assert_eq!(lv, LinkedVector::from([1, 3]));
     /// ```
     #[inline]
-    pub fn remove_node(&mut self, node: HNode) -> Option<T> {
+    pub fn remove(&mut self, node: HNode) -> Option<T> {
         self.remove_(Some(node))
     }
 
@@ -1118,6 +1033,26 @@ impl<T> IndexMut<HNode> for LinkedVector<T> {
     #[inline]
     fn index_mut(&mut self, handle: HNode) -> &mut Self::Output {
         self.get_mut(handle).expect("Invalid handle")
+    }
+}
+
+impl<T> Index<usize> for LinkedVector<T> {
+    type Output = T;
+
+    #[inline]
+    fn index(&self, index: usize) -> &Self::Output {
+        self.handle(index)
+            .and_then(|h| self.vec[h.0].value.as_ref())
+            .expect("Invalid index")
+    }
+}
+
+impl<T> IndexMut<usize> for LinkedVector<T> {
+    #[inline]
+    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+        self.handle(index)
+            .and_then(|h| self.vec[h.0].value.as_mut())
+            .expect("Invalid index")
     }
 }
 
