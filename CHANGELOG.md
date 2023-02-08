@@ -4,6 +4,12 @@
 
 - First major release `v1.0.0` coming soon.
 
+## v0.2.1 - ????-??-??
+
+### Added
+
+- Items can now be positionally indexed by usize.
+
 ## v0.2.0 - 2023-02-07
 
 ### Added
