@@ -10,10 +10,6 @@ pub trait CursorBase<T> {
     /// 
     fn get(&self) -> Option<&T>;
 
-    /// Returns a mutable reference to the element at the cursor's current
-    /// position.
-    fn get_mut(&mut self) -> Option<&mut T>;
-
     /// Moves the cursor to the specified handle. Returns true if the cursor
     /// was moved, false if the handle was invalid.
     /// 
@@ -62,19 +58,11 @@ pub struct Cursor<'a, T> {
 }
 
 impl<'a, T> Cursor<'a, T> {
-    pub(crate) fn new(lvec: &'a LinkedVector<T>) -> Self {
-        let handle = lvec.front_node()
-                         .expect("Cursor::new() called on empty LinkedVector.");
-        Self {
-            lvec,
-            handle,
-        }
-    }
-    pub(crate) fn new_at(lvec   : &'a LinkedVector<T>, 
-                         handle : HNode) 
+    pub(crate) fn new(lvec   : &'a LinkedVector<T>, 
+                      handle : HNode) 
         -> Self 
     {
-        lvec.get(handle).expect("Cursor::new_at() called with invalid handle.");
+        lvec.get(handle).expect("Cursor::new() called with invalid handle.");
         Self {
             lvec,
             handle,
@@ -84,11 +72,6 @@ impl<'a, T> Cursor<'a, T> {
 impl<'a, T> CursorBase<T> for Cursor<'a, T> {
     fn get(&self) -> Option<&T> {
         self.lvec.get(self.handle)
-    }
-
-    fn get_mut(&mut self) -> Option<&mut T> {
-        panic!("CursorBase::get_mut() called on Cursor which has an immutable 
-                reference to LinkedVector.")
     }
 
     fn move_to(&mut self, handle: HNode) -> bool {
@@ -153,35 +136,64 @@ pub struct CursorMut<'a, T> {
 }
 
 impl<'a, T> CursorMut<'a, T> {
-    pub(crate) fn new(lvec: &'a mut LinkedVector<T>) -> Self {
-        let handle = lvec.front_node()
-                         .expect("CursorMut::new() called on 
-                                  empty LinkedVector.");
+
+    pub(crate) fn new(lvec   : &'a mut LinkedVector<T>, 
+                      handle : HNode) 
+        -> Self 
+    {
+        lvec.get(handle)
+            .expect("CursorMut::new() called with invalid handle.");
         Self {
             lvec,
             handle,
         }
     }
-    pub(crate) fn new_at(lvec   : &'a mut LinkedVector<T>, 
-                        handle : HNode) 
-        -> Self 
-    {
-        lvec.get(handle)
-            .expect("CursorMut::new_at() called with invalid handle.");
-        Self {
-            lvec,
-            handle,
+    /// Returns a mutable reference to the element at the cursor's current
+    /// position.
+    /// 
+    pub fn get_mut(&mut self) -> Option<&mut T> {
+        self.lvec.get_mut(self.handle)
+    }
+
+    /// Inserts a new element at the cursor's current position. The cursor
+    /// will be moved to the new element. Returns the handle of the new
+    /// element.
+    /// 
+    pub fn insert(&mut self, value: T) -> HNode {
+        self.handle = self.lvec.insert(self.handle, value);
+        self.handle
+    }
+
+    /// Inserts a new element after the cursor's current position. The cursor
+    /// will still be at the same position. Returns the handle of the new
+    /// element.
+    /// 
+    pub fn insert_after(&mut self, value: T) -> HNode {
+        self.lvec.insert_after(self.handle, value)
+    }
+
+    /// Removes the element at the current position and returns its value. The 
+    /// cursor will be moved to the next element if not at the end of the 
+    /// vector, otherwise it moves to the new end. If there was only one item
+    /// in the vector, the cursor's position is set to `BAD_HANDLE` and should
+    /// no longer be used, or could cause invalid handle panics.
+    /// 
+    pub fn remove(&mut self) -> Option<T> {
+        let hrem = self.handle;
+        if let Some(hnext) = self.lvec.next_node(self.handle) {
+            self.handle = hnext;
+        } else if let Some(hprev) = self.lvec.prev_node(self.handle) {
+            self.handle = hprev;
+        } else {
+            self.handle = BAD_HANDLE;
         }
+        self.lvec.remove(hrem)
     }
 }
 
 impl<'a, T> CursorBase<T> for CursorMut<'a, T> {
     fn get(&self) -> Option<&T> {
         self.lvec.get(self.handle)
-    }
-
-    fn get_mut(&mut self) -> Option<&mut T> {
-        self.lvec.get_mut(self.handle)
     }
 
     fn move_to(&mut self, handle: HNode) -> bool {
