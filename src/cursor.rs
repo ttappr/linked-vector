@@ -62,7 +62,7 @@ impl<'a, T> Cursor<'a, T> {
                       handle : HNode) 
         -> Self 
     {
-        lvec.get(handle).expect("Cursor::new_at() called with invalid handle.");
+        lvec.get(handle).expect("Cursor::new() called with invalid handle.");
         Self {
             lvec,
             handle,
@@ -142,7 +142,7 @@ impl<'a, T> CursorMut<'a, T> {
         -> Self 
     {
         lvec.get(handle)
-            .expect("CursorMut::new_at() called with invalid handle.");
+            .expect("CursorMut::new() called with invalid handle.");
         Self {
             lvec,
             handle,
@@ -176,7 +176,7 @@ impl<'a, T> CursorMut<'a, T> {
     /// cursor will be moved to the next element if not at the end of the 
     /// vector, otherwise it moves to the new end. If there was only one item
     /// in the vector, the cursor's position is set to `BAD_HANDLE` and should
-    /// no longer be used, or will cause panics.
+    /// no longer be used, or could cause invalid handle panics.
     /// 
     pub fn remove(&mut self) -> Option<T> {
         let hrem = self.handle;

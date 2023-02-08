@@ -851,7 +851,7 @@ impl<T> LinkedVector<T> {
         #[cfg(debug_assertions)]
         { assert!(node.0 != BAD_HANDLE.0, "Handle is invalid.");
           assert!(node.2 == self.uuid, "Handle is not native.");
-          assert!(node.1 == self.vec[node.0].gen, "Handle is expired."); }
+          assert!(node.1 == self.vec[node.0].gen, "Handle has expired."); }
         &self.vec[node.0]
     }
 
@@ -863,7 +863,7 @@ impl<T> LinkedVector<T> {
         #[cfg(debug_assertions)]
         { assert!(node.0 != BAD_HANDLE.0, "Handle is invalid.");
           assert!(node.2 == self.uuid, "Handle is not native."); 
-          assert!(node.1 == self.vec[node.0].gen, "Handle is expired."); }
+          assert!(node.1 == self.vec[node.0].gen, "Handle has expired."); }
         &mut self.vec[node.0]
     }
 
