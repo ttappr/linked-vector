@@ -4,6 +4,20 @@
 
 - First major release `v1.0.0` coming soon.
 
+## v0.3.0 - ????-??-??
+
+### Changed
+
+- Methods that take a `usize` index have been removed to encourage the O(1) use
+  of handles to locate data, and to simplify the naming conventions of methods.  
+- The following methods have been changed:
+  - `handle_at()` is now just `handle()`
+  - `cursor_at()` is now `cursor()`, the old `cursor()` is removed.
+  - `cursor_at_mut()` is now `cursor_mut()`, the old `cursor_mut()` is removed.
+  - `insert_before()` is now `insert()`, the old `insert()` is removed.
+  - `remove_node()` is now `remove()`, the old `remove()` is removed.
+  - `remove_value()` is removed.
+
 ## v0.2.0 - 2023-02-07
 
 ### Added

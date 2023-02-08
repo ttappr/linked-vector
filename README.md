@@ -16,7 +16,7 @@ Edit your Cargo.toml file to include:
 
 ```rust, ignore
 [dependencies]
-linked-vector = "0.2"
+linked-vector = "0.3"
 ```
 Or run this on the command line from your project folder:
 
@@ -125,8 +125,10 @@ or several via `forward(n_times)` and `backward(n_ntimes)`.
 
 ```rust
 use linked_vector::*;
-let lv = LinkedVector::from([1, 2, 3, 4, 5, 6, 7]);
-let mut cursor = lv.cursor(lv.front_node().unwrap());
+let lv     = LinkedVector::from([1, 2, 3, 4, 5, 6, 7]);
+let hfront = lv.front_node().unwrap();
+
+let mut cursor = lv.cursor(hfront);
 
 assert_eq!(cursor.get(), Some(&1));
 

@@ -107,7 +107,7 @@ fn cursor() {
 #[test]
 fn cursor_2() {
     let lv = LinkedVector::from([1, 2, 3, 4, 5, 6, 7, 8, 9]);
-    let h5 = lv.find_node(&5).unwrap();
+    let h5 = lv.handle(4).unwrap();
     let mut cursor = lv.cursor(h5);
 
     assert_eq!(cursor.get(), Some(&5));
@@ -163,16 +163,6 @@ fn test_drop() {
     lv1.push_back(2);
     lv1.push_back(3);
     drop(lv1);
-}
-
-#[test]
-fn find_node() {
-    let mut lv1 = LinkedVector::new();
-    let _h1 = lv1.push_back(1);
-    let  h2 = lv1.push_back(2);
-    let _h3 = lv1.push_back(3);
-    assert_eq!(lv1.find_node(&2), Some(h2));
-    assert_eq!(lv1.find_node(&4), None);
 }
 
 #[test]
@@ -554,7 +544,7 @@ fn push_front() {
 #[test]
 fn remove_node() {
     let mut lv1 = LinkedVector::from([1, 2, 3, 4, 5, 6, 7, 8, 9]);
-    let h = lv1.find_node(&7).unwrap();
+    let h = lv1.handle(6).unwrap();
     assert_eq!(lv1.remove(h), Some(7));
     assert_eq!(lv1.to_vec(), vec![1, 2, 3, 4, 5, 6, 8, 9]);
 }

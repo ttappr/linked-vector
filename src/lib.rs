@@ -213,8 +213,8 @@ impl<T> LinkedVector<T> {
     /// ```
     /// use linked_vector::*;
     /// let lv = LinkedVector::from([1, 2, 3, 4, 5, 6, 7, 8, 9]);
-    /// let h  = lv.find_node(&3).unwrap();
-    /// let mut cursor = lv.cursor(h);
+    /// let h3 = lv.handle(2).unwrap();
+    /// let mut cursor = lv.cursor(h3);
     /// 
     /// cursor.forward(3);
     /// 
@@ -243,29 +243,6 @@ impl<T> LinkedVector<T> {
     #[inline]
     pub fn cursor_mut(&mut self, hnode: HNode) -> CursorMut<T> {
         CursorMut::new(self, hnode)
-    }
-
-    /// Returns the handle to the first node with the given value. If no such
-    /// node exists, `None` is returned. This operation completes in O(n) time.
-    /// ```
-    /// use linked_vector::*;
-    /// let lv = LinkedVector::from([1, 2, 3, 4, 5, 6]);
-    /// let h  = lv.find_node(&3).unwrap();
-    /// 
-    /// assert_eq!(lv.get(h), Some(&3));
-    /// assert_eq!(lv.find_node(&42), None);
-    /// ```
-    #[inline]
-    pub fn find_node(&self, value: &T) -> Option<HNode>
-    where
-        T: PartialEq
-    {
-        for (h, v) in self.handles().zip(self.iter()) {
-            if v == value {
-                return Some(h);
-            }
-        }
-        None
     }
 
     /// Gives a reference to the element at the front of the vector, or `None` 

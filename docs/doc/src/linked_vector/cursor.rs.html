@@ -233,12 +233,6 @@
 <a href="#233" id="233">233</a>
 <a href="#234" id="234">234</a>
 <a href="#235" id="235">235</a>
-<a href="#236" id="236">236</a>
-<a href="#237" id="237">237</a>
-<a href="#238" id="238">238</a>
-<a href="#239" id="239">239</a>
-<a href="#240" id="240">240</a>
-<a href="#241" id="241">241</a>
 </pre><pre class="rust"><code>
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
@@ -250,10 +244,6 @@
     <span class="doccomment">/// Returns a reference to the element at the cursor&#39;s current position.
     /// 
     </span><span class="kw">fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>T&gt;;
-
-    <span class="doccomment">/// Returns a mutable reference to the element at the cursor&#39;s current
-    /// position.
-    </span><span class="kw">fn </span>get_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;mut </span>T&gt;;
 
     <span class="doccomment">/// Moves the cursor to the specified handle. Returns true if the cursor
     /// was moved, false if the handle was invalid.
@@ -303,16 +293,8 @@
 }
 
 <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T&gt; Cursor&lt;<span class="lifetime">&#39;a</span>, T&gt; {
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new(lvec: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>LinkedVector&lt;T&gt;) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span>handle = lvec.front_node()
-                         .expect(<span class="string">&quot;Cursor::new() called on empty LinkedVector.&quot;</span>);
-        <span class="self">Self </span>{
-            lvec,
-            handle,
-        }
-    }
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new_at(lvec   : <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>LinkedVector&lt;T&gt;, 
-                         handle : HNode) 
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new(lvec   : <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>LinkedVector&lt;T&gt;, 
+                      handle : HNode) 
         -&gt; <span class="self">Self 
     </span>{
         lvec.get(handle).expect(<span class="string">&quot;Cursor::new_at() called with invalid handle.&quot;</span>);
@@ -325,11 +307,6 @@
 <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T&gt; CursorBase&lt;T&gt; <span class="kw">for </span>Cursor&lt;<span class="lifetime">&#39;a</span>, T&gt; {
     <span class="kw">fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>T&gt; {
         <span class="self">self</span>.lvec.get(<span class="self">self</span>.handle)
-    }
-
-    <span class="kw">fn </span>get_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;mut </span>T&gt; {
-        <span class="macro">panic!</span>(<span class="string">&quot;CursorBase::get_mut() called on Cursor which has an immutable 
-                reference to LinkedVector.&quot;</span>)
     }
 
     <span class="kw">fn </span>move_to(<span class="kw-2">&amp;mut </span><span class="self">self</span>, handle: HNode) -&gt; bool {
@@ -394,17 +371,9 @@
 }
 
 <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T&gt; CursorMut&lt;<span class="lifetime">&#39;a</span>, T&gt; {
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new(lvec: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>LinkedVector&lt;T&gt;) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span>handle = lvec.front_node()
-                         .expect(<span class="string">&quot;CursorMut::new() called on 
-                                  empty LinkedVector.&quot;</span>);
-        <span class="self">Self </span>{
-            lvec,
-            handle,
-        }
-    }
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new_at(lvec   : <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>LinkedVector&lt;T&gt;, 
-                        handle : HNode) 
+
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new(lvec   : <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>LinkedVector&lt;T&gt;, 
+                      handle : HNode) 
         -&gt; <span class="self">Self 
     </span>{
         lvec.get(handle)
@@ -414,15 +383,34 @@
             handle,
         }
     }
+    <span class="doccomment">/// Returns a mutable reference to the element at the cursor&#39;s current
+    /// position.
+    /// 
+    </span><span class="kw">pub fn </span>get_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;mut </span>T&gt; {
+        <span class="self">self</span>.lvec.get_mut(<span class="self">self</span>.handle)
+    }
+
+    <span class="doccomment">/// Inserts a new element at the cursor&#39;s current position. The cursor
+    /// will be moved to the new element. Returns the handle of the new
+    /// element.
+    /// 
+    </span><span class="kw">pub fn </span>insert(<span class="kw-2">&amp;mut </span><span class="self">self</span>, elem: T) -&gt; HNode {
+        <span class="self">self</span>.handle = <span class="self">self</span>.lvec.insert(<span class="self">self</span>.handle, elem);
+        <span class="self">self</span>.handle
+    }
+
+    <span class="doccomment">/// Inserts a new element after the cursor&#39;s current position. The cursor
+    /// will still be at the same position. Returns the handle of the new
+    /// element.
+    /// 
+    </span><span class="kw">pub fn </span>insert_after(<span class="kw-2">&amp;mut </span><span class="self">self</span>, elem: T) -&gt; HNode {
+        <span class="self">self</span>.lvec.insert_after(<span class="self">self</span>.handle, elem)
+    }
 }
 
 <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T&gt; CursorBase&lt;T&gt; <span class="kw">for </span>CursorMut&lt;<span class="lifetime">&#39;a</span>, T&gt; {
     <span class="kw">fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>T&gt; {
         <span class="self">self</span>.lvec.get(<span class="self">self</span>.handle)
-    }
-
-    <span class="kw">fn </span>get_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;mut </span>T&gt; {
-        <span class="self">self</span>.lvec.get_mut(<span class="self">self</span>.handle)
     }
 
     <span class="kw">fn </span>move_to(<span class="kw-2">&amp;mut </span><span class="self">self</span>, handle: HNode) -&gt; bool {
