@@ -221,8 +221,8 @@ impl<T> LinkedVector<T> {
     /// assert_eq!(cursor.get(), Some(&6));
     /// ```
     #[inline]
-    pub fn cursor(&self, hnode: HNode) -> Cursor<T> {
-        Cursor::new(self, hnode)
+    pub fn cursor(&self, node: HNode) -> Cursor<T> {
+        Cursor::new(self, node)
     }
 
     /// Creates a cursor that holds a mutable reference to the LinkedVector that
@@ -241,8 +241,8 @@ impl<T> LinkedVector<T> {
     /// assert_eq!(lv.to_vec(), vec![1, 2, 3, 42, 5, 6]);
     /// ```
     #[inline]
-    pub fn cursor_mut(&mut self, hnode: HNode) -> CursorMut<T> {
-        CursorMut::new(self, hnode)
+    pub fn cursor_mut(&mut self, node: HNode) -> CursorMut<T> {
+        CursorMut::new(self, node)
     }
 
     /// Gives a reference to the element at the front of the vector, or `None` 
@@ -673,8 +673,8 @@ impl<T> LinkedVector<T> {
         self.sort_unstable_by(|a, b| key(a).cmp(&key(b)));
     }
 
-    /// Swaps the elements indicated by the handles, `hnode1` and `hnode2`. Only
-    /// the next and prev fields of nodes are altered. `hnode1` and `hnode2` 
+    /// Swaps the elements indicated by the handles, `node1` and `node2`. Only
+    /// the next and prev fields of nodes are altered. `node1` and `node2` 
     /// will be updated to reference the swapped values. This operation 
     /// completes in O(1) time.
     /// ```
@@ -697,9 +697,9 @@ impl<T> LinkedVector<T> {
     /// assert_eq!(lv.get(h2_bak), Some(&43));
     /// ```
     #[inline]
-    pub fn swap(&mut self, hnode1: &mut HNode, hnode2: &mut HNode) {
-        let h1 = *hnode1;
-        let h2 = *hnode2;
+    pub fn swap(&mut self, node1: &mut HNode, node2: &mut HNode) {
+        let h1 = *node1;
+        let h2 = *node2;
         let prev1 = self.get_(h1).prev;
         let next1 = self.get_(h1).next;
 
@@ -730,7 +730,7 @@ impl<T> LinkedVector<T> {
         if      next1 == BAD_HANDLE { self.get_mut_(self.head).prev = h2; }
         else if next2 == BAD_HANDLE { self.get_mut_(self.head).prev = h1; }
 
-        swap(hnode1, hnode2);
+        swap(node1, node2);
     }
 
     /// Returns a vector containing the elements of the list. This operation
