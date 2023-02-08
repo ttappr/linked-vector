@@ -220,6 +220,7 @@ impl<T> LinkedVector<T> {
     /// 
     /// assert_eq!(cursor.get(), Some(&6));
     /// ```
+    #[inline]
     pub fn cursor(&self, hnode: HNode) -> Cursor<T> {
         Cursor::new(self, hnode)
     }
@@ -239,6 +240,7 @@ impl<T> LinkedVector<T> {
     /// 
     /// assert_eq!(lv.to_vec(), vec![1, 2, 3, 42, 5, 6]);
     /// ```
+    #[inline]
     pub fn cursor_mut(&mut self, hnode: HNode) -> CursorMut<T> {
         CursorMut::new(self, hnode)
     }

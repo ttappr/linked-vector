@@ -10,10 +10,6 @@ pub trait CursorBase<T> {
     /// 
     fn get(&self) -> Option<&T>;
 
-    /// Returns a mutable reference to the element at the cursor's current
-    /// position.
-    fn get_mut(&mut self) -> Option<&mut T>;
-
     /// Moves the cursor to the specified handle. Returns true if the cursor
     /// was moved, false if the handle was invalid.
     /// 
@@ -76,11 +72,6 @@ impl<'a, T> Cursor<'a, T> {
 impl<'a, T> CursorBase<T> for Cursor<'a, T> {
     fn get(&self) -> Option<&T> {
         self.lvec.get(self.handle)
-    }
-
-    fn get_mut(&mut self) -> Option<&mut T> {
-        panic!("CursorBase::get_mut() called on Cursor which has an immutable 
-                reference to LinkedVector.")
     }
 
     fn move_to(&mut self, handle: HNode) -> bool {
@@ -157,15 +148,34 @@ impl<'a, T> CursorMut<'a, T> {
             handle,
         }
     }
+    /// Returns a mutable reference to the element at the cursor's current
+    /// position.
+    /// 
+    pub fn get_mut(&mut self) -> Option<&mut T> {
+        self.lvec.get_mut(self.handle)
+    }
+
+    /// Inserts a new element at the cursor's current position. The cursor
+    /// will be moved to the new element. Returns the handle of the new
+    /// element.
+    /// 
+    pub fn insert(&mut self, elem: T) -> HNode {
+        self.handle = self.lvec.insert(self.handle, elem);
+        self.handle
+    }
+
+    /// Inserts a new element after the cursor's current position. The cursor
+    /// will still be at the same position. Returns the handle of the new
+    /// element.
+    /// 
+    pub fn insert_after(&mut self, elem: T) -> HNode {
+        self.lvec.insert_after(self.handle, elem)
+    }
 }
 
 impl<'a, T> CursorBase<T> for CursorMut<'a, T> {
     fn get(&self) -> Option<&T> {
         self.lvec.get(self.handle)
-    }
-
-    fn get_mut(&mut self) -> Option<&mut T> {
-        self.lvec.get_mut(self.handle)
     }
 
     fn move_to(&mut self, handle: HNode) -> bool {

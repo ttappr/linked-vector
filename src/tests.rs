@@ -105,7 +105,7 @@ fn cursor() {
 }
 
 #[test]
-fn cursor_at() {
+fn cursor_2() {
     let lv = LinkedVector::from([1, 2, 3, 4, 5, 6, 7, 8, 9]);
     let h5 = lv.find_node(&5).unwrap();
     let mut cursor = lv.cursor(h5);
