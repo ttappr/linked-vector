@@ -76,7 +76,7 @@ fn contains() {
 #[test]
 fn cursor() {
     let lv = LinkedVector::from([1, 2, 3, 4, 5, 6, 7]);
-    let mut cursor = lv.cursor(lv.front_node().unwrap());
+    let mut cursor = lv.cursor();
     
     assert_eq!(cursor.get(), Some(&1));
     
@@ -91,7 +91,7 @@ fn cursor() {
     assert_eq!(lv.get(hend), Some(&7));
     assert_eq!(lv.get(hbak), Some(&5));
     
-    let mut cursor = lv.cursor(hbak);
+    let mut cursor = lv.cursor_at(hbak);
     
     match cursor.backward(20) {
         Ok(handle) => panic!("Should move to beginning on overshoot."),
@@ -108,7 +108,7 @@ fn cursor() {
 fn cursor_at() {
     let lv = LinkedVector::from([1, 2, 3, 4, 5, 6, 7, 8, 9]);
     let h5 = lv.find_node(&5).unwrap();
-    let mut cursor = lv.cursor(h5);
+    let mut cursor = lv.cursor_at(h5);
 
     assert_eq!(cursor.get(), Some(&5));
     
@@ -230,10 +230,10 @@ fn get_handle() {
     let h1 = lv1.push_back(1);
     let h2 = lv1.push_back(2);
     let h3 = lv1.push_back(3);
-    assert_eq!(lv1.handle(0), Some(h1));
-    assert_eq!(lv1.handle(1), Some(h2));
-    assert_eq!(lv1.handle(2), Some(h3));
-    assert_eq!(lv1.handle(3), None);
+    assert_eq!(lv1.get_handle(0), Some(h1));
+    assert_eq!(lv1.get_handle(1), Some(h2));
+    assert_eq!(lv1.get_handle(2), Some(h3));
+    assert_eq!(lv1.get_handle(3), None);
 }
 
 #[test]
@@ -260,6 +260,35 @@ fn handles() {
 }
 
 #[test]
+fn insert() {
+    let mut lv1 = LinkedVector::from([1, 2, 3, 4, 5]);
+    let h4 = lv1.insert(2, 42);
+
+    assert_eq!(lv1.len(), 6);
+    assert_eq!(lv1.to_vec(), vec![1, 2, 42, 3, 4, 5]);
+
+    let h5 = lv1.insert(4, 24);
+
+    assert_eq!(lv1.len(), 7);
+    assert_eq!(lv1.to_vec(), vec![1, 2, 42, 3, 24, 4, 5]);
+
+    let h6 = lv1.insert(100, 99);
+
+    assert_eq!(lv1.len(), 8);
+    assert_eq!(lv1.to_vec(), vec![1, 2, 42, 3, 24, 4, 5, 99]);
+
+    let h7 = lv1.insert(7, 55);
+
+    assert_eq!(lv1.len(), 9);
+    assert_eq!(lv1.to_vec(), vec![1, 2, 42, 3, 24, 4, 5, 55, 99]);
+
+    let h8 = lv1.insert(9, 255);
+
+    assert_eq!(lv1.len(), 10);
+    assert_eq!(lv1.to_vec(), vec![1, 2, 42, 3, 24, 4, 5, 55, 99, 255]);
+}
+
+#[test]
 fn index() {
     let mut lv1 = LinkedVector::new();
     let h1 = lv1.push_back(1);
@@ -282,32 +311,6 @@ fn index_mut() {
     assert_eq!(lv1[h1], 4);
     assert_eq!(lv1[h2], 5);
     assert_eq!(lv1[h3], 6);
-    assert_eq!(lv1.len(), 3);
-}
-
-#[test]
-fn index_usize() {
-    let mut lv1 = LinkedVector::new();
-    let h1 = lv1.push_back(1);
-    let h2 = lv1.push_back(2);
-    let h3 = lv1.push_back(3);
-    assert_eq!(lv1[0], 1);
-    assert_eq!(lv1[1], 2);
-    assert_eq!(lv1[2], 3);
-}
-
-#[test]
-fn index_mut_usize() {
-    let mut lv1 = LinkedVector::new();
-    let h1 = lv1.push_back(1);
-    let h2 = lv1.push_back(2);
-    let h3 = lv1.push_back(3);
-    lv1[0] = 4;
-    lv1[1] = 5;
-    lv1[2] = 6;
-    assert_eq!(lv1[0], 4);
-    assert_eq!(lv1[1], 5);
-    assert_eq!(lv1[2], 6);
     assert_eq!(lv1.len(), 3);
 }
 
@@ -348,7 +351,7 @@ fn insert_before() {
     let h1 = lv1.push_back(1);
     let h2 = lv1.push_back(2);
     let h3 = lv1.push_back(3);
-    let h4 = lv1.insert(h3, 4);
+    let h4 = lv1.insert_before(h3, 4);
     assert_eq!(lv1.front(), Some(&1));
     assert_eq!(lv1.back(), Some(&3));
     assert_eq!(lv1.get_(h4).next, h3);
@@ -365,7 +368,7 @@ fn test_insertions_deletions_etc() {
     }
 
     for &h in hs.iter().step_by(2) {
-        lv1.remove(h);
+        lv1.remove_node(h);
     }
 
     for (&h1, h2) in hs.iter().skip(1).step_by(2).zip(lv1.handles()) {
@@ -552,10 +555,27 @@ fn push_front() {
 }
 
 #[test]
+fn remove() {
+    let mut lv = LinkedVector::from([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+
+    assert_eq!(lv.remove(0), Some(1));
+    assert_eq!(lv.remove(7), Some(9));
+    assert_eq!(lv.remove(3), Some(5));
+    assert_eq!(lv.remove(11), None);
+}
+
+#[test]
+fn remove_value() {
+    let mut lv1 = LinkedVector::from([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+    assert_eq!(lv1.remove_value(&7), Some(7));
+    assert_eq!(lv1.to_vec(), vec![1, 2, 3, 4, 5, 6, 8, 9]);
+}
+
+#[test]
 fn remove_node() {
     let mut lv1 = LinkedVector::from([1, 2, 3, 4, 5, 6, 7, 8, 9]);
     let h = lv1.find_node(&7).unwrap();
-    assert_eq!(lv1.remove(h), Some(7));
+    assert_eq!(lv1.remove_node(h), Some(7));
     assert_eq!(lv1.to_vec(), vec![1, 2, 3, 4, 5, 6, 8, 9]);
 }
 
