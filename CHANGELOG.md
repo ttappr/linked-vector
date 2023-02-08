@@ -4,7 +4,7 @@
 
 - First major release `v1.0.0` coming soon.
 
-## v0.2.0 - ??
+## v0.2.0 - 2023-02-07
 
 ### Added
 
