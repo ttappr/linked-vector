@@ -109,7 +109,7 @@ let h3 = lv.push_back(3);
 let h4 = lv.insert_after(h1, 4);
 
 lv.insert_after(h2, 42);
-lv.remove_node(h1);
+lv.remove(h1);
 
 assert_eq!(lv.front(), Some(&4));
 assert_eq!(lv.to_vec(), vec![4, 2, 42, 3]);
@@ -126,7 +126,7 @@ or several via `forward(n_times)` and `backward(n_ntimes)`.
 ```rust
 use linked_vector::*;
 let lv = LinkedVector::from([1, 2, 3, 4, 5, 6, 7]);
-let mut cursor = lv.cursor();
+let mut cursor = lv.cursor(lv.front_node().unwrap());
 
 assert_eq!(cursor.get(), Some(&1));
 
