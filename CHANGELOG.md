@@ -4,7 +4,12 @@
 
 - First major release `v1.0.0` coming soon.
 
-## v0.3.0 - ????-??-??
+## v0.3.0 - 2023-02-08
+
+### Added
+
+- `CursorMut::insert()` & `CursorMut::insert_after()`
+- `CursorMut::remove()`
 
 ### Changed
 
