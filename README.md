@@ -18,7 +18,7 @@ Edit your Cargo.toml file to include:
 [dependencies]
 linked-vector = "0.2"
 ```
-Or run this in the commandline from your project folder:
+Or run this on the command line from your project folder:
 
 ```console, ignore
 cargo add linked-vector

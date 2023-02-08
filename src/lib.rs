@@ -351,6 +351,13 @@ impl<T> LinkedVector<T> {
     /// ```
     #[inline]
     pub fn get(&self, node: HNode) -> Option<&T> {
+        // TODO - The name may be inconsistent. Most commands dealing with nodes
+        //        have node in their title; this one doesn't. This follows a
+        //        convention of other commands that take a usize index as arg.
+        //        There are other commands that may be inconsistent. Maybe get
+        //        input from users on naming conventions for this lib, if 
+        //        possible. Consider naming all methods that take a usize index
+        //        suffixed with '_at()'.
         self.get_(node).value.as_ref()
     }
 
@@ -1118,6 +1125,26 @@ impl<T> IndexMut<HNode> for LinkedVector<T> {
     #[inline]
     fn index_mut(&mut self, handle: HNode) -> &mut Self::Output {
         self.get_mut(handle).expect("Invalid handle")
+    }
+}
+
+impl<T> Index<usize> for LinkedVector<T> {
+    type Output = T;
+
+    #[inline]
+    fn index(&self, index: usize) -> &Self::Output {
+        self.get_handle(index)
+            .and_then(|h| self.vec[h.0].value.as_ref())
+            .expect("Invalid index")
+    }
+}
+
+impl<T> IndexMut<usize> for LinkedVector<T> {
+    #[inline]
+    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+        self.get_handle(index)
+            .and_then(|h| self.vec[h.0].value.as_mut())
+            .expect("Invalid index")
     }
 }
 
