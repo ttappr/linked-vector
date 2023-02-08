@@ -355,7 +355,8 @@ impl<T> LinkedVector<T> {
     }
 
     /// Returns the handle to the node at the given index, or `None` if the
-    /// index is out of bounds. This operation completes in O(n) time.
+    /// index is out of bounds. If `index > self.len / 2`, the search starts
+    /// from the end of the list. This operation completes in O(n) time.
     /// ```
     /// use linked_vector::*;
     /// let mut lv = LinkedVector::new();
@@ -365,10 +366,17 @@ impl<T> LinkedVector<T> {
     /// 
     /// assert_eq!(lv.get_handle(1), Some(h2));
     /// assert_eq!(lv.get_handle(3), None);
+    /// assert_eq!(lv.get_handle(2), Some(h1));
     /// ```
     #[inline]
     pub fn get_handle(&self, index: usize) -> Option<HNode> {
-        self.handles().nth(index)
+        if index <= self.len / 2 {
+            self.handles().nth(index)
+        } else if index >= self.len {
+            None
+        } else {
+            self.handles().rev().nth(self.len - index - 1)
+        }
     }
 
     /// Provides a mutable reference to the element indicated by the given
@@ -409,9 +417,9 @@ impl<T> LinkedVector<T> {
     }
 
     /// Inserts `value` in the `index`th position of the vector. Returns a 
-    /// handle to the newly inserted element. If `index` goes beyond the end, 
-    /// the new value will be placed on the end. This operation completes in 
-    /// O(n) time.
+    /// handle to the newly inserted element. If `index > self.len / 2`, the
+    /// positional search starts from the back of the list.  This operation 
+    /// completes in  O(n) time.
     /// ```
     /// use linked_vector::*;
     /// let mut lv = LinkedVector::from([1, 2, 3, 4, 5, 6, 7, 8]);
@@ -423,13 +431,10 @@ impl<T> LinkedVector<T> {
     /// ```
     #[inline]
     pub fn insert(&mut self, index: usize, value: T) -> HNode {
-        if index == 0 {
-            self.push_front(value)
-        } else if index >= self.len {
-            self.push_back(value)
+        if let Some(handle) = self.get_handle(index) {
+            self.insert_(Some(handle), value)
         } else {
-            let node = self.handles().nth(index).unwrap();
-            self.insert_(Some(node), value)
+            self.insert_(None, value)
         }
     }
 
@@ -627,8 +632,8 @@ impl<T> LinkedVector<T> {
     /// ```
     #[inline]
     pub fn remove(&mut self, index: usize) -> Option<T> {
-        if index < self.len() {
-            self.remove_(self.get_handle(index))
+        if let Some(handle) = self.get_handle(index) {
+            self.remove_(Some(handle))
         } else {
             None
         }

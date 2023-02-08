@@ -266,6 +266,26 @@ fn insert() {
 
     assert_eq!(lv1.len(), 6);
     assert_eq!(lv1.to_vec(), vec![1, 2, 42, 3, 4, 5]);
+
+    let h5 = lv1.insert(4, 24);
+
+    assert_eq!(lv1.len(), 7);
+    assert_eq!(lv1.to_vec(), vec![1, 2, 42, 3, 24, 4, 5]);
+
+    let h6 = lv1.insert(100, 99);
+
+    assert_eq!(lv1.len(), 8);
+    assert_eq!(lv1.to_vec(), vec![1, 2, 42, 3, 24, 4, 5, 99]);
+
+    let h7 = lv1.insert(7, 55);
+
+    assert_eq!(lv1.len(), 9);
+    assert_eq!(lv1.to_vec(), vec![1, 2, 42, 3, 24, 4, 5, 55, 99]);
+
+    let h8 = lv1.insert(9, 255);
+
+    assert_eq!(lv1.len(), 10);
+    assert_eq!(lv1.to_vec(), vec![1, 2, 42, 3, 24, 4, 5, 55, 99, 255]);
 }
 
 #[test]

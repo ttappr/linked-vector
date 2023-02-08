@@ -1382,6 +1382,11 @@
 <a href="#1382" id="1382">1382</a>
 <a href="#1383" id="1383">1383</a>
 <a href="#1384" id="1384">1384</a>
+<a href="#1385" id="1385">1385</a>
+<a href="#1386" id="1386">1386</a>
+<a href="#1387" id="1387">1387</a>
+<a href="#1388" id="1388">1388</a>
+<a href="#1389" id="1389">1389</a>
 </pre><pre class="rust"><code>
 <span class="attr">#![doc = <span class="macro">include_str!</span>(<span class="string">&quot;../README.md&quot;</span>)]
 
@@ -1739,7 +1744,8 @@
     }
 
     <span class="doccomment">/// Returns the handle to the node at the given index, or `None` if the
-    /// index is out of bounds. This operation completes in O(n) time.
+    /// index is out of bounds. If `index &gt; self.len / 2`, the search starts
+    /// from the end of the list. This operation completes in O(n) time.
     /// ```
     /// use linked_vector::*;
     /// let mut lv = LinkedVector::new();
@@ -1749,10 +1755,17 @@
     /// 
     /// assert_eq!(lv.get_handle(1), Some(h2));
     /// assert_eq!(lv.get_handle(3), None);
+    /// assert_eq!(lv.get_handle(2), Some(h1));
     /// ```
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>get_handle(<span class="kw-2">&amp;</span><span class="self">self</span>, index: usize) -&gt; <span class="prelude-ty">Option</span>&lt;HNode&gt; {
-        <span class="self">self</span>.handles().nth(index)
+        <span class="kw">if </span>index &lt;= <span class="self">self</span>.len / <span class="number">2 </span>{
+            <span class="self">self</span>.handles().nth(index)
+        } <span class="kw">else if </span>index &gt;= <span class="self">self</span>.len {
+            <span class="prelude-val">None
+        </span>} <span class="kw">else </span>{
+            <span class="self">self</span>.handles().rev().nth(<span class="self">self</span>.len - index - <span class="number">1</span>)
+        }
     }
 
     <span class="doccomment">/// Provides a mutable reference to the element indicated by the given
@@ -1793,9 +1806,9 @@
     }
 
     <span class="doccomment">/// Inserts `value` in the `index`th position of the vector. Returns a 
-    /// handle to the newly inserted element. If `index` goes beyond the end, 
-    /// the new value will be placed on the end. This operation completes in 
-    /// O(n) time.
+    /// handle to the newly inserted element. If `index &gt; self.len / 2`, the
+    /// positional search starts from the back of the list.  This operation 
+    /// completes in  O(n) time.
     /// ```
     /// use linked_vector::*;
     /// let mut lv = LinkedVector::from([1, 2, 3, 4, 5, 6, 7, 8]);
@@ -1807,13 +1820,10 @@
     /// ```
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>insert(<span class="kw-2">&amp;mut </span><span class="self">self</span>, index: usize, value: T) -&gt; HNode {
-        <span class="kw">if </span>index == <span class="number">0 </span>{
-            <span class="self">self</span>.push_front(value)
-        } <span class="kw">else if </span>index &gt;= <span class="self">self</span>.len {
-            <span class="self">self</span>.push_back(value)
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(handle) = <span class="self">self</span>.get_handle(index) {
+            <span class="self">self</span>.insert_(<span class="prelude-val">Some</span>(handle), value)
         } <span class="kw">else </span>{
-            <span class="kw">let </span>node = <span class="self">self</span>.handles().nth(index).unwrap();
-            <span class="self">self</span>.insert_(<span class="prelude-val">Some</span>(node), value)
+            <span class="self">self</span>.insert_(<span class="prelude-val">None</span>, value)
         }
     }
 
@@ -2011,8 +2021,8 @@
     /// ```
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>remove(<span class="kw-2">&amp;mut </span><span class="self">self</span>, index: usize) -&gt; <span class="prelude-ty">Option</span>&lt;T&gt; {
-        <span class="kw">if </span>index &lt; <span class="self">self</span>.len() {
-            <span class="self">self</span>.remove_(<span class="self">self</span>.get_handle(index))
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(handle) = <span class="self">self</span>.get_handle(index) {
+            <span class="self">self</span>.remove_(<span class="prelude-val">Some</span>(handle))
         } <span class="kw">else </span>{
             <span class="prelude-val">None
         </span>}
