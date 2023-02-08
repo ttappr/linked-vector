@@ -62,8 +62,16 @@ pub struct Cursor<'a, T> {
 }
 
 impl<'a, T> Cursor<'a, T> {
-    pub(crate) fn new(lvec   : &'a LinkedVector<T>, 
-                      handle : HNode) 
+    pub(crate) fn new(lvec: &'a LinkedVector<T>) -> Self {
+        let handle = lvec.front_node()
+                         .expect("Cursor::new() called on empty LinkedVector.");
+        Self {
+            lvec,
+            handle,
+        }
+    }
+    pub(crate) fn new_at(lvec   : &'a LinkedVector<T>, 
+                         handle : HNode) 
         -> Self 
     {
         lvec.get(handle).expect("Cursor::new_at() called with invalid handle.");
@@ -145,9 +153,17 @@ pub struct CursorMut<'a, T> {
 }
 
 impl<'a, T> CursorMut<'a, T> {
-
-    pub(crate) fn new(lvec   : &'a mut LinkedVector<T>, 
-                      handle : HNode) 
+    pub(crate) fn new(lvec: &'a mut LinkedVector<T>) -> Self {
+        let handle = lvec.front_node()
+                         .expect("CursorMut::new() called on 
+                                  empty LinkedVector.");
+        Self {
+            lvec,
+            handle,
+        }
+    }
+    pub(crate) fn new_at(lvec   : &'a mut LinkedVector<T>, 
+                        handle : HNode) 
         -> Self 
     {
         lvec.get(handle)
