@@ -121,6 +121,33 @@ fn cursor_2() {
 }
 
 #[test]
+fn cursor_insert() {
+    let mut lv = LinkedVector::from([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+    let h5 = lv.handle(4).unwrap();
+    let mut cursor = lv.cursor_mut(h5);
+
+    cursor.insert(10);
+    assert_eq!(lv.len(), 10);
+    assert_eq!(lv.to_vec(), vec![1, 2, 3, 4, 10, 5, 6, 7, 8, 9]);
+}
+
+#[test]
+fn cursor_remove() {
+    let mut lv = LinkedVector::from([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+    let h5 = lv.handle(4).unwrap();
+    
+    let mut cursor = lv.cursor_mut(h5);
+
+    cursor.remove();
+    assert_eq!(cursor.get(), Some(&6));
+
+    cursor.move_to_end().unwrap();
+    cursor.remove();
+    assert_eq!(cursor.get(), Some(&8));
+    assert_eq!(lv.to_vec(), vec![1, 2, 3, 4, 6, 7, 8]);
+}
+
+#[test]
 fn default() {
     let lv1 = LinkedVector::<i32>::default();
     assert_eq!(lv1.is_empty(), true);

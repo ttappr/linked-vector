@@ -159,8 +159,8 @@ impl<'a, T> CursorMut<'a, T> {
     /// will be moved to the new element. Returns the handle of the new
     /// element.
     /// 
-    pub fn insert(&mut self, elem: T) -> HNode {
-        self.handle = self.lvec.insert(self.handle, elem);
+    pub fn insert(&mut self, value: T) -> HNode {
+        self.handle = self.lvec.insert(self.handle, value);
         self.handle
     }
 
@@ -168,8 +168,26 @@ impl<'a, T> CursorMut<'a, T> {
     /// will still be at the same position. Returns the handle of the new
     /// element.
     /// 
-    pub fn insert_after(&mut self, elem: T) -> HNode {
-        self.lvec.insert_after(self.handle, elem)
+    pub fn insert_after(&mut self, value: T) -> HNode {
+        self.lvec.insert_after(self.handle, value)
+    }
+
+    /// Removes the element at the current position and returns its value. The 
+    /// cursor will be moved to the next element if not at the end of the 
+    /// vector, otherwise it moves to the new end. If there was only one item
+    /// in the vector, the cursor's position is set to `BAD_HANDLE` and should
+    /// no longer be used, or will cause panics.
+    /// 
+    pub fn remove(&mut self) -> Option<T> {
+        let hrem = self.handle;
+        if let Some(hnext) = self.lvec.next_node(self.handle) {
+            self.handle = hnext;
+        } else if let Some(hprev) = self.lvec.prev_node(self.handle) {
+            self.handle = hprev;
+        } else {
+            self.handle = BAD_HANDLE;
+        }
+        self.lvec.remove(hrem)
     }
 }
 
