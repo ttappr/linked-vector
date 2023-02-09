@@ -55,7 +55,7 @@ fn expired_handles_3() {
     lv.get(h5); // Same node recycled twice now. h5 should work as it has
                 // generation == 2 same as the node.
 
-    lv.get(h1);
+    lv.get(h1); // These should still be good.
     lv.get(h3);
 }
 

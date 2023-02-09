@@ -62,15 +62,23 @@ struct Node<T> {
     gen   : usize,
 }
 impl<T> Node<T> {
+    #[cfg(debug_assertions)]
+    #[inline]
+    fn new(value: T, gen: usize) -> Self {
+        Self { 
+            value : Some(value), 
+            next  : BAD_HANDLE, 
+            prev  : BAD_HANDLE, 
+            gen,
+        }
+    }
+    #[cfg(not(debug_assertions))]
     #[inline]
     fn new(value: T) -> Self {
         Self { 
             value : Some(value), 
             next  : BAD_HANDLE, 
             prev  : BAD_HANDLE, 
-
-            #[cfg(debug_assertions)]
-            gen   : 0,
         }
     }
 }
@@ -844,8 +852,7 @@ impl<T> LinkedVector<T> {
             #[cfg(debug_assertions)]
             {
                 let gen = self.vec[hnode.0].gen;
-                self.vec[hnode.0] = Node::new(value);
-                self.vec[hnode.0].gen = gen;
+                self.vec[hnode.0] = Node::new(value, gen);
                 let mut hnode = hnode;
                 hnode.1 = gen;
                 hnode 
@@ -856,11 +863,16 @@ impl<T> LinkedVector<T> {
                 hnode
             }
         } else {
-            self.vec.push(Node::new(value));
             #[cfg(debug_assertions)]
-            { HNode(self.vec.len() - 1, 0, self.uuid) }
+            { 
+                self.vec.push(Node::new(value, 0));
+                HNode(self.vec.len() - 1, 0, self.uuid) 
+            }
             #[cfg(not(debug_assertions))]
-            { HNode(self.vec.len() - 1) }
+            { 
+                self.vec.push(Node::new(value));
+                HNode(self.vec.len() - 1) 
+            }
         }
     }
 

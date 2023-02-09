@@ -1304,6 +1304,18 @@
 <a href="#1304" id="1304">1304</a>
 <a href="#1305" id="1305">1305</a>
 <a href="#1306" id="1306">1306</a>
+<a href="#1307" id="1307">1307</a>
+<a href="#1308" id="1308">1308</a>
+<a href="#1309" id="1309">1309</a>
+<a href="#1310" id="1310">1310</a>
+<a href="#1311" id="1311">1311</a>
+<a href="#1312" id="1312">1312</a>
+<a href="#1313" id="1313">1313</a>
+<a href="#1314" id="1314">1314</a>
+<a href="#1315" id="1315">1315</a>
+<a href="#1316" id="1316">1316</a>
+<a href="#1317" id="1317">1317</a>
+<a href="#1318" id="1318">1318</a>
 </pre><pre class="rust"><code>
 <span class="attr">#![doc = <span class="string">&quot;To Primary Struct: [LinkedVector]&quot;</span>]
 #![doc = <span class="macro">include_str!</span>(<span class="string">&quot;../README.md&quot;</span>)]
@@ -1368,15 +1380,23 @@
     </span>gen   : usize,
 }
 <span class="kw">impl</span>&lt;T&gt; Node&lt;T&gt; {
-    <span class="attr">#[inline]
+    <span class="attr">#[cfg(debug_assertions)]
+    #[inline]
+    </span><span class="kw">fn </span>new(value: T, gen: usize) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{ 
+            value : <span class="prelude-val">Some</span>(value), 
+            next  : BAD_HANDLE, 
+            prev  : BAD_HANDLE, 
+            gen,
+        }
+    }
+    <span class="attr">#[cfg(not(debug_assertions))]
+    #[inline]
     </span><span class="kw">fn </span>new(value: T) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{ 
             value : <span class="prelude-val">Some</span>(value), 
             next  : BAD_HANDLE, 
             prev  : BAD_HANDLE, 
-
-            <span class="attr">#[cfg(debug_assertions)]
-            </span>gen   : <span class="number">0</span>,
         }
     }
 }
@@ -2150,8 +2170,7 @@
             <span class="attr">#[cfg(debug_assertions)]
             </span>{
                 <span class="kw">let </span>gen = <span class="self">self</span>.vec[hnode.<span class="number">0</span>].gen;
-                <span class="self">self</span>.vec[hnode.<span class="number">0</span>] = Node::new(value);
-                <span class="self">self</span>.vec[hnode.<span class="number">0</span>].gen = gen;
+                <span class="self">self</span>.vec[hnode.<span class="number">0</span>] = Node::new(value, gen);
                 <span class="kw">let </span><span class="kw-2">mut </span>hnode = hnode;
                 hnode.<span class="number">1 </span>= gen;
                 hnode 
@@ -2162,11 +2181,16 @@
                 hnode
             }
         } <span class="kw">else </span>{
-            <span class="self">self</span>.vec.push(Node::new(value));
             <span class="attr">#[cfg(debug_assertions)]
-            </span>{ HNode(<span class="self">self</span>.vec.len() - <span class="number">1</span>, <span class="number">0</span>, <span class="self">self</span>.uuid) }
+            </span>{ 
+                <span class="self">self</span>.vec.push(Node::new(value, <span class="number">0</span>));
+                HNode(<span class="self">self</span>.vec.len() - <span class="number">1</span>, <span class="number">0</span>, <span class="self">self</span>.uuid) 
+            }
             <span class="attr">#[cfg(not(debug_assertions))]
-            </span>{ HNode(<span class="self">self</span>.vec.len() - <span class="number">1</span>) }
+            </span>{ 
+                <span class="self">self</span>.vec.push(Node::new(value));
+                HNode(<span class="self">self</span>.vec.len() - <span class="number">1</span>) 
+            }
         }
     }
 
