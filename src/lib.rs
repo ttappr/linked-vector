@@ -1,4 +1,5 @@
 
+#![doc = "To Primary Struct: [LinkedVector]"]
 #![doc = include_str!("../README.md")]
 
 use core::iter::{FromIterator, FusedIterator};
@@ -576,8 +577,8 @@ impl<T> LinkedVector<T> {
     /// Sorts the elemements in place in ascending order. Previously held 
     /// handles will still be valid and reference the same elements (with the 
     /// same values) as before.  Only the `next` and `prev` fields of the nodes 
-    /// are modified in the list. This operation completes in `O(n log n)` time
-    /// with `O(1)` memory.
+    /// are modified in the list. Uses an iterative version of Quicksort. This 
+    /// operation completes in `O(n log n)` time.
     /// ```
     /// use linked_vector::*;
     /// let mut lv = LinkedVector::new();
@@ -585,12 +586,14 @@ impl<T> LinkedVector<T> {
     /// let h2 = lv.push_back(2);
     /// let h3 = lv.push_back(1);
     /// 
+    /// lv.extend([7, 11, 4, 6, 8, 13, 12, 9, 14, 5, 10]);
+    /// 
     /// lv.sort_unstable();
     /// 
-    /// assert_eq!(lv.to_vec(), vec![1, 2, 3]);
-    /// assert_eq!(lv.get(h1), Some(&3));
-    /// assert_eq!(lv.get(h2), Some(&2));
-    /// assert_eq!(lv.get(h3), Some(&1));
+    /// assert_eq!(lv.to_vec(), (1..15).collect::<Vec<_>>());
+    /// assert_eq!(lv[h1], 3);
+    /// assert_eq!(lv[h2], 2);
+    /// assert_eq!(lv[h3], 1);
     /// ```
     pub fn sort_unstable(&mut self) 
     where
@@ -600,7 +603,7 @@ impl<T> LinkedVector<T> {
     }
 
     /// Sorts the elemements in place using the provided comparison function.
-    /// See [LinkedVector::sort_unstable()] for more details.
+    /// See [sort_unstable()](LinkedVector::sort_unstable) for more details.
     /// ```
     /// use linked_vector::*;
     /// let mut lv = LinkedVector::from([1, 2, 3, 4, 5]);
@@ -657,7 +660,8 @@ impl<T> LinkedVector<T> {
     }
 
     /// Sorts the elemements in place in using the provided key extraction
-    /// function. See [LinkedVector::sort_unstable()] for more details.
+    /// function. See [sort_unstable()](LinkedVector::sort_unstable) for more 
+    /// details.
     /// ```
     /// use linked_vector::*;
     /// let mut lv = LinkedVector::from([1, 2, 3, 4, 5]);
@@ -836,6 +840,8 @@ impl<T> LinkedVector<T> {
                 } else {
                     self.get_mut_(hprev).next = hnext;
                 }
+            } else {
+                self.head = BAD_HANDLE;
             }
             self.len -= 1;
             let value = self.get_mut_(hnode).value.take();

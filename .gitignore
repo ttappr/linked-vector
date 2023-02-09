@@ -1,5 +1,6 @@
 /target
 /Cargo.lock
 notes.py
+notes.md
 changelog-template.md
 TODO.md
