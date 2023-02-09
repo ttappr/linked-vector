@@ -26,11 +26,12 @@ cargo add linked-vector
 
 ## Handles
 
-Items in a `LinkedVector` are directly accessible via handles. These are 
-instances of the `HNode` struct. They're returned by operations such as insert, 
-push, and getters. If direct access is required to any specific items, their 
-handles can be stored for later use. These handles lack the performance overhead
-of smart pointers, while providing a flexible reference model.
+Items in a `LinkedVector` are directly accessible via handles, which are 
+instances of the `HNode` struct. These are returned by operations such as insert 
+or push, or other accessor methods. If direct access is required to any specific 
+items, their handles can be stored for later use. These handles lack the 
+performance overhead of smart pointers, while providing a flexible reference 
+model.
 
 ```rust
 use linked_vector::*;
@@ -86,7 +87,8 @@ does indeed have a tial node accessible in `O(1)` time.
 
 - **Cursors**:   The Cursor interface facilitates traversing the vector from any 
                  point.
-- **Indexing**:  Items can be indexed as with a vector using the handles.
+- **Indexing**:  `Index<HNode>` and `Index<usize>` are implemented, enabling 
+                 items to be accessed directly.
 - **Iterators**: The standard assortment of double-ended iterators are 
                  implemented.
 - **Sorting**:   In-place sorting of elements is supported in `O(n log n)` time.

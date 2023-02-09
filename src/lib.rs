@@ -576,7 +576,8 @@ impl<T> LinkedVector<T> {
     /// Sorts the elemements in place in ascending order. Previously held 
     /// handles will still be valid and reference the same elements (with the 
     /// same values) as before.  Only the `next` and `prev` fields of the nodes 
-    /// are modified in the list. This operation completes in `O(n log n)` time.
+    /// are modified in the list. This operation completes in `O(n log n)` time
+    /// with `O(1)` memory.
     /// ```
     /// use linked_vector::*;
     /// let mut lv = LinkedVector::new();

@@ -1301,6 +1301,7 @@
 <a href="#1301" id="1301">1301</a>
 <a href="#1302" id="1302">1302</a>
 <a href="#1303" id="1303">1303</a>
+<a href="#1304" id="1304">1304</a>
 </pre><pre class="rust"><code>
 <span class="attr">#![doc = <span class="macro">include_str!</span>(<span class="string">&quot;../README.md&quot;</span>)]
 
@@ -1524,8 +1525,8 @@
     /// assert_eq!(cursor.get(), Some(&amp;6));
     /// ```
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>cursor(<span class="kw-2">&amp;</span><span class="self">self</span>, hnode: HNode) -&gt; Cursor&lt;T&gt; {
-        Cursor::new(<span class="self">self</span>, hnode)
+    </span><span class="kw">pub fn </span>cursor(<span class="kw-2">&amp;</span><span class="self">self</span>, node: HNode) -&gt; Cursor&lt;T&gt; {
+        Cursor::new(<span class="self">self</span>, node)
     }
 
     <span class="doccomment">/// Creates a cursor that holds a mutable reference to the LinkedVector that
@@ -1544,8 +1545,8 @@
     /// assert_eq!(lv.to_vec(), vec![1, 2, 3, 42, 5, 6]);
     /// ```
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>cursor_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>, hnode: HNode) -&gt; CursorMut&lt;T&gt; {
-        CursorMut::new(<span class="self">self</span>, hnode)
+    </span><span class="kw">pub fn </span>cursor_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>, node: HNode) -&gt; CursorMut&lt;T&gt; {
+        CursorMut::new(<span class="self">self</span>, node)
     }
 
     <span class="doccomment">/// Gives a reference to the element at the front of the vector, or `None` 
@@ -1879,7 +1880,8 @@
     <span class="doccomment">/// Sorts the elemements in place in ascending order. Previously held 
     /// handles will still be valid and reference the same elements (with the 
     /// same values) as before.  Only the `next` and `prev` fields of the nodes 
-    /// are modified in the list. This operation completes in `O(n log n)` time.
+    /// are modified in the list. This operation completes in `O(n log n)` time
+    /// with `O(1)` memory.
     /// ```
     /// use linked_vector::*;
     /// let mut lv = LinkedVector::new();
@@ -1976,8 +1978,8 @@
         <span class="self">self</span>.sort_unstable_by(|a, b| key(a).cmp(<span class="kw-2">&amp;</span>key(b)));
     }
 
-    <span class="doccomment">/// Swaps the elements indicated by the handles, `hnode1` and `hnode2`. Only
-    /// the next and prev fields of nodes are altered. `hnode1` and `hnode2` 
+    <span class="doccomment">/// Swaps the elements indicated by the handles, `node1` and `node2`. Only
+    /// the next and prev fields of nodes are altered. `node1` and `node2` 
     /// will be updated to reference the swapped values. This operation 
     /// completes in O(1) time.
     /// ```
@@ -2000,9 +2002,9 @@
     /// assert_eq!(lv.get(h2_bak), Some(&amp;43));
     /// ```
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>swap(<span class="kw-2">&amp;mut </span><span class="self">self</span>, hnode1: <span class="kw-2">&amp;mut </span>HNode, hnode2: <span class="kw-2">&amp;mut </span>HNode) {
-        <span class="kw">let </span>h1 = <span class="kw-2">*</span>hnode1;
-        <span class="kw">let </span>h2 = <span class="kw-2">*</span>hnode2;
+    </span><span class="kw">pub fn </span>swap(<span class="kw-2">&amp;mut </span><span class="self">self</span>, node1: <span class="kw-2">&amp;mut </span>HNode, node2: <span class="kw-2">&amp;mut </span>HNode) {
+        <span class="kw">let </span>h1 = <span class="kw-2">*</span>node1;
+        <span class="kw">let </span>h2 = <span class="kw-2">*</span>node2;
         <span class="kw">let </span>prev1 = <span class="self">self</span>.get_(h1).prev;
         <span class="kw">let </span>next1 = <span class="self">self</span>.get_(h1).next;
 
@@ -2033,7 +2035,7 @@
         <span class="kw">if      </span>next1 == BAD_HANDLE { <span class="self">self</span>.get_mut_(<span class="self">self</span>.head).prev = h2; }
         <span class="kw">else if </span>next2 == BAD_HANDLE { <span class="self">self</span>.get_mut_(<span class="self">self</span>.head).prev = h1; }
 
-        swap(hnode1, hnode2);
+        swap(node1, node2);
     }
 
     <span class="doccomment">/// Returns a vector containing the elements of the list. This operation
