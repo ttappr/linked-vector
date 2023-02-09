@@ -4,6 +4,35 @@ use std::cmp::Reverse;
 
 use super::*;
 
+#[test]
+#[should_panic]
+#[cfg(debug_assertions)]
+fn expired_handles() {
+    let mut lv = LinkedVector::new();
+    let h1 = lv.push_back(1);
+    let h2 = lv.push_back(2);
+    let h3 = lv.push_back(3);
+
+    lv.remove(h2);
+
+    lv.push_back(4); // This will recycle node pointed to by h2.
+
+    lv.get(h2);
+}
+
+#[test]
+#[should_panic]
+#[cfg(debug_assertions)]
+fn foreign_handles() {
+    let mut lv1 = LinkedVector::new();
+    let     lv2 = LinkedVector::from([1, 2, 3]);
+    let h1 = lv1.push_back(1);
+    let h2 = lv1.push_back(2);
+    let h3 = lv1.push_back(3);
+
+    lv2.get(h1);
+}
+
 #[test] 
 fn append() {
     let mut lv1 = LinkedVector::new();

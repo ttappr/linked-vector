@@ -841,15 +841,20 @@ impl<T> LinkedVector<T> {
     #[inline]
     fn new_node(&mut self, value: T) -> HNode {
         if let Some(hnode) = self.pop_recyc() {
-            self.vec[hnode.0] = Node::new(value);
             #[cfg(debug_assertions)]
             {
+                let gen = self.vec[hnode.0].gen;
+                self.vec[hnode.0] = Node::new(value);
+                self.vec[hnode.0].gen = gen;
                 let mut hnode = hnode;
-                hnode.1 = self.vec[hnode.0].gen;
+                hnode.1 = gen;
                 hnode 
             }
             #[cfg(not(debug_assertions))]
-            { hnode }
+            { 
+                self.vec[hnode.0] = Node::new(value);
+                hnode
+            }
         } else {
             self.vec.push(Node::new(value));
             #[cfg(debug_assertions)]
