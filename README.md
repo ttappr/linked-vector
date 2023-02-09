@@ -12,7 +12,7 @@ Edit your Cargo.toml file to include:
 
 ```rust, ignore
 [dependencies]
-linked-vector = "1.3"
+linked-vector = "1.0"
 ```
 Or run this on the command line from your project folder:
 

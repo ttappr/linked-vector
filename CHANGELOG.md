@@ -1,6 +1,10 @@
 # Changelog
 
-## v1.3.0 - ????-??-??
+## v1.0.0 - ????-??-??
+
+### Added
+
+- `LinkedVector::compact()` method added that produces a new compacted vector.
 
 ### Changed
 

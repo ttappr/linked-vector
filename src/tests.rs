@@ -126,6 +126,13 @@ fn clone() {
 }
 
 #[test]
+fn compact() {
+    let lv1 = LinkedVector::from([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+    let lv2 = lv1.compact();
+    assert_eq!(lv2.to_vec(), vec![1, 2, 3, 4, 5, 6, 7, 8, 9]);
+}
+
+#[test]
 fn contains() {
     let mut lv1 = LinkedVector::new();
     lv1.push_back(1);

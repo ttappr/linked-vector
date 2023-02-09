@@ -205,6 +205,17 @@ impl<T> LinkedVector<T> {
         self.recyc = BAD_HANDLE;
     }
     
+    /// Consumes the LinkedVector and produces a new one that has all its nodes 
+    /// placed contiguously in sequential order at the front of the internal 
+    /// vector. Where performance is critical and the cost of a clone operation 
+    /// is infrequent and acceptible, compacting the vector *may* give a small 
+    /// gain in performance. This operation completes in O(n) time.
+    /// 
+    #[inline]
+    pub fn compact(self) -> Self {
+        self.into_iter().collect()
+    }
+
     /// Returns `true` if the list contains an element with the given value.
     /// This operation completes in O(n) time where n is the length of the list.
     /// 
@@ -877,7 +888,8 @@ impl<T> LinkedVector<T> {
     }
 
     /// Internal method that returns a handle to a useable node from the recycle
-    /// bin. The node is removed from the bin.
+    /// bin. The node is removed from the bin. Only new_node() should call this.
+    /// Use new_node() if you need a new node instead of this.
     /// 
     #[inline]
     fn pop_recyc(&mut self) -> Option<HNode> {
@@ -892,7 +904,7 @@ impl<T> LinkedVector<T> {
     }
 
     /// Pushes a recently discarded node, indicated by the handle,  back into 
-    /// the recycle bin.
+    /// the recycle bin. This can be called by any method that discards a node.
     /// 
     #[inline]
     fn push_recyc(&mut self, node: HNode) {

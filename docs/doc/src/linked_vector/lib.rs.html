@@ -1316,6 +1316,18 @@
 <a href="#1316" id="1316">1316</a>
 <a href="#1317" id="1317">1317</a>
 <a href="#1318" id="1318">1318</a>
+<a href="#1319" id="1319">1319</a>
+<a href="#1320" id="1320">1320</a>
+<a href="#1321" id="1321">1321</a>
+<a href="#1322" id="1322">1322</a>
+<a href="#1323" id="1323">1323</a>
+<a href="#1324" id="1324">1324</a>
+<a href="#1325" id="1325">1325</a>
+<a href="#1326" id="1326">1326</a>
+<a href="#1327" id="1327">1327</a>
+<a href="#1328" id="1328">1328</a>
+<a href="#1329" id="1329">1329</a>
+<a href="#1330" id="1330">1330</a>
 </pre><pre class="rust"><code>
 <span class="attr">#![doc = <span class="string">&quot;To Primary Struct: [LinkedVector]&quot;</span>]
 #![doc = <span class="macro">include_str!</span>(<span class="string">&quot;../README.md&quot;</span>)]
@@ -1523,6 +1535,17 @@
         <span class="self">self</span>.recyc = BAD_HANDLE;
     }
     
+    <span class="doccomment">/// Consumes the LinkedVector and produces a new one that has all its nodes 
+    /// placed contiguously in sequential order at the front of the internal 
+    /// vector. Where performance is critical and the cost of a clone operation 
+    /// is infrequent and acceptible, compacting the vector *may* give a small 
+    /// gain in performance. This operation completes in O(n) time.
+    /// 
+    </span><span class="attr">#[inline]
+    </span><span class="kw">pub fn </span>compact(<span class="self">self</span>) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.into_iter().collect()
+    }
+
     <span class="doccomment">/// Returns `true` if the list contains an element with the given value.
     /// This operation completes in O(n) time where n is the length of the list.
     /// 
@@ -2195,7 +2218,8 @@
     }
 
     <span class="doccomment">/// Internal method that returns a handle to a useable node from the recycle
-    /// bin. The node is removed from the bin.
+    /// bin. The node is removed from the bin. Only new_node() should call this.
+    /// Use new_node() if you need a new node instead of this.
     /// 
     </span><span class="attr">#[inline]
     </span><span class="kw">fn </span>pop_recyc(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;HNode&gt; {
@@ -2210,7 +2234,7 @@
     }
 
     <span class="doccomment">/// Pushes a recently discarded node, indicated by the handle,  back into 
-    /// the recycle bin.
+    /// the recycle bin. This can be called by any method that discards a node.
     /// 
     </span><span class="attr">#[inline]
     </span><span class="kw">fn </span>push_recyc(<span class="kw-2">&amp;mut </span><span class="self">self</span>, node: HNode) {
