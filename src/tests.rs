@@ -647,6 +647,21 @@ fn sort_by() {
 }
 
 #[test]
+fn sort_unstable() {
+    let mut lv = LinkedVector::from([2, 1, 6, 7, 4, 8, 5, 3]);
+    lv.sort_unstable();
+    assert_eq!(lv.to_vec(), vec![1, 2, 3, 4, 5, 6, 7, 8]);
+
+    lv = LinkedVector::from([2, 1, 6, 7, 4, 8, 5, 3]);
+    lv.sort_unstable_by(|a, b| b.cmp(a));
+    assert_eq!(lv.to_vec(), vec![8, 7, 6, 5, 4, 3, 2, 1]);
+
+    lv = LinkedVector::from([2, 1, 6, 7, 4, 8, 5, 3]);
+    lv.sort_unstable_by_key(|a| Reverse(*a));
+    assert_eq!(lv.to_vec(), vec![8, 7, 6, 5, 4, 3, 2, 1]);
+}
+
+#[test]
 fn sort_by_key() {
     let mut lv1 = LinkedVector::from([2, 1, 6, 7, 4, 8, 5, 3]);
     lv1.sort_by_key(|a| Reverse(*a));

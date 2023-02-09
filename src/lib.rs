@@ -312,7 +312,8 @@ impl<T> LinkedVector<T> {
 
     /// Returns the handle to the node at the given index, or `None` if the
     /// index is out of bounds. If `index > self.len / 2`, the search starts
-    /// from the end of the list. This operation completes in O(n) time.
+    /// from the end of the list. This operation performs in O(n / 2) time
+    /// worst case.
     /// ```
     /// use linked_vector::*;
     /// let mut lv = LinkedVector::new();
@@ -594,11 +595,12 @@ impl<T> LinkedVector<T> {
     /// assert_eq!(lv[h2], 2);
     /// assert_eq!(lv[h3], 1);
     /// ```
+    #[inline]
     pub fn sort(&mut self) 
     where
         T: Ord
     {
-        self.sort_by(|a, b| a.cmp(b));
+        self.sort_by_(|a, b| a.cmp(b), true);
     }
 
     /// Sorts the elemements in place using the provided comparison function.
@@ -611,23 +613,12 @@ impl<T> LinkedVector<T> {
     /// 
     /// assert_eq!(lv.to_vec(), vec![5, 4, 3, 2, 1]);
     /// ```
-    pub fn sort_by<F>(&mut self, mut compare: F) 
+    #[inline]
+    pub fn sort_by<F>(&mut self, compare: F) 
     where
         F: FnMut(&T, &T) -> Ordering,
     {
-        let mut handles = self.handles().collect::<Vec<_>>();
-        handles.sort_by(|h1, h2| {
-            compare(self.vec[h1.0].value.as_ref().unwrap(), 
-                    self.vec[h2.0].value.as_ref().unwrap())
-        });
-        for i in 0..self.len - 1 {
-            self.vec[handles[i].0].next = handles[i + 1];
-            self.vec[handles[i + 1].0].prev = handles[i];
-        }
-        let tail = *handles.last().unwrap();
-        self.head = handles[0];
-        self.vec[self.head.0].prev = tail;
-        self.vec[tail.0].next = BAD_HANDLE;
+        self.sort_by_(compare, true)
     }
 
     /// Sorts the elemements in place in using the provided key extraction
@@ -640,12 +631,72 @@ impl<T> LinkedVector<T> {
     /// 
     /// assert_eq!(lv.to_vec(), vec![5, 4, 3, 2, 1]);
     /// ```
+    #[inline]
     pub fn sort_by_key<K, F>(&mut self, mut key: F) 
     where
         K: Ord,
         F: FnMut(&T) -> K,
     {
-        self.sort_by(|a, b| key(a).cmp(&key(b)));
+        self.sort_by_(|a, b| key(a).cmp(&key(b)), true);
+    }
+
+    /// Sorts the elemements in place in ascending order. Previously held
+    /// handles will still be valid and reference the same elements (with the
+    /// same values) as before.  Only the `next` and `prev` fields of the nodes
+    /// are modified in the list. Uses Rust's unstable sort internally and
+    /// requires some auxiliary memory for a temporary handle list.
+    /// ```
+    /// use linked_vector::*;
+    /// let mut lv = LinkedVector::from([5, 4, 3, 2, 1, 0]);
+    /// 
+    /// lv.sort_unstable();
+    /// 
+    /// assert_eq!(lv.to_vec(), vec![0, 1, 2, 3, 4, 5]);
+    /// ```
+    #[inline]
+    pub fn sort_unstable(&mut self) 
+    where
+        T: Ord
+    {
+        self.sort_by_(|a, b| a.cmp(b), false);
+    }
+
+    /// Sorts the elemements in place using the provided comparison function.
+    /// See [sort_unstable()](LinkedVector::sort_unstable) for more details.
+    /// ```
+    /// use linked_vector::*;
+    /// let mut lv = LinkedVector::from([1, 2, 3, 4, 5]);
+    /// 
+    /// lv.sort_unstable_by(|a, b| b.cmp(a));
+    /// 
+    /// assert_eq!(lv.to_vec(), vec![5, 4, 3, 2, 1]);
+    /// ```
+    #[inline]
+    pub fn sort_unstable_by<F>(&mut self , compare: F) 
+    where
+        F: FnMut(&T, &T) -> Ordering,
+    {
+        self.sort_by_(compare, false);
+    }
+
+    /// Sorts the elemements in place in using the provided key extraction
+    /// function. See [sort_unstable()](LinkedVector::sort_unstable) for more
+    /// details.
+    /// ```
+    /// use linked_vector::*;
+    /// let mut lv = LinkedVector::from([1, 2, 3, 4, 5]);
+    /// 
+    /// lv.sort_unstable_by_key(|k| -k);
+    /// 
+    /// assert_eq!(lv.to_vec(), vec![5, 4, 3, 2, 1]);
+    /// ```
+    #[inline]
+    pub fn sort_unstable_by_key<K, F>(&mut self, mut key: F) 
+    where
+        K: Ord,
+        F: FnMut(&T) -> K,
+    {
+        self.sort_by_(|a, b| key(a).cmp(&key(b)), false);
     }
 
     /// Returns a vector containing the elements of the list. This operation
@@ -838,6 +889,36 @@ impl<T> LinkedVector<T> {
         }
         #[cfg(debug_assertions)]
         { self.vec[node.0].gen += 1; }
+    }
+
+    /// Sorts the list by the given comparison function. This operation 
+    /// completes in O(2n + n log n) time.
+    /// 
+    fn sort_by_<F>(&mut self, mut compare: F, stable: bool) 
+    where
+        F: FnMut(&T, &T) -> Ordering,
+    {
+        if self.len < 2 { return; }
+        let mut handles = self.handles().collect::<Vec<_>>();
+        if stable {
+            handles.sort_by(|h1, h2| {
+                compare(self.vec[h1.0].value.as_ref().unwrap(), 
+                        self.vec[h2.0].value.as_ref().unwrap())
+            });
+        } else {
+            handles.sort_unstable_by(|h1, h2| {
+                compare(self.vec[h1.0].value.as_ref().unwrap(), 
+                        self.vec[h2.0].value.as_ref().unwrap())
+            });
+        }
+        for i in 0..self.len - 1 {
+            self.vec[handles[i].0].next = handles[i + 1];
+            self.vec[handles[i + 1].0].prev = handles[i];
+        }
+        let tail = *handles.last().unwrap();
+        self.head = handles[0];
+        self.vec[self.head.0].prev = tail;
+        self.vec[tail.0].next = BAD_HANDLE;
     }
 }
 
