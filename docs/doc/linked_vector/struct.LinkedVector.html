@@ -82,7 +82,18 @@ empty. This operation completes in O(1) time.</p>
 <span class="kw">let </span>hnode = lv.push_front(<span class="number">42</span>);
  
 <span class="macro">assert_eq!</span>(lv.get(hnode), <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="number">42</span>));</code></pre></div>
-</div></details><details class="rustdoc-toggle method-toggle" open><summary><section id="method.handle" class="method has-srclink"><a class="srclink rightside" href="../src/linked_vector/lib.rs.html#329-337">source</a><h4 class="code-header">pub fn <a href="#method.handle" class="fn">handle</a>(&amp;self, index: <a class="primitive" href="https://doc.rust-lang.org/1.67.0/std/primitive.usize.html">usize</a>) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.67.0/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;<a class="struct" href="struct.HNode.html" title="struct linked_vector::HNode">HNode</a>&gt;</h4></section></summary><div class="docblock"><p>Returns the handle to the node at the given index, or <code>None</code> if the
+</div></details><details class="rustdoc-toggle method-toggle" open><summary><section id="method.get_mut" class="method has-srclink"><a class="srclink rightside" href="../src/linked_vector/lib.rs.html#326-328">source</a><h4 class="code-header">pub fn <a href="#method.get_mut" class="fn">get_mut</a>(&amp;mut self, node: <a class="struct" href="struct.HNode.html" title="struct linked_vector::HNode">HNode</a>) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.67.0/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.67.0/std/primitive.reference.html">&amp;mut </a>T&gt;</h4></section></summary><div class="docblock"><p>Provides a mutable reference to the element indicated by the given
+handle, or <code>None</code> if the handle is invalid. This operation completes in
+O(1) time.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>linked_vector::<span class="kw-2">*</span>;
+<span class="kw">let </span><span class="kw-2">mut </span>lv = LinkedVector::new();
+<span class="kw">let </span>hnode = lv.push_front(<span class="number">0</span>);
+ 
+<span class="kw-2">*</span>lv.get_mut(hnode).unwrap() = <span class="number">42</span>;
+ 
+<span class="macro">assert_eq!</span>(lv.get(hnode), <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="number">42</span>));</code></pre></div>
+</div></details><details class="rustdoc-toggle method-toggle" open><summary><section id="method.handle" class="method has-srclink"><a class="srclink rightside" href="../src/linked_vector/lib.rs.html#346-354">source</a><h4 class="code-header">pub fn <a href="#method.handle" class="fn">handle</a>(&amp;self, index: <a class="primitive" href="https://doc.rust-lang.org/1.67.0/std/primitive.usize.html">usize</a>) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.67.0/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;<a class="struct" href="struct.HNode.html" title="struct linked_vector::HNode">HNode</a>&gt;</h4></section></summary><div class="docblock"><p>Returns the handle to the node at the given index, or <code>None</code> if the
 index is out of bounds. If <code>index &gt; self.len / 2</code>, the search starts
 from the end of the list. This operation performs in O(n / 2) time
 worst case.</p>
@@ -96,17 +107,6 @@ worst case.</p>
 <span class="macro">assert_eq!</span>(lv.handle(<span class="number">1</span>), <span class="prelude-val">Some</span>(h2));
 <span class="macro">assert_eq!</span>(lv.handle(<span class="number">3</span>), <span class="prelude-val">None</span>);
 <span class="macro">assert_eq!</span>(lv.handle(<span class="number">2</span>), <span class="prelude-val">Some</span>(h1));</code></pre></div>
-</div></details><details class="rustdoc-toggle method-toggle" open><summary><section id="method.get_mut" class="method has-srclink"><a class="srclink rightside" href="../src/linked_vector/lib.rs.html#352-354">source</a><h4 class="code-header">pub fn <a href="#method.get_mut" class="fn">get_mut</a>(&amp;mut self, node: <a class="struct" href="struct.HNode.html" title="struct linked_vector::HNode">HNode</a>) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.67.0/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.67.0/std/primitive.reference.html">&amp;mut </a>T&gt;</h4></section></summary><div class="docblock"><p>Provides a mutable reference to the element indicated by the given
-handle, or <code>None</code> if the handle is invalid. This operation completes in
-O(1) time.</p>
-
-<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>linked_vector::<span class="kw-2">*</span>;
-<span class="kw">let </span><span class="kw-2">mut </span>lv = LinkedVector::new();
-<span class="kw">let </span>hnode = lv.push_front(<span class="number">0</span>);
- 
-<span class="kw-2">*</span>lv.get_mut(hnode).unwrap() = <span class="number">42</span>;
- 
-<span class="macro">assert_eq!</span>(lv.get(hnode), <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="number">42</span>));</code></pre></div>
 </div></details><details class="rustdoc-toggle method-toggle" open><summary><section id="method.handles" class="method has-srclink"><a class="srclink rightside" href="../src/linked_vector/lib.rs.html#372-374">source</a><h4 class="code-header">pub fn <a href="#method.handles" class="fn">handles</a>(&amp;self) -&gt; <a class="struct" href="struct.Handles.html" title="struct linked_vector::Handles">Handles</a>&lt;'_, T&gt; <a href="#" class="notable-traits" data-ty="Handles&lt;&#39;_, T&gt;">ⓘ</a></h4></section></summary><div class="docblock"><p>Returns an iterator over the handles of the vector. The handles will 
 reflect the order of the linked list. This operation completes in O(1) 
 time.</p>
@@ -121,19 +121,7 @@ time.</p>
 <span class="kw">let </span>iter = lv.handles();
  
 <span class="macro">assert_eq!</span>(iter.collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;(), <span class="macro">vec!</span>[h1, h2, h3]);</code></pre></div>
-</div></details><details class="rustdoc-toggle method-toggle" open><summary><section id="method.insert_after" class="method has-srclink"><a class="srclink rightside" href="../src/linked_vector/lib.rs.html#390-396">source</a><h4 class="code-header">pub fn <a href="#method.insert_after" class="fn">insert_after</a>(&amp;mut self, node: <a class="struct" href="struct.HNode.html" title="struct linked_vector::HNode">HNode</a>, value: T) -&gt; <a class="struct" href="struct.HNode.html" title="struct linked_vector::HNode">HNode</a></h4></section></summary><div class="docblock"><p>Inserts a new element after the one indicated by the handle, <code>node</code>.
-Returns a handle to the newly inserted element. This operation completes
-in O(1) time.</p>
-
-<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>linked_vector::<span class="kw-2">*</span>;
-<span class="kw">let </span><span class="kw-2">mut </span>lv = LinkedVector::new();
- 
-<span class="kw">let </span>h1 = lv.push_back(<span class="number">42</span>);
-<span class="kw">let </span>h2 = lv.insert_after(h1, <span class="number">43</span>);
- 
-<span class="macro">assert_eq!</span>(lv.next_node(h1), <span class="prelude-val">Some</span>(h2));
-<span class="macro">assert_eq!</span>(lv.get(h2), <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="number">43</span>));</code></pre></div>
-</div></details><details class="rustdoc-toggle method-toggle" open><summary><section id="method.insert" class="method has-srclink"><a class="srclink rightside" href="../src/linked_vector/lib.rs.html#412-414">source</a><h4 class="code-header">pub fn <a href="#method.insert" class="fn">insert</a>(&amp;mut self, node: <a class="struct" href="struct.HNode.html" title="struct linked_vector::HNode">HNode</a>, value: T) -&gt; <a class="struct" href="struct.HNode.html" title="struct linked_vector::HNode">HNode</a></h4></section></summary><div class="docblock"><p>Inserts a new element at the position indicated by the handle, <code>node</code>.
+</div></details><details class="rustdoc-toggle method-toggle" open><summary><section id="method.insert" class="method has-srclink"><a class="srclink rightside" href="../src/linked_vector/lib.rs.html#390-392">source</a><h4 class="code-header">pub fn <a href="#method.insert" class="fn">insert</a>(&amp;mut self, node: <a class="struct" href="struct.HNode.html" title="struct linked_vector::HNode">HNode</a>, value: T) -&gt; <a class="struct" href="struct.HNode.html" title="struct linked_vector::HNode">HNode</a></h4></section></summary><div class="docblock"><p>Inserts a new element at the position indicated by the handle, <code>node</code>.
 Returns a handle to the newly inserted element. This operation completes
 in O(1) time.</p>
 
@@ -145,6 +133,18 @@ in O(1) time.</p>
  
 <span class="macro">assert_eq!</span>(lv.next_node(h2), <span class="prelude-val">Some</span>(h1));
 <span class="macro">assert_eq!</span>(lv.get(h1), <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="number">42</span>));</code></pre></div>
+</div></details><details class="rustdoc-toggle method-toggle" open><summary><section id="method.insert_after" class="method has-srclink"><a class="srclink rightside" href="../src/linked_vector/lib.rs.html#408-414">source</a><h4 class="code-header">pub fn <a href="#method.insert_after" class="fn">insert_after</a>(&amp;mut self, node: <a class="struct" href="struct.HNode.html" title="struct linked_vector::HNode">HNode</a>, value: T) -&gt; <a class="struct" href="struct.HNode.html" title="struct linked_vector::HNode">HNode</a></h4></section></summary><div class="docblock"><p>Inserts a new element after the one indicated by the handle, <code>node</code>.
+Returns a handle to the newly inserted element. This operation completes
+in O(1) time.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>linked_vector::<span class="kw-2">*</span>;
+<span class="kw">let </span><span class="kw-2">mut </span>lv = LinkedVector::new();
+ 
+<span class="kw">let </span>h1 = lv.push_back(<span class="number">42</span>);
+<span class="kw">let </span>h2 = lv.insert_after(h1, <span class="number">43</span>);
+ 
+<span class="macro">assert_eq!</span>(lv.next_node(h1), <span class="prelude-val">Some</span>(h2));
+<span class="macro">assert_eq!</span>(lv.get(h2), <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="number">43</span>));</code></pre></div>
 </div></details><details class="rustdoc-toggle method-toggle" open><summary><section id="method.is_empty" class="method has-srclink"><a class="srclink rightside" href="../src/linked_vector/lib.rs.html#419-421">source</a><h4 class="code-header">pub fn <a href="#method.is_empty" class="fn">is_empty</a>(&amp;self) -&gt; <a class="primitive" href="https://doc.rust-lang.org/1.67.0/std/primitive.bool.html">bool</a></h4></section></summary><div class="docblock"><p>Returns <code>true</code> if the list contains no elements.</p>
 </div></details><details class="rustdoc-toggle method-toggle" open><summary><section id="method.iter" class="method has-srclink"><a class="srclink rightside" href="../src/linked_vector/lib.rs.html#426-428">source</a><h4 class="code-header">pub fn <a href="#method.iter" class="fn">iter</a>(&amp;self) -&gt; <a class="struct" href="struct.Iter.html" title="struct linked_vector::Iter">Iter</a>&lt;'_, T&gt; <a href="#" class="notable-traits" data-ty="Iter&lt;&#39;_, T&gt;">ⓘ</a></h4></section></summary><div class="docblock"><p>Returns an iterator over the elements of the list.</p>
 </div></details><details class="rustdoc-toggle method-toggle" open><summary><section id="method.iter_mut" class="method has-srclink"><a class="srclink rightside" href="../src/linked_vector/lib.rs.html#441-443">source</a><h4 class="code-header">pub fn <a href="#method.iter_mut" class="fn">iter_mut</a>(&amp;mut self) -&gt; <a class="struct" href="struct.IterMut.html" title="struct linked_vector::IterMut">IterMut</a>&lt;'_, T&gt; <a href="#" class="notable-traits" data-ty="IterMut&lt;&#39;_, T&gt;">ⓘ</a></h4></section></summary><div class="docblock"><p>Returns an iterator over the elements of the list. Renders mutable
@@ -167,21 +167,7 @@ handle is the last node in the list. This operation completes in O(1)</p>
 <span class="kw">let </span>h2 = lv.push_back(<span class="number">43</span>);
  
 <span class="macro">assert_eq!</span>(lv.next_node(h1), <span class="prelude-val">Some</span>(h2));</code></pre></div>
-</div></details><details class="rustdoc-toggle method-toggle" open><summary><section id="method.pop_back" class="method has-srclink"><a class="srclink rightside" href="../src/linked_vector/lib.rs.html#482-484">source</a><h4 class="code-header">pub fn <a href="#method.pop_back" class="fn">pop_back</a>(&amp;mut self) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.67.0/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;T&gt;</h4></section></summary><div class="docblock"><p>Pops the last element of the vector. Returns <code>None</code> if the vector is
-empty. This operation completes in O(1) time.</p>
-
-<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>linked_vector::<span class="kw-2">*</span>;
-<span class="kw">let </span><span class="kw-2">mut </span>lv = LinkedVector::from([<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>]);
- 
-<span class="macro">assert_eq!</span>(lv.pop_back(), <span class="prelude-val">Some</span>(<span class="number">3</span>));</code></pre></div>
-</div></details><details class="rustdoc-toggle method-toggle" open><summary><section id="method.pop_front" class="method has-srclink"><a class="srclink rightside" href="../src/linked_vector/lib.rs.html#495-501">source</a><h4 class="code-header">pub fn <a href="#method.pop_front" class="fn">pop_front</a>(&amp;mut self) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.67.0/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;T&gt;</h4></section></summary><div class="docblock"><p>Pops the first element of the vector. Returns <code>None</code> if the vector is
-empty. This operation completes in O(1) time.</p>
-
-<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>linked_vector::<span class="kw-2">*</span>;
-<span class="kw">let </span><span class="kw-2">mut </span>lv = LinkedVector::from([<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>]);
- 
-<span class="macro">assert_eq!</span>(lv.pop_front(), <span class="prelude-val">Some</span>(<span class="number">1</span>));</code></pre></div>
-</div></details><details class="rustdoc-toggle method-toggle" open><summary><section id="method.prev_node" class="method has-srclink"><a class="srclink rightside" href="../src/linked_vector/lib.rs.html#516-522">source</a><h4 class="code-header">pub fn <a href="#method.prev_node" class="fn">prev_node</a>(&amp;self, node: <a class="struct" href="struct.HNode.html" title="struct linked_vector::HNode">HNode</a>) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.67.0/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;<a class="struct" href="struct.HNode.html" title="struct linked_vector::HNode">HNode</a>&gt;</h4></section></summary><div class="docblock"><p>Returns a handle to the previous node in the list, or <code>None</code> if the 
+</div></details><details class="rustdoc-toggle method-toggle" open><summary><section id="method.prev_node" class="method has-srclink"><a class="srclink rightside" href="../src/linked_vector/lib.rs.html#486-492">source</a><h4 class="code-header">pub fn <a href="#method.prev_node" class="fn">prev_node</a>(&amp;self, node: <a class="struct" href="struct.HNode.html" title="struct linked_vector::HNode">HNode</a>) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.67.0/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;<a class="struct" href="struct.HNode.html" title="struct linked_vector::HNode">HNode</a>&gt;</h4></section></summary><div class="docblock"><p>Returns a handle to the previous node in the list, or <code>None</code> if the 
 given handle is the first node in the list. This operation completes in
 O(1) time.</p>
 
@@ -192,6 +178,20 @@ O(1) time.</p>
 <span class="kw">let </span>h2 = lv.push_back(<span class="number">43</span>);
  
 <span class="macro">assert_eq!</span>(lv.prev_node(h2), <span class="prelude-val">Some</span>(h1));</code></pre></div>
+</div></details><details class="rustdoc-toggle method-toggle" open><summary><section id="method.pop_back" class="method has-srclink"><a class="srclink rightside" href="../src/linked_vector/lib.rs.html#503-505">source</a><h4 class="code-header">pub fn <a href="#method.pop_back" class="fn">pop_back</a>(&amp;mut self) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.67.0/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;T&gt;</h4></section></summary><div class="docblock"><p>Pops the last element of the vector. Returns <code>None</code> if the vector is
+empty. This operation completes in O(1) time.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>linked_vector::<span class="kw-2">*</span>;
+<span class="kw">let </span><span class="kw-2">mut </span>lv = LinkedVector::from([<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>]);
+ 
+<span class="macro">assert_eq!</span>(lv.pop_back(), <span class="prelude-val">Some</span>(<span class="number">3</span>));</code></pre></div>
+</div></details><details class="rustdoc-toggle method-toggle" open><summary><section id="method.pop_front" class="method has-srclink"><a class="srclink rightside" href="../src/linked_vector/lib.rs.html#516-522">source</a><h4 class="code-header">pub fn <a href="#method.pop_front" class="fn">pop_front</a>(&amp;mut self) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.67.0/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;T&gt;</h4></section></summary><div class="docblock"><p>Pops the first element of the vector. Returns <code>None</code> if the vector is
+empty. This operation completes in O(1) time.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>linked_vector::<span class="kw-2">*</span>;
+<span class="kw">let </span><span class="kw-2">mut </span>lv = LinkedVector::from([<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>]);
+ 
+<span class="macro">assert_eq!</span>(lv.pop_front(), <span class="prelude-val">Some</span>(<span class="number">1</span>));</code></pre></div>
 </div></details><details class="rustdoc-toggle method-toggle" open><summary><section id="method.push_back" class="method has-srclink"><a class="srclink rightside" href="../src/linked_vector/lib.rs.html#536-538">source</a><h4 class="code-header">pub fn <a href="#method.push_back" class="fn">push_back</a>(&amp;mut self, value: T) -&gt; <a class="struct" href="struct.HNode.html" title="struct linked_vector::HNode">HNode</a></h4></section></summary><div class="docblock"><p>Pushes a new element to the back of the list. Returns a handle to the
 newly inserted element. This operation completes in O(1) time.</p>
 

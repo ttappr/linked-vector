@@ -1616,6 +1616,23 @@
         <span class="self">self</span>.get_(node).value.as_ref()
     }
 
+    <span class="doccomment">/// Provides a mutable reference to the element indicated by the given
+    /// handle, or `None` if the handle is invalid. This operation completes in
+    /// O(1) time.
+    /// ```
+    /// use linked_vector::*;
+    /// let mut lv = LinkedVector::new();
+    /// let hnode = lv.push_front(0);
+    /// 
+    /// *lv.get_mut(hnode).unwrap() = 42;
+    /// 
+    /// assert_eq!(lv.get(hnode), Some(&amp;42));
+    /// ```
+    </span><span class="attr">#[inline]
+    </span><span class="kw">pub fn </span>get_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>, node: HNode) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;mut </span>T&gt; {
+        <span class="self">self</span>.get_mut_(node).value.as_mut()
+    }
+
     <span class="doccomment">/// Returns the handle to the node at the given index, or `None` if the
     /// index is out of bounds. If `index &gt; self.len / 2`, the search starts
     /// from the end of the list. This operation performs in O(n / 2) time
@@ -1642,23 +1659,6 @@
         }
     }
 
-    <span class="doccomment">/// Provides a mutable reference to the element indicated by the given
-    /// handle, or `None` if the handle is invalid. This operation completes in
-    /// O(1) time.
-    /// ```
-    /// use linked_vector::*;
-    /// let mut lv = LinkedVector::new();
-    /// let hnode = lv.push_front(0);
-    /// 
-    /// *lv.get_mut(hnode).unwrap() = 42;
-    /// 
-    /// assert_eq!(lv.get(hnode), Some(&amp;42));
-    /// ```
-    </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>get_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>, node: HNode) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;mut </span>T&gt; {
-        <span class="self">self</span>.get_mut_(node).value.as_mut()
-    }
-
     <span class="doccomment">/// Returns an iterator over the handles of the vector. The handles will 
     /// reflect the order of the linked list. This operation completes in O(1) 
     /// time.
@@ -1677,6 +1677,24 @@
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>handles(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Handles&lt;T&gt; {
         Handles::new(<span class="self">self</span>)
+    }
+
+    <span class="doccomment">/// Inserts a new element at the position indicated by the handle, `node`.
+    /// Returns a handle to the newly inserted element. This operation completes
+    /// in O(1) time.
+    /// ```
+    /// use linked_vector::*;
+    /// let mut lv = LinkedVector::new();
+    /// 
+    /// let h1 = lv.push_back(42);
+    /// let h2 = lv.insert(h1, 43);
+    /// 
+    /// assert_eq!(lv.next_node(h2), Some(h1));
+    /// assert_eq!(lv.get(h1), Some(&amp;42));
+    /// ```
+    </span><span class="attr">#[inline]
+    </span><span class="kw">pub fn </span>insert(<span class="kw-2">&amp;mut </span><span class="self">self</span>, node: HNode, value: T) -&gt; HNode {
+        <span class="self">self</span>.insert_(<span class="prelude-val">Some</span>(node), value)
     }
 
     <span class="doccomment">/// Inserts a new element after the one indicated by the handle, `node`.
@@ -1699,24 +1717,6 @@
         } <span class="kw">else </span>{
             <span class="self">self</span>.insert_(<span class="prelude-val">None</span>, value)
         }
-    }
-
-    <span class="doccomment">/// Inserts a new element at the position indicated by the handle, `node`.
-    /// Returns a handle to the newly inserted element. This operation completes
-    /// in O(1) time.
-    /// ```
-    /// use linked_vector::*;
-    /// let mut lv = LinkedVector::new();
-    /// 
-    /// let h1 = lv.push_back(42);
-    /// let h2 = lv.insert(h1, 43);
-    /// 
-    /// assert_eq!(lv.next_node(h2), Some(h1));
-    /// assert_eq!(lv.get(h1), Some(&amp;42));
-    /// ```
-    </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>insert(<span class="kw-2">&amp;mut </span><span class="self">self</span>, node: HNode, value: T) -&gt; HNode {
-        <span class="self">self</span>.insert_(<span class="prelude-val">Some</span>(node), value)
     }
 
     <span class="doccomment">/// Returns `true` if the list contains no elements.
@@ -1776,6 +1776,27 @@
         }
     }    
 
+    <span class="doccomment">/// Returns a handle to the previous node in the list, or `None` if the 
+    /// given handle is the first node in the list. This operation completes in
+    /// O(1) time.
+    /// ```
+    /// use linked_vector::*;
+    /// let mut lv = LinkedVector::new();
+    /// 
+    /// let h1 = lv.push_back(42);
+    /// let h2 = lv.push_back(43);
+    /// 
+    /// assert_eq!(lv.prev_node(h2), Some(h1));
+    /// ```
+    </span><span class="attr">#[inline]
+    </span><span class="kw">pub fn </span>prev_node(<span class="kw-2">&amp;</span><span class="self">self</span>, node: HNode) -&gt; <span class="prelude-ty">Option</span>&lt;HNode&gt; {
+        <span class="kw">if </span>node != <span class="self">self</span>.head {
+            <span class="prelude-val">Some</span>(<span class="self">self</span>.get_(node).prev)
+        } <span class="kw">else </span>{
+            <span class="prelude-val">None
+        </span>}
+    }
+
     <span class="doccomment">/// Pops the last element of the vector. Returns `None` if the vector is
     /// empty. This operation completes in O(1) time.
     /// ```
@@ -1804,27 +1825,6 @@
         </span>} <span class="kw">else </span>{
             <span class="self">self</span>.remove_(<span class="prelude-val">Some</span>(<span class="self">self</span>.head))
         }
-    }
-
-    <span class="doccomment">/// Returns a handle to the previous node in the list, or `None` if the 
-    /// given handle is the first node in the list. This operation completes in
-    /// O(1) time.
-    /// ```
-    /// use linked_vector::*;
-    /// let mut lv = LinkedVector::new();
-    /// 
-    /// let h1 = lv.push_back(42);
-    /// let h2 = lv.push_back(43);
-    /// 
-    /// assert_eq!(lv.prev_node(h2), Some(h1));
-    /// ```
-    </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>prev_node(<span class="kw-2">&amp;</span><span class="self">self</span>, node: HNode) -&gt; <span class="prelude-ty">Option</span>&lt;HNode&gt; {
-        <span class="kw">if </span>node != <span class="self">self</span>.head {
-            <span class="prelude-val">Some</span>(<span class="self">self</span>.get_(node).prev)
-        } <span class="kw">else </span>{
-            <span class="prelude-val">None
-        </span>}
     }
 
     <span class="doccomment">/// Pushes a new element to the back of the list. Returns a handle to the

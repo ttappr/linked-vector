@@ -310,6 +310,23 @@ impl<T> LinkedVector<T> {
         self.get_(node).value.as_ref()
     }
 
+    /// Provides a mutable reference to the element indicated by the given
+    /// handle, or `None` if the handle is invalid. This operation completes in
+    /// O(1) time.
+    /// ```
+    /// use linked_vector::*;
+    /// let mut lv = LinkedVector::new();
+    /// let hnode = lv.push_front(0);
+    /// 
+    /// *lv.get_mut(hnode).unwrap() = 42;
+    /// 
+    /// assert_eq!(lv.get(hnode), Some(&42));
+    /// ```
+    #[inline]
+    pub fn get_mut(&mut self, node: HNode) -> Option<&mut T> {
+        self.get_mut_(node).value.as_mut()
+    }
+
     /// Returns the handle to the node at the given index, or `None` if the
     /// index is out of bounds. If `index > self.len / 2`, the search starts
     /// from the end of the list. This operation performs in O(n / 2) time
@@ -336,23 +353,6 @@ impl<T> LinkedVector<T> {
         }
     }
 
-    /// Provides a mutable reference to the element indicated by the given
-    /// handle, or `None` if the handle is invalid. This operation completes in
-    /// O(1) time.
-    /// ```
-    /// use linked_vector::*;
-    /// let mut lv = LinkedVector::new();
-    /// let hnode = lv.push_front(0);
-    /// 
-    /// *lv.get_mut(hnode).unwrap() = 42;
-    /// 
-    /// assert_eq!(lv.get(hnode), Some(&42));
-    /// ```
-    #[inline]
-    pub fn get_mut(&mut self, node: HNode) -> Option<&mut T> {
-        self.get_mut_(node).value.as_mut()
-    }
-
     /// Returns an iterator over the handles of the vector. The handles will 
     /// reflect the order of the linked list. This operation completes in O(1) 
     /// time.
@@ -371,6 +371,24 @@ impl<T> LinkedVector<T> {
     #[inline]
     pub fn handles(&self) -> Handles<T> {
         Handles::new(self)
+    }
+
+    /// Inserts a new element at the position indicated by the handle, `node`.
+    /// Returns a handle to the newly inserted element. This operation completes
+    /// in O(1) time.
+    /// ```
+    /// use linked_vector::*;
+    /// let mut lv = LinkedVector::new();
+    /// 
+    /// let h1 = lv.push_back(42);
+    /// let h2 = lv.insert(h1, 43);
+    /// 
+    /// assert_eq!(lv.next_node(h2), Some(h1));
+    /// assert_eq!(lv.get(h1), Some(&42));
+    /// ```
+    #[inline]
+    pub fn insert(&mut self, node: HNode, value: T) -> HNode {
+        self.insert_(Some(node), value)
     }
 
     /// Inserts a new element after the one indicated by the handle, `node`.
@@ -393,24 +411,6 @@ impl<T> LinkedVector<T> {
         } else {
             self.insert_(None, value)
         }
-    }
-
-    /// Inserts a new element at the position indicated by the handle, `node`.
-    /// Returns a handle to the newly inserted element. This operation completes
-    /// in O(1) time.
-    /// ```
-    /// use linked_vector::*;
-    /// let mut lv = LinkedVector::new();
-    /// 
-    /// let h1 = lv.push_back(42);
-    /// let h2 = lv.insert(h1, 43);
-    /// 
-    /// assert_eq!(lv.next_node(h2), Some(h1));
-    /// assert_eq!(lv.get(h1), Some(&42));
-    /// ```
-    #[inline]
-    pub fn insert(&mut self, node: HNode, value: T) -> HNode {
-        self.insert_(Some(node), value)
     }
 
     /// Returns `true` if the list contains no elements.
@@ -470,6 +470,27 @@ impl<T> LinkedVector<T> {
         }
     }    
 
+    /// Returns a handle to the previous node in the list, or `None` if the 
+    /// given handle is the first node in the list. This operation completes in
+    /// O(1) time.
+    /// ```
+    /// use linked_vector::*;
+    /// let mut lv = LinkedVector::new();
+    /// 
+    /// let h1 = lv.push_back(42);
+    /// let h2 = lv.push_back(43);
+    /// 
+    /// assert_eq!(lv.prev_node(h2), Some(h1));
+    /// ```
+    #[inline]
+    pub fn prev_node(&self, node: HNode) -> Option<HNode> {
+        if node != self.head {
+            Some(self.get_(node).prev)
+        } else {
+            None
+        }
+    }
+
     /// Pops the last element of the vector. Returns `None` if the vector is
     /// empty. This operation completes in O(1) time.
     /// ```
@@ -497,27 +518,6 @@ impl<T> LinkedVector<T> {
             None
         } else {
             self.remove_(Some(self.head))
-        }
-    }
-
-    /// Returns a handle to the previous node in the list, or `None` if the 
-    /// given handle is the first node in the list. This operation completes in
-    /// O(1) time.
-    /// ```
-    /// use linked_vector::*;
-    /// let mut lv = LinkedVector::new();
-    /// 
-    /// let h1 = lv.push_back(42);
-    /// let h2 = lv.push_back(43);
-    /// 
-    /// assert_eq!(lv.prev_node(h2), Some(h1));
-    /// ```
-    #[inline]
-    pub fn prev_node(&self, node: HNode) -> Option<HNode> {
-        if node != self.head {
-            Some(self.get_(node).prev)
-        } else {
-            None
         }
     }
 
