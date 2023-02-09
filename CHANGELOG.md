@@ -1,8 +1,14 @@
 # Changelog
 
-## Upcoming
+## v1.3.0 - ????-??-??
 
-- First major release `v1.0.0` coming soon.
+### Changed
+
+- The unstable sort methods are replaced by stable sort methods of similar name.
+
+### Removed
+
+- `LinkedVector::swap()` removed since the sort methods no longer need it.
 
 ## v0.3.0 - 2023-02-08
 

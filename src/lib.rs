@@ -5,7 +5,6 @@
 use core::iter::{FromIterator, FusedIterator};
 use core::ops::{Index, IndexMut};
 use std::cmp::Ordering;
-use std::mem::swap;
 pub use cursor::*;
 
 #[cfg(test)]
@@ -577,8 +576,8 @@ impl<T> LinkedVector<T> {
     /// Sorts the elemements in place in ascending order. Previously held 
     /// handles will still be valid and reference the same elements (with the 
     /// same values) as before.  Only the `next` and `prev` fields of the nodes 
-    /// are modified in the list. Uses an iterative version of Quicksort. This 
-    /// operation completes in `O(n log n)` time.
+    /// are modified in the list. Uses Rust's stable sort internally and
+    /// requires some auxiliary memory for a temporary handle list.
     /// ```
     /// use linked_vector::*;
     /// let mut lv = LinkedVector::new();
@@ -588,154 +587,65 @@ impl<T> LinkedVector<T> {
     /// 
     /// lv.extend([7, 11, 4, 6, 8, 13, 12, 9, 14, 5, 10]);
     /// 
-    /// lv.sort_unstable();
+    /// lv.sort();
     /// 
     /// assert_eq!(lv.to_vec(), (1..15).collect::<Vec<_>>());
     /// assert_eq!(lv[h1], 3);
     /// assert_eq!(lv[h2], 2);
     /// assert_eq!(lv[h3], 1);
     /// ```
-    pub fn sort_unstable(&mut self) 
+    pub fn sort(&mut self) 
     where
         T: Ord
     {
-        self.sort_unstable_by(|a, b| a.cmp(b));
+        self.sort_by(|a, b| a.cmp(b));
     }
 
     /// Sorts the elemements in place using the provided comparison function.
-    /// See [sort_unstable()](LinkedVector::sort_unstable) for more details.
+    /// See [sort()](LinkedVector::sort) for more details.
     /// ```
     /// use linked_vector::*;
     /// let mut lv = LinkedVector::from([1, 2, 3, 4, 5]);
     /// 
-    /// lv.sort_unstable_by(|a, b| b.cmp(a));
+    /// lv.sort_by(|a, b| b.cmp(a));
     /// 
     /// assert_eq!(lv.to_vec(), vec![5, 4, 3, 2, 1]);
     /// ```
-    pub fn sort_unstable_by<F>(&mut self, mut compare: F) 
+    pub fn sort_by<F>(&mut self, mut compare: F) 
     where
         F: FnMut(&T, &T) -> Ordering,
     {
-        use Ordering::Less;
-        if self.len < 2 { return; }
-        if let (Some(lo), Some(hi)) = (self.front_node(), self.back_node()) {
-            let mut stack = vec![(lo, hi)];
-
-            while let Some((mut lo, mut hi)) = stack.pop() {
-                let     p = hi;
-                let mut i = lo;
-                let mut j = lo;
-
-                while j != hi {
-                    if compare(self.vec[j.0].value.as_ref().unwrap(), 
-                               self.vec[p.0].value.as_ref().unwrap()) == Less {
-                        if i != j {
-                            if i == lo {
-                                self.swap(&mut i, &mut j);
-                                lo = i;
-                            } else {
-                                self.swap(&mut i, &mut j);
-                            }
-                        }
-                        i = self.vec[i.0].next;
-                    }
-                    j = self.vec[j.0].next;
-                }
-                if i == lo { 
-                    self.swap(&mut i, &mut hi);
-                    lo = i;
-                } else {
-                    self.swap(&mut i, &mut hi);
-                }
-                if lo != hi {
-                    if i != lo {
-                        stack.push((lo, self.vec[i.0].prev));
-                    }
-                    if i != hi {
-                        stack.push((self.vec[i.0].next, hi));
-                    }
-                }
-            }
+        let mut handles = self.handles().collect::<Vec<_>>();
+        handles.sort_by(|h1, h2| {
+            compare(self.vec[h1.0].value.as_ref().unwrap(), 
+                    self.vec[h2.0].value.as_ref().unwrap())
+        });
+        for i in 0..self.len - 1 {
+            self.vec[handles[i].0].next = handles[i + 1];
+            self.vec[handles[i + 1].0].prev = handles[i];
         }
+        let tail = *handles.last().unwrap();
+        self.head = handles[0];
+        self.vec[self.head.0].prev = tail;
+        self.vec[tail.0].next = BAD_HANDLE;
     }
 
     /// Sorts the elemements in place in using the provided key extraction
-    /// function. See [sort_unstable()](LinkedVector::sort_unstable) for more 
-    /// details.
+    /// function. See [sort()](LinkedVector::sort) for more details.
     /// ```
     /// use linked_vector::*;
     /// let mut lv = LinkedVector::from([1, 2, 3, 4, 5]);
     /// 
-    /// lv.sort_unstable_by_key(|k| -k);
+    /// lv.sort_by_key(|k| -k);
     /// 
     /// assert_eq!(lv.to_vec(), vec![5, 4, 3, 2, 1]);
     /// ```
-    pub fn sort_unstable_by_key<K, F>(&mut self, mut key: F) 
+    pub fn sort_by_key<K, F>(&mut self, mut key: F) 
     where
         K: Ord,
         F: FnMut(&T) -> K,
     {
-        self.sort_unstable_by(|a, b| key(a).cmp(&key(b)));
-    }
-
-    /// Swaps the elements indicated by the handles, `node1` and `node2`. Only
-    /// the next and prev fields of nodes are altered. `node1` and `node2` 
-    /// will be updated to reference the swapped values. This operation 
-    /// completes in O(1) time.
-    /// ```
-    /// use linked_vector::*;
-    /// let mut lv = LinkedVector::new();
-    /// 
-    /// let mut h1 = lv.push_back(42);
-    /// let mut h2 = lv.push_back(43);
-    /// 
-    /// let h1_bak = h1;
-    /// let h2_bak = h2;
-    /// 
-    /// lv.swap(&mut h1, &mut h2);
-    /// 
-    /// assert_eq!(lv[h1], 43);
-    /// assert_eq!(lv[h2], 42);
-    /// assert_eq!(lv.next_node(h1), Some(h2));
-    /// assert_eq!(lv.next_node(h2_bak), Some(h1_bak));
-    /// assert_eq!(lv.get(h1_bak), Some(&42));
-    /// assert_eq!(lv.get(h2_bak), Some(&43));
-    /// ```
-    #[inline]
-    pub fn swap(&mut self, node1: &mut HNode, node2: &mut HNode) {
-        let h1 = *node1;
-        let h2 = *node2;
-        let prev1 = self.get_(h1).prev;
-        let next1 = self.get_(h1).next;
-
-        let prev2 = self.get_(h2).prev;
-        let next2 = self.get_(h2).next;
-        
-        self.get_mut_(prev1).next = h2;
-        self.get_mut_(prev2).next = h1;
-
-        if next1 != BAD_HANDLE {
-            self.get_mut_(next1).prev = h2;
-        }
-        if next2 != BAD_HANDLE {
-            self.get_mut_(next2).prev = h1;
-        }
-        if prev1 == h2 { self.get_mut_(h2).prev = h1;    }
-        else           { self.get_mut_(h2).prev = prev1; }
-        if prev2 == h1 { self.get_mut_(h1).prev = h2;    }
-        else           { self.get_mut_(h1).prev = prev2; }
-        if next1 == h2 { self.get_mut_(h2).next = h1;    }
-        else           { self.get_mut_(h2).next = next1; }
-        if next2 == h1 { self.get_mut_(h1).next = h2;    }
-        else           { self.get_mut_(h1).next = next2; }
-
-        if      self.head == h1 { self.head = h2; } 
-        else if self.head == h2 { self.head = h1; }
-
-        if      next1 == BAD_HANDLE { self.get_mut_(self.head).prev = h2; }
-        else if next2 == BAD_HANDLE { self.get_mut_(self.head).prev = h1; }
-
-        swap(node1, node2);
+        self.sort_by(|a, b| key(a).cmp(&key(b)));
     }
 
     /// Returns a vector containing the elements of the list. This operation

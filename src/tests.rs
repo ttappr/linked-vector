@@ -577,13 +577,13 @@ fn remove_node() {
 }
 
 #[test]
-fn sort_unstable() {
+fn sort() {
     let mut lv1 = LinkedVector::from([2, 1, 6, 7, 4, 8, 5, 3]);
-    lv1.sort_unstable();
+    lv1.sort();
     assert_eq!(lv1.to_vec(), vec![1, 2, 3, 4, 5, 6, 7, 8]);
 
     lv1 = LinkedVector::from([3, 1, 4, 1, 5, 9]);
-    lv1.sort_unstable();
+    lv1.sort();
     assert_eq!(lv1.to_vec(), vec![1, 1, 3, 4, 5, 9]);
 
     lv1 = LinkedVector::from([104, 188, 5, 44, 199, 139, 31, 54, 30, 43, 151, 
@@ -605,22 +605,22 @@ fn sort_unstable() {
                               113, 110, 186, 80, 28, 13, 101, 115, 6, 179, 171, 
                               20, 174, 168, 112, 121, 91, 32, 24, 8, 40, 133, 
                               152, 142, 83, 187, 63]);
-    lv1.sort_unstable();
+    lv1.sort();
     lv1.into_iter().zip(0..).for_each(|(a, b)| assert_eq!(a, b));
 
     lv1 = LinkedVector::from([5, 2]);
-    lv1.sort_unstable();
+    lv1.sort();
     assert_eq!(lv1.to_vec(), vec![2, 5]);
 }
 
 #[test]
-fn sort_unstable_by() {
+fn sort_by() {
     let mut lv1 = LinkedVector::from([2, 1, 6, 7, 4, 8, 5, 3]);
-    lv1.sort_unstable_by(|a, b| b.cmp(a));
+    lv1.sort_by(|a, b| b.cmp(a));
     assert_eq!(lv1.to_vec(), vec![8, 7, 6, 5, 4, 3, 2, 1]);
 
     lv1 = LinkedVector::from([3, 1, 4, 1, 5, 9]);
-    lv1.sort_unstable_by(|a, b| b.cmp(a));
+    lv1.sort_by(|a, b| b.cmp(a));
     assert_eq!(lv1.to_vec(), vec![9, 5, 4, 3, 1, 1]);
 
     lv1 = LinkedVector::from([104, 188, 5, 44, 199, 139, 31, 54, 30, 43, 151, 
@@ -642,106 +642,15 @@ fn sort_unstable_by() {
                               113, 110, 186, 80, 28, 13, 101, 115, 6, 179, 171, 
                               20, 174, 168, 112, 121, 91, 32, 24, 8, 40, 133, 
                               152, 142, 83, 187, 63]);
-    lv1.sort_unstable_by(|a, b| b.cmp(a));
+    lv1.sort_by(|a, b| b.cmp(a));
     lv1.into_iter().zip((0..200).rev()).for_each(|(a, b)| assert_eq!(a, b));
 }
 
 #[test]
-fn sort_unstable_by_key() {
+fn sort_by_key() {
     let mut lv1 = LinkedVector::from([2, 1, 6, 7, 4, 8, 5, 3]);
-    lv1.sort_unstable_by_key(|a| Reverse(*a));
+    lv1.sort_by_key(|a| Reverse(*a));
     assert_eq!(lv1.to_vec(), vec![8, 7, 6, 5, 4, 3, 2, 1]);    
-}
-
-#[test]
-fn swap() {
-    let mut lv = LinkedVector::from([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
-    let mut handles = lv.handles().collect::<Vec<_>>();
-
-    // Swap non terminal nodes.
-
-    let (h0, h8) = handles.split_at_mut(8);
-
-    lv.swap(&mut h0[1], &mut h8[0]);
-
-    assert_eq!(lv.get(handles[1]), Some(&8));
-    assert_eq!(lv.get(handles[8]), Some(&1));
-
-    assert_eq!(lv.to_vec(), vec![0, 8, 2, 3, 4, 5, 6, 7, 1, 9]);
-
-    assert_eq!(lv.iter().copied().rev().collect::<Vec<_>>(), 
-               vec![9, 1, 7, 6, 5, 4, 3, 2, 8, 0]);
-
-    assert_eq!(lv.next_node(handles[1]), Some(handles[2]));
-
-    // Swap head and tail nodes.
-
-    let (h0, h9) = handles.split_at_mut(9);
-
-    lv.swap(&mut h0[0], &mut h9[0]);
-
-    assert_eq!(lv.get(handles[0]), Some(&9));
-    assert_eq!(lv.get(handles[9]), Some(&0));
-
-    assert_eq!(lv.to_vec(), vec![9, 8, 2, 3, 4, 5, 6, 7, 1, 0]);
-
-    assert_eq!(lv.iter().copied().rev().collect::<Vec<_>>(), 
-               vec![0, 1, 7, 6, 5, 4, 3, 2, 8, 9]);
-
-    assert_eq!(lv.back(), Some(&0));
-    assert_eq!(lv.front(), Some(&9));
-
-    assert_eq!(lv.next_node(handles[0]), Some(handles[1]));
-
-    // Swap middle node with head node.
-
-    lv           = LinkedVector::from([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
-    handles      = lv.handles().collect::<Vec<_>>();
-    let (h0, h5) = handles.split_at_mut(5);
-
-    lv.swap(&mut h0[0], &mut h5[0]);
-
-    assert_eq!(lv.get(handles[0]), Some(&5));
-    assert_eq!(lv.prev_node(handles[0]), None);
-    assert_eq!(lv.prev_node(handles[5]), Some(handles[4]));
-    assert_eq!(lv.to_vec(), vec![5, 1, 2, 3, 4, 0, 6, 7, 8, 9]);
-    assert_eq!(lv.back(), Some(&9));
-
-    // Swap middle node with tail node.
-
-    lv           = LinkedVector::from([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
-    handles      = lv.handles().collect::<Vec<_>>();
-    let (h0, h9) = handles.split_at_mut(9);
-
-    lv.swap(&mut h0[5], &mut h9[0]);
-
-    assert_eq!(lv.get(handles[9]), Some(&5));
-    assert_eq!(lv.get(handles[5]), Some(&9));
-    assert_eq!(lv.next_node(handles[5]), Some(handles[6]));
-    assert_eq!(lv.next_node(handles[9]), None);
-
-    assert_eq!(lv.to_vec(), vec![0, 1, 2, 3, 4, 9, 6, 7, 8, 5]);
-    assert_eq!(lv.front(), Some(&0));
-    assert_eq!(lv.back(), Some(&5));
-    assert_eq!(lv.iter().rev().copied().collect::<Vec<_>>(), 
-               vec![5, 8, 7, 6, 9, 4, 3, 2, 1, 0]);
-
-    // Swap adjacent nodes.
-
-    lv           = LinkedVector::from([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
-    handles      = lv.handles().collect::<Vec<_>>();
-    let (h0, h5) = handles.split_at_mut(5);
-
-    lv.swap(&mut h0[4], &mut h5[0]);
-
-    assert_eq!(lv.get(handles[4]), Some(&5));
-    assert_eq!(lv.get(handles[5]), Some(&4));
-
-    assert_eq!(lv.to_vec(), vec![0, 1, 2, 3, 5, 4, 6, 7, 8, 9]);
-    assert_eq!(lv.front(), Some(&0));
-    assert_eq!(lv.back(), Some(&9));
-    assert_eq!(lv.iter().rev().copied().collect::<Vec<_>>(), 
-               vec![9, 8, 7, 6, 4, 5, 3, 2, 1, 0]);
 }
 
 #[test]
