@@ -10,6 +10,10 @@
 
 - `LinkedVector::swap()` removed since the sort methods no longer need it.
 
+### Fixed
+
+- Issue where expired handles weren't detected if the node had been recycled.
+
 ## v0.3.0 - 2023-02-08
 
 ### Added

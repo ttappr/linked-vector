@@ -7,7 +7,7 @@ use super::*;
 #[test]
 #[should_panic]
 #[cfg(debug_assertions)]
-fn expired_handles() {
+fn expired_handles_1() {
     let mut lv = LinkedVector::new();
     let h1 = lv.push_back(1);
     let h2 = lv.push_back(2);
@@ -18,6 +18,45 @@ fn expired_handles() {
     lv.push_back(4); // This will recycle node pointed to by h2.
 
     lv.get(h2);
+}
+
+#[test]
+#[should_panic]
+#[cfg(debug_assertions)]
+fn expired_handles_2() {
+    let mut lv = LinkedVector::new();
+    let h1 = lv.push_back(1);
+    let h2 = lv.push_back(2);
+    let h3 = lv.push_back(3);
+
+    lv.remove(h2);
+
+    lv.get(h2);
+}
+
+#[test]
+#[cfg(debug_assertions)]
+fn expired_handles_3() {
+    let mut lv = LinkedVector::new();
+    let h1 = lv.push_back(1);
+    let h2 = lv.push_back(2);
+    let h3 = lv.push_back(3);
+
+    lv.remove(h2);
+
+    let h4 = lv.push_back(4); // This will recycle node pointed to by h2.
+
+    lv.get(h4); // The new handle should work.
+
+    lv.remove(h4);
+
+    let h5 = lv.push_back(9);
+
+    lv.get(h5); // Same node recycled twice now. h5 should work as it has
+                // generation == 2 same as the node.
+
+    lv.get(h1);
+    lv.get(h3);
 }
 
 #[test]

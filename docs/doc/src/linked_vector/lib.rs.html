@@ -1299,6 +1299,11 @@
 <a href="#1299" id="1299">1299</a>
 <a href="#1300" id="1300">1300</a>
 <a href="#1301" id="1301">1301</a>
+<a href="#1302" id="1302">1302</a>
+<a href="#1303" id="1303">1303</a>
+<a href="#1304" id="1304">1304</a>
+<a href="#1305" id="1305">1305</a>
+<a href="#1306" id="1306">1306</a>
 </pre><pre class="rust"><code>
 <span class="attr">#![doc = <span class="string">&quot;To Primary Struct: [LinkedVector]&quot;</span>]
 #![doc = <span class="macro">include_str!</span>(<span class="string">&quot;../README.md&quot;</span>)]
@@ -2142,15 +2147,20 @@
     </span><span class="attr">#[inline]
     </span><span class="kw">fn </span>new_node(<span class="kw-2">&amp;mut </span><span class="self">self</span>, value: T) -&gt; HNode {
         <span class="kw">if let </span><span class="prelude-val">Some</span>(hnode) = <span class="self">self</span>.pop_recyc() {
-            <span class="self">self</span>.vec[hnode.<span class="number">0</span>] = Node::new(value);
             <span class="attr">#[cfg(debug_assertions)]
             </span>{
+                <span class="kw">let </span>gen = <span class="self">self</span>.vec[hnode.<span class="number">0</span>].gen;
+                <span class="self">self</span>.vec[hnode.<span class="number">0</span>] = Node::new(value);
+                <span class="self">self</span>.vec[hnode.<span class="number">0</span>].gen = gen;
                 <span class="kw">let </span><span class="kw-2">mut </span>hnode = hnode;
-                hnode.<span class="number">1 </span>= <span class="self">self</span>.vec[hnode.<span class="number">0</span>].gen;
+                hnode.<span class="number">1 </span>= gen;
                 hnode 
             }
             <span class="attr">#[cfg(not(debug_assertions))]
-            </span>{ hnode }
+            </span>{ 
+                <span class="self">self</span>.vec[hnode.<span class="number">0</span>] = Node::new(value);
+                hnode
+            }
         } <span class="kw">else </span>{
             <span class="self">self</span>.vec.push(Node::new(value));
             <span class="attr">#[cfg(debug_assertions)]
