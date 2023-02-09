@@ -1328,6 +1328,8 @@
 <a href="#1328" id="1328">1328</a>
 <a href="#1329" id="1329">1329</a>
 <a href="#1330" id="1330">1330</a>
+<a href="#1331" id="1331">1331</a>
+<a href="#1332" id="1332">1332</a>
 </pre><pre class="rust"><code>
 <span class="attr">#![doc = <span class="string">&quot;To Primary Struct: [LinkedVector]&quot;</span>]
 #![doc = <span class="macro">include_str!</span>(<span class="string">&quot;../README.md&quot;</span>)]
@@ -1537,9 +1539,11 @@
     
     <span class="doccomment">/// Consumes the LinkedVector and produces a new one that has all its nodes 
     /// placed contiguously in sequential order at the front of the internal 
-    /// vector. Where performance is critical and the cost of a clone operation 
-    /// is infrequent and acceptible, compacting the vector *may* give a small 
-    /// gain in performance. This operation completes in O(n) time.
+    /// vector. Where performance is critical and the cost of a compact 
+    /// operation is infrequent and acceptible, compacting the vector *may* give
+    /// a small gain in performance. All handles from the old vector will not 
+    /// be native to the new compacted vector. `compact()` completes in O(n) 
+    /// time.
     /// 
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>compact(<span class="self">self</span>) -&gt; <span class="self">Self </span>{
