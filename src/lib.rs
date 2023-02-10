@@ -976,17 +976,9 @@ where
     T: Debug,
 {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        let mut it = self.iter();
-        if let Some(v) = it.next() {
-            write!(f, "LinkedVector([{:?}", v)?;
-            for v in it {
-                write!(f, ", {:?}", v)?;
-            }
-            write!(f, "])")?;
-
-        } else {
-            write!(f, "LinkedVector([])")?;
-        }
+        write!(f, "LinkedVector(")?;
+        f.debug_list().entries(self.iter()).finish()?;
+        write!(f, ")")?;
         Ok(())
     }
 }
