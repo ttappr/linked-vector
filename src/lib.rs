@@ -52,7 +52,6 @@ impl Default for HNode {
 /// The node type used by `LinkedVector`. It holds a value of type `T`, and 
 /// handles to the next and previous nodes in the list.
 /// 
-#[derive(Debug)]
 struct Node<T> {
     value : Option<T>,
     next  : HNode,
