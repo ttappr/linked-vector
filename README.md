@@ -6,6 +6,18 @@ accessible directly in `O(1)` time, and insertions and deletions also operate in
 handles to its previous and next neighbors. So there's no shifting of data when 
 items are inserted or removed.
 
+## Updates
+
+** master branch currently reflects the v1.0.0 pre-release **
+
+The first major release is here! The methods and features of v1.0 `LinkedVector`
+have been finalized and should be compatible with the last release `v0.3.0`. 
+The frequency of releases will now slow down and follow SemVer conventions:
+
+- MAJOR version indicates incompatible API changes with previous major version.
+- MINOR version indicates added functionality in a backwards-compatible manner.
+- PATCH version indicates backwards-compatible bug fixes.
+
 ## Usage
 
 Edit your Cargo.toml file to include:
