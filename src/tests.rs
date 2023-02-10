@@ -224,7 +224,10 @@ fn debug() {
 
     let lv2 = LinkedVector::from(["foo", "bar", "baz"]);
     assert_eq!(format!("{:?}", lv2), 
-                       "LinkedVector([\"foo\", \"bar\", \"baz\"])");
+               "LinkedVector([\"foo\", \"bar\", \"baz\"])");
+
+    let lv3 = LinkedVector::<i32>::new();
+    assert_eq!(format!("{:?}", lv3), "LinkedVector([])");
 }
 
 #[test]
