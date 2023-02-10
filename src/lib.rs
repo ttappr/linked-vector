@@ -120,6 +120,7 @@ impl<T> LinkedVector<T> {
     /// Creates a new, empty `LinkedVector` with the specified capacity.
     /// 
     #[inline]
+    #[must_use]
     pub fn with_capacity(size: usize) -> Self {
         Self { 
             vec   : Vec::with_capacity(size), 
@@ -214,6 +215,7 @@ impl<T> LinkedVector<T> {
     /// time.
     /// 
     #[inline]
+    #[must_use]
     pub fn compact(self) -> Self {
         self.into_iter().collect()
     }
