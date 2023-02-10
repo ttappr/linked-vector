@@ -1,6 +1,6 @@
 # Changelog
 
-## v1.0.0 - 2023-02-09
+## [v1.0.0] - 2023-02-09
 
 ### Added
 
@@ -22,7 +22,7 @@
 
 - Issue where expired handles weren't detected if the node had been recycled.
 
-## v0.3.0 - 2023-02-08
+## [v0.3.0] - 2023-02-08
 
 ### Added
 
@@ -41,7 +41,7 @@
   - `remove_node()` is now `remove()`, the old `remove()` is removed.
   - `remove_value()` is removed.
 
-## v0.2.0 - 2023-02-07
+## [v0.2.0] - 2023-02-07
 
 ### Added
 
@@ -54,13 +54,13 @@
 
 - Changed the name of `remove()` to `remove_value()`. 
 
-## v0.1.5 - 2023-02-07
+## [v0.1.5] - 2023-02-07
 
 ### Fixes
 
 - Fixed issue with detection of expired handles.
 
-## v0.1.4 - 2023-02-07
+## [v0.1.4] - 2023-02-07
 
 ### Added
 

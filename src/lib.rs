@@ -208,11 +208,11 @@ impl<T> LinkedVector<T> {
     
     /// Consumes the LinkedVector and produces a new one that has all its nodes 
     /// placed contiguously in sequential order at the front of the internal 
-    /// vector. Where performance is critical and the cost of a compact 
+    /// vector. Where performance is critical and the cost of a compacting 
     /// operation is infrequent and acceptible, compacting the vector *may* give
-    /// a small gain in performance. All handles from the old vector will not 
-    /// be native to the new compacted vector. `compact()` completes in O(n) 
-    /// time.
+    /// a gain in performance for certain use cases. All handles from the old 
+    /// vector will not be native to the new compacted vector. `compact()` 
+    /// completes in O(n) time.
     /// 
     #[inline]
     #[must_use]

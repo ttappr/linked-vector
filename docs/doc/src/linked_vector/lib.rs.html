@@ -1330,6 +1330,8 @@
 <a href="#1330" id="1330">1330</a>
 <a href="#1331" id="1331">1331</a>
 <a href="#1332" id="1332">1332</a>
+<a href="#1333" id="1333">1333</a>
+<a href="#1334" id="1334">1334</a>
 </pre><pre class="rust"><code>
 <span class="attr">#![doc = <span class="string">&quot;To Primary Struct: [LinkedVector]&quot;</span>]
 #![doc = <span class="macro">include_str!</span>(<span class="string">&quot;../README.md&quot;</span>)]
@@ -1452,6 +1454,7 @@
     <span class="doccomment">/// Creates a new, empty `LinkedVector` with the specified capacity.
     /// 
     </span><span class="attr">#[inline]
+    #[must_use]
     </span><span class="kw">pub fn </span>with_capacity(size: usize) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{ 
             vec   : Vec::with_capacity(size), 
@@ -1539,13 +1542,14 @@
     
     <span class="doccomment">/// Consumes the LinkedVector and produces a new one that has all its nodes 
     /// placed contiguously in sequential order at the front of the internal 
-    /// vector. Where performance is critical and the cost of a compact 
+    /// vector. Where performance is critical and the cost of a compacting 
     /// operation is infrequent and acceptible, compacting the vector *may* give
-    /// a small gain in performance. All handles from the old vector will not 
-    /// be native to the new compacted vector. `compact()` completes in O(n) 
-    /// time.
+    /// a gain in performance for certain use cases. All handles from the old 
+    /// vector will not be native to the new compacted vector. `compact()` 
+    /// completes in O(n) time.
     /// 
     </span><span class="attr">#[inline]
+    #[must_use]
     </span><span class="kw">pub fn </span>compact(<span class="self">self</span>) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.into_iter().collect()
     }
