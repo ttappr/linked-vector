@@ -2,10 +2,13 @@
 #![doc = "To Primary Struct: [LinkedVector]"]
 #![doc = include_str!("../README.md")]
 
+use core::fmt;
 use core::iter::{FromIterator, FusedIterator};
 use core::ops::{Index, IndexMut};
 use core::cmp::Ordering;
 use core::hash::{Hash, Hasher};
+use core::fmt::Formatter;
+use core::fmt::Debug;
 pub use cursor::*;
 
 #[cfg(test)]
@@ -88,7 +91,6 @@ impl<T> Node<T> {
 /// within a vector. This allows for O(1) insertion and removal of elements
 /// from the list, and O(1) access to elements by handle.
 /// 
-#[derive(Debug)]
 pub struct LinkedVector<T> {
     vec   : Vec<Node<T>>,
     head  : HNode,
@@ -967,6 +969,15 @@ where
             lv.push_back(v.clone());
         }
         lv
+    }
+}
+
+impl<T> Debug for LinkedVector<T> 
+where
+    T: Debug,
+{
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+        write!(f, "LinkedVector({:?})", self.iter().collect::<Vec<_>>())
     }
 }
 

@@ -218,6 +218,16 @@ fn cursor_remove() {
 }
 
 #[test]
+fn debug() {
+    let lv1 = LinkedVector::from([1, 2, 3]);
+    assert_eq!(format!("{:?}", lv1), "LinkedVector([1, 2, 3])");
+
+    let lv2 = LinkedVector::from(["foo", "bar", "baz"]);
+    assert_eq!(format!("{:?}", lv2), 
+                       "LinkedVector([\"foo\", \"bar\", \"baz\"])");
+}
+
+#[test]
 fn default() {
     let lv1 = LinkedVector::<i32>::default();
     assert_eq!(lv1.is_empty(), true);

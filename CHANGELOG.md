@@ -5,6 +5,7 @@
 ### Added
 
 - `Hash` implemented for `LinkedVector`.
+- `Debug` customized & simplified string repr for `LinkedVector`.
 
 ## [v1.0.0] - 2023-02-09
 
