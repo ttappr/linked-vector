@@ -18,7 +18,7 @@ The frequency of releases will now slow down and follow SemVer conventions:
 - MINOR version indicates added functionality in a backwards-compatible manner.
 - PATCH version indicates backwards-compatible bug fixes.
 
-[Change Log](CHANGELOG.md)
+[Change Log](https://github.com/ttappr/linked-vector/blob/master/CHANGELOG.md)
 
 ## Usage
 
