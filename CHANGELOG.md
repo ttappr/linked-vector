@@ -1,10 +1,12 @@
 # Changelog
 
-## v1.0.0 - ????-??-??
+## v1.0.0 - 2023-02-09
 
 ### Added
 
-- `LinkedVector::compact()` method added that produces a new compacted vector.
+- `compact()` method added to `LinkedVector` that produces a new compacted 
+  vector.
+- `LinkedVector` gets a few more stable/unstable sort methods.
 
 ### Changed
 
