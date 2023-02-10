@@ -1,6 +1,7 @@
 #![allow(unused_variables)]
 
-use std::cmp::Reverse;
+use core::cmp::Reverse;
+use std::collections::HashMap;
 
 use super::*;
 
@@ -375,6 +376,19 @@ fn handles() {
     assert_eq!(it.next(), Some(h2));
     assert_eq!(it.next(), Some(h1));
     assert!(it.next().is_none());
+}
+
+#[test]
+fn hashing() {
+    let mut map = HashMap::new();
+    let     lv1 = LinkedVector::from([1, 2, 3]);
+    let     lv2 = LinkedVector::from([3, 4, 5]);
+
+    map.insert(lv1.clone(), 1);
+    map.insert(lv2.clone(), 2);
+
+    assert_eq!(map.get(&lv1), Some(&1));
+    assert_eq!(map.get(&lv2), Some(&2));
 }
 
 #[test]

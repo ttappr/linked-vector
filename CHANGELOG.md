@@ -1,5 +1,11 @@
 # Changelog
 
+## [v1.1.0] - ????-??-??
+
+### Added
+
+- `Hash` implemented for `LinkedVector`.
+
 ## [v1.0.0] - 2023-02-09
 
 ### Added
@@ -21,6 +27,7 @@
 ### Fixed
 
 - Issue where expired handles weren't detected if the node had been recycled.
+
 
 ## [v0.3.0] - 2023-02-08
 

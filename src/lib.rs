@@ -4,7 +4,8 @@
 
 use core::iter::{FromIterator, FusedIterator};
 use core::ops::{Index, IndexMut};
-use std::cmp::Ordering;
+use core::cmp::Ordering;
+use core::hash::{Hash, Hasher};
 pub use cursor::*;
 
 #[cfg(test)]
@@ -1027,6 +1028,18 @@ impl<T> FromIterator<T> for LinkedVector<T> {
             lv.push_back(v);
         }
         lv
+    }
+}
+
+impl<T> Hash for LinkedVector<T> 
+where
+    T: Hash,
+{
+    #[inline]
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        for v in self.iter() {
+            v.hash(state);
+        }
     }
 }
 
