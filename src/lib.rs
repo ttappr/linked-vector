@@ -1,10 +1,10 @@
 
+#![doc = "To Primary Struct: [LinkedVector]"]
 #![doc = include_str!("../README.md")]
 
 use core::iter::{FromIterator, FusedIterator};
 use core::ops::{Index, IndexMut};
 use std::cmp::Ordering;
-use std::mem::swap;
 pub use cursor::*;
 
 #[cfg(test)]
@@ -62,15 +62,23 @@ struct Node<T> {
     gen   : usize,
 }
 impl<T> Node<T> {
+    #[cfg(debug_assertions)]
+    #[inline]
+    fn new(value: T, gen: usize) -> Self {
+        Self { 
+            value : Some(value), 
+            next  : BAD_HANDLE, 
+            prev  : BAD_HANDLE, 
+            gen,
+        }
+    }
+    #[cfg(not(debug_assertions))]
     #[inline]
     fn new(value: T) -> Self {
         Self { 
             value : Some(value), 
             next  : BAD_HANDLE, 
             prev  : BAD_HANDLE, 
-
-            #[cfg(debug_assertions)]
-            gen   : 0,
         }
     }
 }
@@ -197,6 +205,19 @@ impl<T> LinkedVector<T> {
         self.recyc = BAD_HANDLE;
     }
     
+    /// Consumes the LinkedVector and produces a new one that has all its nodes 
+    /// placed contiguously in sequential order at the front of the internal 
+    /// vector. Where performance is critical and the cost of a compact 
+    /// operation is infrequent and acceptible, compacting the vector *may* give
+    /// a small gain in performance. All handles from the old vector will not 
+    /// be native to the new compacted vector. `compact()` completes in O(n) 
+    /// time.
+    /// 
+    #[inline]
+    pub fn compact(self) -> Self {
+        self.into_iter().collect()
+    }
+
     /// Returns `true` if the list contains an element with the given value.
     /// This operation completes in O(n) time where n is the length of the list.
     /// 
@@ -310,9 +331,27 @@ impl<T> LinkedVector<T> {
         self.get_(node).value.as_ref()
     }
 
+    /// Provides a mutable reference to the element indicated by the given
+    /// handle, or `None` if the handle is invalid. This operation completes in
+    /// O(1) time.
+    /// ```
+    /// use linked_vector::*;
+    /// let mut lv = LinkedVector::new();
+    /// let hnode = lv.push_front(0);
+    /// 
+    /// *lv.get_mut(hnode).unwrap() = 42;
+    /// 
+    /// assert_eq!(lv.get(hnode), Some(&42));
+    /// ```
+    #[inline]
+    pub fn get_mut(&mut self, node: HNode) -> Option<&mut T> {
+        self.get_mut_(node).value.as_mut()
+    }
+
     /// Returns the handle to the node at the given index, or `None` if the
     /// index is out of bounds. If `index > self.len / 2`, the search starts
-    /// from the end of the list. This operation completes in O(n) time.
+    /// from the end of the list. This operation performs in O(n / 2) time
+    /// worst case.
     /// ```
     /// use linked_vector::*;
     /// let mut lv = LinkedVector::new();
@@ -335,23 +374,6 @@ impl<T> LinkedVector<T> {
         }
     }
 
-    /// Provides a mutable reference to the element indicated by the given
-    /// handle, or `None` if the handle is invalid. This operation completes in
-    /// O(1) time.
-    /// ```
-    /// use linked_vector::*;
-    /// let mut lv = LinkedVector::new();
-    /// let hnode = lv.push_front(0);
-    /// 
-    /// *lv.get_mut(hnode).unwrap() = 42;
-    /// 
-    /// assert_eq!(lv.get(hnode), Some(&42));
-    /// ```
-    #[inline]
-    pub fn get_mut(&mut self, node: HNode) -> Option<&mut T> {
-        self.get_mut_(node).value.as_mut()
-    }
-
     /// Returns an iterator over the handles of the vector. The handles will 
     /// reflect the order of the linked list. This operation completes in O(1) 
     /// time.
@@ -370,6 +392,24 @@ impl<T> LinkedVector<T> {
     #[inline]
     pub fn handles(&self) -> Handles<T> {
         Handles::new(self)
+    }
+
+    /// Inserts a new element at the position indicated by the handle, `node`.
+    /// Returns a handle to the newly inserted element. This operation completes
+    /// in O(1) time.
+    /// ```
+    /// use linked_vector::*;
+    /// let mut lv = LinkedVector::new();
+    /// 
+    /// let h1 = lv.push_back(42);
+    /// let h2 = lv.insert(h1, 43);
+    /// 
+    /// assert_eq!(lv.next_node(h2), Some(h1));
+    /// assert_eq!(lv.get(h1), Some(&42));
+    /// ```
+    #[inline]
+    pub fn insert(&mut self, node: HNode, value: T) -> HNode {
+        self.insert_(Some(node), value)
     }
 
     /// Inserts a new element after the one indicated by the handle, `node`.
@@ -392,24 +432,6 @@ impl<T> LinkedVector<T> {
         } else {
             self.insert_(None, value)
         }
-    }
-
-    /// Inserts a new element at the position indicated by the handle, `node`.
-    /// Returns a handle to the newly inserted element. This operation completes
-    /// in O(1) time.
-    /// ```
-    /// use linked_vector::*;
-    /// let mut lv = LinkedVector::new();
-    /// 
-    /// let h1 = lv.push_back(42);
-    /// let h2 = lv.insert(h1, 43);
-    /// 
-    /// assert_eq!(lv.next_node(h2), Some(h1));
-    /// assert_eq!(lv.get(h1), Some(&42));
-    /// ```
-    #[inline]
-    pub fn insert(&mut self, node: HNode, value: T) -> HNode {
-        self.insert_(Some(node), value)
     }
 
     /// Returns `true` if the list contains no elements.
@@ -469,6 +491,27 @@ impl<T> LinkedVector<T> {
         }
     }    
 
+    /// Returns a handle to the previous node in the list, or `None` if the 
+    /// given handle is the first node in the list. This operation completes in
+    /// O(1) time.
+    /// ```
+    /// use linked_vector::*;
+    /// let mut lv = LinkedVector::new();
+    /// 
+    /// let h1 = lv.push_back(42);
+    /// let h2 = lv.push_back(43);
+    /// 
+    /// assert_eq!(lv.prev_node(h2), Some(h1));
+    /// ```
+    #[inline]
+    pub fn prev_node(&self, node: HNode) -> Option<HNode> {
+        if node != self.head {
+            Some(self.get_(node).prev)
+        } else {
+            None
+        }
+    }
+
     /// Pops the last element of the vector. Returns `None` if the vector is
     /// empty. This operation completes in O(1) time.
     /// ```
@@ -496,27 +539,6 @@ impl<T> LinkedVector<T> {
             None
         } else {
             self.remove_(Some(self.head))
-        }
-    }
-
-    /// Returns a handle to the previous node in the list, or `None` if the 
-    /// given handle is the first node in the list. This operation completes in
-    /// O(1) time.
-    /// ```
-    /// use linked_vector::*;
-    /// let mut lv = LinkedVector::new();
-    /// 
-    /// let h1 = lv.push_back(42);
-    /// let h2 = lv.push_back(43);
-    /// 
-    /// assert_eq!(lv.prev_node(h2), Some(h1));
-    /// ```
-    #[inline]
-    pub fn prev_node(&self, node: HNode) -> Option<HNode> {
-        if node != self.head {
-            Some(self.get_(node).prev)
-        } else {
-            None
         }
     }
 
@@ -576,7 +598,8 @@ impl<T> LinkedVector<T> {
     /// Sorts the elemements in place in ascending order. Previously held 
     /// handles will still be valid and reference the same elements (with the 
     /// same values) as before.  Only the `next` and `prev` fields of the nodes 
-    /// are modified in the list. This operation completes in `O(n log n)` time.
+    /// are modified in the list. Uses Rust's stable sort internally and
+    /// requires some auxiliary memory for a temporary handle list.
     /// ```
     /// use linked_vector::*;
     /// let mut lv = LinkedVector::new();
@@ -584,22 +607,83 @@ impl<T> LinkedVector<T> {
     /// let h2 = lv.push_back(2);
     /// let h3 = lv.push_back(1);
     /// 
+    /// lv.extend([7, 11, 4, 6, 8, 13, 12, 9, 14, 5, 10]);
+    /// 
+    /// lv.sort();
+    /// 
+    /// assert_eq!(lv.to_vec(), (1..15).collect::<Vec<_>>());
+    /// assert_eq!(lv[h1], 3);
+    /// assert_eq!(lv[h2], 2);
+    /// assert_eq!(lv[h3], 1);
+    /// ```
+    #[inline]
+    pub fn sort(&mut self) 
+    where
+        T: Ord
+    {
+        self.sort_by_(|a, b| a.cmp(b), true);
+    }
+
+    /// Sorts the elemements in place using the provided comparison function.
+    /// See [sort()](LinkedVector::sort) for more details.
+    /// ```
+    /// use linked_vector::*;
+    /// let mut lv = LinkedVector::from([1, 2, 3, 4, 5]);
+    /// 
+    /// lv.sort_by(|a, b| b.cmp(a));
+    /// 
+    /// assert_eq!(lv.to_vec(), vec![5, 4, 3, 2, 1]);
+    /// ```
+    #[inline]
+    pub fn sort_by<F>(&mut self, compare: F) 
+    where
+        F: FnMut(&T, &T) -> Ordering,
+    {
+        self.sort_by_(compare, true)
+    }
+
+    /// Sorts the elemements in place in using the provided key extraction
+    /// function. See [sort()](LinkedVector::sort) for more details.
+    /// ```
+    /// use linked_vector::*;
+    /// let mut lv = LinkedVector::from([1, 2, 3, 4, 5]);
+    /// 
+    /// lv.sort_by_key(|k| -k);
+    /// 
+    /// assert_eq!(lv.to_vec(), vec![5, 4, 3, 2, 1]);
+    /// ```
+    #[inline]
+    pub fn sort_by_key<K, F>(&mut self, mut key: F) 
+    where
+        K: Ord,
+        F: FnMut(&T) -> K,
+    {
+        self.sort_by_(|a, b| key(a).cmp(&key(b)), true);
+    }
+
+    /// Sorts the elemements in place in ascending order. Previously held
+    /// handles will still be valid and reference the same elements (with the
+    /// same values) as before.  Only the `next` and `prev` fields of the nodes
+    /// are modified in the list. Uses Rust's unstable sort internally and
+    /// requires some auxiliary memory for a temporary handle list.
+    /// ```
+    /// use linked_vector::*;
+    /// let mut lv = LinkedVector::from([5, 4, 3, 2, 1, 0]);
+    /// 
     /// lv.sort_unstable();
     /// 
-    /// assert_eq!(lv.to_vec(), vec![1, 2, 3]);
-    /// assert_eq!(lv.get(h1), Some(&3));
-    /// assert_eq!(lv.get(h2), Some(&2));
-    /// assert_eq!(lv.get(h3), Some(&1));
+    /// assert_eq!(lv.to_vec(), vec![0, 1, 2, 3, 4, 5]);
     /// ```
+    #[inline]
     pub fn sort_unstable(&mut self) 
     where
         T: Ord
     {
-        self.sort_unstable_by(|a, b| a.cmp(b));
+        self.sort_by_(|a, b| a.cmp(b), false);
     }
 
     /// Sorts the elemements in place using the provided comparison function.
-    /// See [LinkedVector::sort_unstable()] for more details.
+    /// See [sort_unstable()](LinkedVector::sort_unstable) for more details.
     /// ```
     /// use linked_vector::*;
     /// let mut lv = LinkedVector::from([1, 2, 3, 4, 5]);
@@ -608,55 +692,17 @@ impl<T> LinkedVector<T> {
     /// 
     /// assert_eq!(lv.to_vec(), vec![5, 4, 3, 2, 1]);
     /// ```
-    pub fn sort_unstable_by<F>(&mut self, mut compare: F) 
+    #[inline]
+    pub fn sort_unstable_by<F>(&mut self , compare: F) 
     where
         F: FnMut(&T, &T) -> Ordering,
     {
-        use Ordering::Less;
-        if self.len < 2 { return; }
-        if let (Some(lo), Some(hi)) = (self.front_node(), self.back_node()) {
-            let mut stack = vec![(lo, hi)];
-
-            while let Some((mut lo, mut hi)) = stack.pop() {
-                let     p = hi;
-                let mut i = lo;
-                let mut j = lo;
-
-                while j != hi {
-                    if compare(self.vec[j.0].value.as_ref().unwrap(), 
-                               self.vec[p.0].value.as_ref().unwrap()) == Less {
-                        if i != j {
-                            if i == lo {
-                                self.swap(&mut i, &mut j);
-                                lo = i;
-                            } else {
-                                self.swap(&mut i, &mut j);
-                            }
-                        }
-                        i = self.vec[i.0].next;
-                    }
-                    j = self.vec[j.0].next;
-                }
-                if i == lo { 
-                    self.swap(&mut i, &mut hi);
-                    lo = i;
-                } else {
-                    self.swap(&mut i, &mut hi);
-                }
-                if lo != hi {
-                    if i != lo {
-                        stack.push((lo, self.vec[i.0].prev));
-                    }
-                    if i != hi {
-                        stack.push((self.vec[i.0].next, hi));
-                    }
-                }
-            }
-        }
+        self.sort_by_(compare, false);
     }
 
     /// Sorts the elemements in place in using the provided key extraction
-    /// function. See [LinkedVector::sort_unstable()] for more details.
+    /// function. See [sort_unstable()](LinkedVector::sort_unstable) for more
+    /// details.
     /// ```
     /// use linked_vector::*;
     /// let mut lv = LinkedVector::from([1, 2, 3, 4, 5]);
@@ -665,72 +711,13 @@ impl<T> LinkedVector<T> {
     /// 
     /// assert_eq!(lv.to_vec(), vec![5, 4, 3, 2, 1]);
     /// ```
+    #[inline]
     pub fn sort_unstable_by_key<K, F>(&mut self, mut key: F) 
     where
         K: Ord,
         F: FnMut(&T) -> K,
     {
-        self.sort_unstable_by(|a, b| key(a).cmp(&key(b)));
-    }
-
-    /// Swaps the elements indicated by the handles, `node1` and `node2`. Only
-    /// the next and prev fields of nodes are altered. `node1` and `node2` 
-    /// will be updated to reference the swapped values. This operation 
-    /// completes in O(1) time.
-    /// ```
-    /// use linked_vector::*;
-    /// let mut lv = LinkedVector::new();
-    /// 
-    /// let mut h1 = lv.push_back(42);
-    /// let mut h2 = lv.push_back(43);
-    /// 
-    /// let h1_bak = h1;
-    /// let h2_bak = h2;
-    /// 
-    /// lv.swap(&mut h1, &mut h2);
-    /// 
-    /// assert_eq!(lv[h1], 43);
-    /// assert_eq!(lv[h2], 42);
-    /// assert_eq!(lv.next_node(h1), Some(h2));
-    /// assert_eq!(lv.next_node(h2_bak), Some(h1_bak));
-    /// assert_eq!(lv.get(h1_bak), Some(&42));
-    /// assert_eq!(lv.get(h2_bak), Some(&43));
-    /// ```
-    #[inline]
-    pub fn swap(&mut self, node1: &mut HNode, node2: &mut HNode) {
-        let h1 = *node1;
-        let h2 = *node2;
-        let prev1 = self.get_(h1).prev;
-        let next1 = self.get_(h1).next;
-
-        let prev2 = self.get_(h2).prev;
-        let next2 = self.get_(h2).next;
-        
-        self.get_mut_(prev1).next = h2;
-        self.get_mut_(prev2).next = h1;
-
-        if next1 != BAD_HANDLE {
-            self.get_mut_(next1).prev = h2;
-        }
-        if next2 != BAD_HANDLE {
-            self.get_mut_(next2).prev = h1;
-        }
-        if prev1 == h2 { self.get_mut_(h2).prev = h1;    }
-        else           { self.get_mut_(h2).prev = prev1; }
-        if prev2 == h1 { self.get_mut_(h1).prev = h2;    }
-        else           { self.get_mut_(h1).prev = prev2; }
-        if next1 == h2 { self.get_mut_(h2).next = h1;    }
-        else           { self.get_mut_(h2).next = next1; }
-        if next2 == h1 { self.get_mut_(h1).next = h2;    }
-        else           { self.get_mut_(h1).next = next2; }
-
-        if      self.head == h1 { self.head = h2; } 
-        else if self.head == h2 { self.head = h1; }
-
-        if      next1 == BAD_HANDLE { self.get_mut_(self.head).prev = h2; }
-        else if next2 == BAD_HANDLE { self.get_mut_(self.head).prev = h1; }
-
-        swap(node1, node2);
+        self.sort_by_(|a, b| key(a).cmp(&key(b)), false);
     }
 
     /// Returns a vector containing the elements of the list. This operation
@@ -835,6 +822,8 @@ impl<T> LinkedVector<T> {
                 } else {
                     self.get_mut_(hprev).next = hnext;
                 }
+            } else {
+                self.head = BAD_HANDLE;
             }
             self.len -= 1;
             let value = self.get_mut_(hnode).value.take();
@@ -873,26 +862,36 @@ impl<T> LinkedVector<T> {
     #[inline]
     fn new_node(&mut self, value: T) -> HNode {
         if let Some(hnode) = self.pop_recyc() {
-            self.vec[hnode.0] = Node::new(value);
             #[cfg(debug_assertions)]
             {
+                let gen = self.vec[hnode.0].gen;
+                self.vec[hnode.0] = Node::new(value, gen);
                 let mut hnode = hnode;
-                hnode.1 = self.vec[hnode.0].gen;
+                hnode.1 = gen;
                 hnode 
             }
             #[cfg(not(debug_assertions))]
-            { hnode }
+            { 
+                self.vec[hnode.0] = Node::new(value);
+                hnode
+            }
         } else {
-            self.vec.push(Node::new(value));
             #[cfg(debug_assertions)]
-            { HNode(self.vec.len() - 1, 0, self.uuid) }
+            { 
+                self.vec.push(Node::new(value, 0));
+                HNode(self.vec.len() - 1, 0, self.uuid) 
+            }
             #[cfg(not(debug_assertions))]
-            { HNode(self.vec.len() - 1) }
+            { 
+                self.vec.push(Node::new(value));
+                HNode(self.vec.len() - 1) 
+            }
         }
     }
 
     /// Internal method that returns a handle to a useable node from the recycle
-    /// bin. The node is removed from the bin.
+    /// bin. The node is removed from the bin. Only new_node() should call this.
+    /// Use new_node() if you need a new node instead of this.
     /// 
     #[inline]
     fn pop_recyc(&mut self) -> Option<HNode> {
@@ -907,7 +906,7 @@ impl<T> LinkedVector<T> {
     }
 
     /// Pushes a recently discarded node, indicated by the handle,  back into 
-    /// the recycle bin.
+    /// the recycle bin. This can be called by any method that discards a node.
     /// 
     #[inline]
     fn push_recyc(&mut self, node: HNode) {
@@ -921,6 +920,36 @@ impl<T> LinkedVector<T> {
         }
         #[cfg(debug_assertions)]
         { self.vec[node.0].gen += 1; }
+    }
+
+    /// Sorts the list by the given comparison function. This operation 
+    /// completes in O(2n + n log n) time.
+    /// 
+    fn sort_by_<F>(&mut self, mut compare: F, stable: bool) 
+    where
+        F: FnMut(&T, &T) -> Ordering,
+    {
+        if self.len < 2 { return; }
+        let mut handles = self.handles().collect::<Vec<_>>();
+        if stable {
+            handles.sort_by(|h1, h2| {
+                compare(self.vec[h1.0].value.as_ref().unwrap(), 
+                        self.vec[h2.0].value.as_ref().unwrap())
+            });
+        } else {
+            handles.sort_unstable_by(|h1, h2| {
+                compare(self.vec[h1.0].value.as_ref().unwrap(), 
+                        self.vec[h2.0].value.as_ref().unwrap())
+            });
+        }
+        for i in 0..self.len - 1 {
+            self.vec[handles[i].0].next = handles[i + 1];
+            self.vec[handles[i + 1].0].prev = handles[i];
+        }
+        let tail = *handles.last().unwrap();
+        self.head = handles[0];
+        self.vec[self.head.0].prev = tail;
+        self.vec[tail.0].next = BAD_HANDLE;
     }
 }
 

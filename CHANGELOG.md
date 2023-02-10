@@ -1,8 +1,24 @@
 # Changelog
 
-## Upcoming
+## v1.0.0 - 2023-02-09
 
-- First major release `v1.0.0` coming soon.
+### Added
+
+- `compact()` method added to `LinkedVector` that produces a new compacted 
+  vector.
+- `LinkedVector` gets a few more stable/unstable sort methods.
+
+### Changed
+
+- The unstable sort methods are replaced by stable sort methods of similar name.
+
+### Removed
+
+- `LinkedVector::swap()` removed since the sort methods no longer need it.
+
+### Fixed
+
+- Issue where expired handles weren't detected if the node had been recycled.
 
 ## v0.3.0 - 2023-02-08
 

@@ -1301,13 +1301,42 @@
 <a href="#1301" id="1301">1301</a>
 <a href="#1302" id="1302">1302</a>
 <a href="#1303" id="1303">1303</a>
+<a href="#1304" id="1304">1304</a>
+<a href="#1305" id="1305">1305</a>
+<a href="#1306" id="1306">1306</a>
+<a href="#1307" id="1307">1307</a>
+<a href="#1308" id="1308">1308</a>
+<a href="#1309" id="1309">1309</a>
+<a href="#1310" id="1310">1310</a>
+<a href="#1311" id="1311">1311</a>
+<a href="#1312" id="1312">1312</a>
+<a href="#1313" id="1313">1313</a>
+<a href="#1314" id="1314">1314</a>
+<a href="#1315" id="1315">1315</a>
+<a href="#1316" id="1316">1316</a>
+<a href="#1317" id="1317">1317</a>
+<a href="#1318" id="1318">1318</a>
+<a href="#1319" id="1319">1319</a>
+<a href="#1320" id="1320">1320</a>
+<a href="#1321" id="1321">1321</a>
+<a href="#1322" id="1322">1322</a>
+<a href="#1323" id="1323">1323</a>
+<a href="#1324" id="1324">1324</a>
+<a href="#1325" id="1325">1325</a>
+<a href="#1326" id="1326">1326</a>
+<a href="#1327" id="1327">1327</a>
+<a href="#1328" id="1328">1328</a>
+<a href="#1329" id="1329">1329</a>
+<a href="#1330" id="1330">1330</a>
+<a href="#1331" id="1331">1331</a>
+<a href="#1332" id="1332">1332</a>
 </pre><pre class="rust"><code>
-<span class="attr">#![doc = <span class="macro">include_str!</span>(<span class="string">&quot;../README.md&quot;</span>)]
+<span class="attr">#![doc = <span class="string">&quot;To Primary Struct: [LinkedVector]&quot;</span>]
+#![doc = <span class="macro">include_str!</span>(<span class="string">&quot;../README.md&quot;</span>)]
 
 </span><span class="kw">use </span>core::iter::{FromIterator, FusedIterator};
 <span class="kw">use </span>core::ops::{Index, IndexMut};
 <span class="kw">use </span>std::cmp::Ordering;
-<span class="kw">use </span>std::mem::swap;
 <span class="kw">pub use </span>cursor::<span class="kw-2">*</span>;
 
 <span class="attr">#[cfg(test)]
@@ -1365,15 +1394,23 @@
     </span>gen   : usize,
 }
 <span class="kw">impl</span>&lt;T&gt; Node&lt;T&gt; {
-    <span class="attr">#[inline]
+    <span class="attr">#[cfg(debug_assertions)]
+    #[inline]
+    </span><span class="kw">fn </span>new(value: T, gen: usize) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{ 
+            value : <span class="prelude-val">Some</span>(value), 
+            next  : BAD_HANDLE, 
+            prev  : BAD_HANDLE, 
+            gen,
+        }
+    }
+    <span class="attr">#[cfg(not(debug_assertions))]
+    #[inline]
     </span><span class="kw">fn </span>new(value: T) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{ 
             value : <span class="prelude-val">Some</span>(value), 
             next  : BAD_HANDLE, 
             prev  : BAD_HANDLE, 
-
-            <span class="attr">#[cfg(debug_assertions)]
-            </span>gen   : <span class="number">0</span>,
         }
     }
 }
@@ -1500,6 +1537,19 @@
         <span class="self">self</span>.recyc = BAD_HANDLE;
     }
     
+    <span class="doccomment">/// Consumes the LinkedVector and produces a new one that has all its nodes 
+    /// placed contiguously in sequential order at the front of the internal 
+    /// vector. Where performance is critical and the cost of a compact 
+    /// operation is infrequent and acceptible, compacting the vector *may* give
+    /// a small gain in performance. All handles from the old vector will not 
+    /// be native to the new compacted vector. `compact()` completes in O(n) 
+    /// time.
+    /// 
+    </span><span class="attr">#[inline]
+    </span><span class="kw">pub fn </span>compact(<span class="self">self</span>) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.into_iter().collect()
+    }
+
     <span class="doccomment">/// Returns `true` if the list contains an element with the given value.
     /// This operation completes in O(n) time where n is the length of the list.
     /// 
@@ -1524,8 +1574,8 @@
     /// assert_eq!(cursor.get(), Some(&amp;6));
     /// ```
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>cursor(<span class="kw-2">&amp;</span><span class="self">self</span>, hnode: HNode) -&gt; Cursor&lt;T&gt; {
-        Cursor::new(<span class="self">self</span>, hnode)
+    </span><span class="kw">pub fn </span>cursor(<span class="kw-2">&amp;</span><span class="self">self</span>, node: HNode) -&gt; Cursor&lt;T&gt; {
+        Cursor::new(<span class="self">self</span>, node)
     }
 
     <span class="doccomment">/// Creates a cursor that holds a mutable reference to the LinkedVector that
@@ -1544,8 +1594,8 @@
     /// assert_eq!(lv.to_vec(), vec![1, 2, 3, 42, 5, 6]);
     /// ```
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>cursor_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>, hnode: HNode) -&gt; CursorMut&lt;T&gt; {
-        CursorMut::new(<span class="self">self</span>, hnode)
+    </span><span class="kw">pub fn </span>cursor_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>, node: HNode) -&gt; CursorMut&lt;T&gt; {
+        CursorMut::new(<span class="self">self</span>, node)
     }
 
     <span class="doccomment">/// Gives a reference to the element at the front of the vector, or `None` 
@@ -1613,9 +1663,27 @@
         <span class="self">self</span>.get_(node).value.as_ref()
     }
 
+    <span class="doccomment">/// Provides a mutable reference to the element indicated by the given
+    /// handle, or `None` if the handle is invalid. This operation completes in
+    /// O(1) time.
+    /// ```
+    /// use linked_vector::*;
+    /// let mut lv = LinkedVector::new();
+    /// let hnode = lv.push_front(0);
+    /// 
+    /// *lv.get_mut(hnode).unwrap() = 42;
+    /// 
+    /// assert_eq!(lv.get(hnode), Some(&amp;42));
+    /// ```
+    </span><span class="attr">#[inline]
+    </span><span class="kw">pub fn </span>get_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>, node: HNode) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;mut </span>T&gt; {
+        <span class="self">self</span>.get_mut_(node).value.as_mut()
+    }
+
     <span class="doccomment">/// Returns the handle to the node at the given index, or `None` if the
     /// index is out of bounds. If `index &gt; self.len / 2`, the search starts
-    /// from the end of the list. This operation completes in O(n) time.
+    /// from the end of the list. This operation performs in O(n / 2) time
+    /// worst case.
     /// ```
     /// use linked_vector::*;
     /// let mut lv = LinkedVector::new();
@@ -1638,23 +1706,6 @@
         }
     }
 
-    <span class="doccomment">/// Provides a mutable reference to the element indicated by the given
-    /// handle, or `None` if the handle is invalid. This operation completes in
-    /// O(1) time.
-    /// ```
-    /// use linked_vector::*;
-    /// let mut lv = LinkedVector::new();
-    /// let hnode = lv.push_front(0);
-    /// 
-    /// *lv.get_mut(hnode).unwrap() = 42;
-    /// 
-    /// assert_eq!(lv.get(hnode), Some(&amp;42));
-    /// ```
-    </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>get_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>, node: HNode) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;mut </span>T&gt; {
-        <span class="self">self</span>.get_mut_(node).value.as_mut()
-    }
-
     <span class="doccomment">/// Returns an iterator over the handles of the vector. The handles will 
     /// reflect the order of the linked list. This operation completes in O(1) 
     /// time.
@@ -1673,6 +1724,24 @@
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>handles(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Handles&lt;T&gt; {
         Handles::new(<span class="self">self</span>)
+    }
+
+    <span class="doccomment">/// Inserts a new element at the position indicated by the handle, `node`.
+    /// Returns a handle to the newly inserted element. This operation completes
+    /// in O(1) time.
+    /// ```
+    /// use linked_vector::*;
+    /// let mut lv = LinkedVector::new();
+    /// 
+    /// let h1 = lv.push_back(42);
+    /// let h2 = lv.insert(h1, 43);
+    /// 
+    /// assert_eq!(lv.next_node(h2), Some(h1));
+    /// assert_eq!(lv.get(h1), Some(&amp;42));
+    /// ```
+    </span><span class="attr">#[inline]
+    </span><span class="kw">pub fn </span>insert(<span class="kw-2">&amp;mut </span><span class="self">self</span>, node: HNode, value: T) -&gt; HNode {
+        <span class="self">self</span>.insert_(<span class="prelude-val">Some</span>(node), value)
     }
 
     <span class="doccomment">/// Inserts a new element after the one indicated by the handle, `node`.
@@ -1695,24 +1764,6 @@
         } <span class="kw">else </span>{
             <span class="self">self</span>.insert_(<span class="prelude-val">None</span>, value)
         }
-    }
-
-    <span class="doccomment">/// Inserts a new element at the position indicated by the handle, `node`.
-    /// Returns a handle to the newly inserted element. This operation completes
-    /// in O(1) time.
-    /// ```
-    /// use linked_vector::*;
-    /// let mut lv = LinkedVector::new();
-    /// 
-    /// let h1 = lv.push_back(42);
-    /// let h2 = lv.insert(h1, 43);
-    /// 
-    /// assert_eq!(lv.next_node(h2), Some(h1));
-    /// assert_eq!(lv.get(h1), Some(&amp;42));
-    /// ```
-    </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>insert(<span class="kw-2">&amp;mut </span><span class="self">self</span>, node: HNode, value: T) -&gt; HNode {
-        <span class="self">self</span>.insert_(<span class="prelude-val">Some</span>(node), value)
     }
 
     <span class="doccomment">/// Returns `true` if the list contains no elements.
@@ -1772,6 +1823,27 @@
         }
     }    
 
+    <span class="doccomment">/// Returns a handle to the previous node in the list, or `None` if the 
+    /// given handle is the first node in the list. This operation completes in
+    /// O(1) time.
+    /// ```
+    /// use linked_vector::*;
+    /// let mut lv = LinkedVector::new();
+    /// 
+    /// let h1 = lv.push_back(42);
+    /// let h2 = lv.push_back(43);
+    /// 
+    /// assert_eq!(lv.prev_node(h2), Some(h1));
+    /// ```
+    </span><span class="attr">#[inline]
+    </span><span class="kw">pub fn </span>prev_node(<span class="kw-2">&amp;</span><span class="self">self</span>, node: HNode) -&gt; <span class="prelude-ty">Option</span>&lt;HNode&gt; {
+        <span class="kw">if </span>node != <span class="self">self</span>.head {
+            <span class="prelude-val">Some</span>(<span class="self">self</span>.get_(node).prev)
+        } <span class="kw">else </span>{
+            <span class="prelude-val">None
+        </span>}
+    }
+
     <span class="doccomment">/// Pops the last element of the vector. Returns `None` if the vector is
     /// empty. This operation completes in O(1) time.
     /// ```
@@ -1800,27 +1872,6 @@
         </span>} <span class="kw">else </span>{
             <span class="self">self</span>.remove_(<span class="prelude-val">Some</span>(<span class="self">self</span>.head))
         }
-    }
-
-    <span class="doccomment">/// Returns a handle to the previous node in the list, or `None` if the 
-    /// given handle is the first node in the list. This operation completes in
-    /// O(1) time.
-    /// ```
-    /// use linked_vector::*;
-    /// let mut lv = LinkedVector::new();
-    /// 
-    /// let h1 = lv.push_back(42);
-    /// let h2 = lv.push_back(43);
-    /// 
-    /// assert_eq!(lv.prev_node(h2), Some(h1));
-    /// ```
-    </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>prev_node(<span class="kw-2">&amp;</span><span class="self">self</span>, node: HNode) -&gt; <span class="prelude-ty">Option</span>&lt;HNode&gt; {
-        <span class="kw">if </span>node != <span class="self">self</span>.head {
-            <span class="prelude-val">Some</span>(<span class="self">self</span>.get_(node).prev)
-        } <span class="kw">else </span>{
-            <span class="prelude-val">None
-        </span>}
     }
 
     <span class="doccomment">/// Pushes a new element to the back of the list. Returns a handle to the
@@ -1879,7 +1930,8 @@
     <span class="doccomment">/// Sorts the elemements in place in ascending order. Previously held 
     /// handles will still be valid and reference the same elements (with the 
     /// same values) as before.  Only the `next` and `prev` fields of the nodes 
-    /// are modified in the list. This operation completes in `O(n log n)` time.
+    /// are modified in the list. Uses Rust&#39;s stable sort internally and
+    /// requires some auxiliary memory for a temporary handle list.
     /// ```
     /// use linked_vector::*;
     /// let mut lv = LinkedVector::new();
@@ -1887,22 +1939,83 @@
     /// let h2 = lv.push_back(2);
     /// let h3 = lv.push_back(1);
     /// 
+    /// lv.extend([7, 11, 4, 6, 8, 13, 12, 9, 14, 5, 10]);
+    /// 
+    /// lv.sort();
+    /// 
+    /// assert_eq!(lv.to_vec(), (1..15).collect::&lt;Vec&lt;_&gt;&gt;());
+    /// assert_eq!(lv[h1], 3);
+    /// assert_eq!(lv[h2], 2);
+    /// assert_eq!(lv[h3], 1);
+    /// ```
+    </span><span class="attr">#[inline]
+    </span><span class="kw">pub fn </span>sort(<span class="kw-2">&amp;mut </span><span class="self">self</span>) 
+    <span class="kw">where
+        </span>T: Ord
+    {
+        <span class="self">self</span>.sort_by_(|a, b| a.cmp(b), <span class="bool-val">true</span>);
+    }
+
+    <span class="doccomment">/// Sorts the elemements in place using the provided comparison function.
+    /// See [sort()](LinkedVector::sort) for more details.
+    /// ```
+    /// use linked_vector::*;
+    /// let mut lv = LinkedVector::from([1, 2, 3, 4, 5]);
+    /// 
+    /// lv.sort_by(|a, b| b.cmp(a));
+    /// 
+    /// assert_eq!(lv.to_vec(), vec![5, 4, 3, 2, 1]);
+    /// ```
+    </span><span class="attr">#[inline]
+    </span><span class="kw">pub fn </span>sort_by&lt;F&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, compare: F) 
+    <span class="kw">where
+        </span>F: FnMut(<span class="kw-2">&amp;</span>T, <span class="kw-2">&amp;</span>T) -&gt; Ordering,
+    {
+        <span class="self">self</span>.sort_by_(compare, <span class="bool-val">true</span>)
+    }
+
+    <span class="doccomment">/// Sorts the elemements in place in using the provided key extraction
+    /// function. See [sort()](LinkedVector::sort) for more details.
+    /// ```
+    /// use linked_vector::*;
+    /// let mut lv = LinkedVector::from([1, 2, 3, 4, 5]);
+    /// 
+    /// lv.sort_by_key(|k| -k);
+    /// 
+    /// assert_eq!(lv.to_vec(), vec![5, 4, 3, 2, 1]);
+    /// ```
+    </span><span class="attr">#[inline]
+    </span><span class="kw">pub fn </span>sort_by_key&lt;K, F&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw-2">mut </span>key: F) 
+    <span class="kw">where
+        </span>K: Ord,
+        F: FnMut(<span class="kw-2">&amp;</span>T) -&gt; K,
+    {
+        <span class="self">self</span>.sort_by_(|a, b| key(a).cmp(<span class="kw-2">&amp;</span>key(b)), <span class="bool-val">true</span>);
+    }
+
+    <span class="doccomment">/// Sorts the elemements in place in ascending order. Previously held
+    /// handles will still be valid and reference the same elements (with the
+    /// same values) as before.  Only the `next` and `prev` fields of the nodes
+    /// are modified in the list. Uses Rust&#39;s unstable sort internally and
+    /// requires some auxiliary memory for a temporary handle list.
+    /// ```
+    /// use linked_vector::*;
+    /// let mut lv = LinkedVector::from([5, 4, 3, 2, 1, 0]);
+    /// 
     /// lv.sort_unstable();
     /// 
-    /// assert_eq!(lv.to_vec(), vec![1, 2, 3]);
-    /// assert_eq!(lv.get(h1), Some(&amp;3));
-    /// assert_eq!(lv.get(h2), Some(&amp;2));
-    /// assert_eq!(lv.get(h3), Some(&amp;1));
+    /// assert_eq!(lv.to_vec(), vec![0, 1, 2, 3, 4, 5]);
     /// ```
+    </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>sort_unstable(<span class="kw-2">&amp;mut </span><span class="self">self</span>) 
     <span class="kw">where
         </span>T: Ord
     {
-        <span class="self">self</span>.sort_unstable_by(|a, b| a.cmp(b));
+        <span class="self">self</span>.sort_by_(|a, b| a.cmp(b), <span class="bool-val">false</span>);
     }
 
     <span class="doccomment">/// Sorts the elemements in place using the provided comparison function.
-    /// See [LinkedVector::sort_unstable()] for more details.
+    /// See [sort_unstable()](LinkedVector::sort_unstable) for more details.
     /// ```
     /// use linked_vector::*;
     /// let mut lv = LinkedVector::from([1, 2, 3, 4, 5]);
@@ -1911,55 +2024,17 @@
     /// 
     /// assert_eq!(lv.to_vec(), vec![5, 4, 3, 2, 1]);
     /// ```
-    </span><span class="kw">pub fn </span>sort_unstable_by&lt;F&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw-2">mut </span>compare: F) 
+    </span><span class="attr">#[inline]
+    </span><span class="kw">pub fn </span>sort_unstable_by&lt;F&gt;(<span class="kw-2">&amp;mut </span><span class="self">self </span>, compare: F) 
     <span class="kw">where
         </span>F: FnMut(<span class="kw-2">&amp;</span>T, <span class="kw-2">&amp;</span>T) -&gt; Ordering,
     {
-        <span class="kw">use </span>Ordering::Less;
-        <span class="kw">if </span><span class="self">self</span>.len &lt; <span class="number">2 </span>{ <span class="kw">return</span>; }
-        <span class="kw">if let </span>(<span class="prelude-val">Some</span>(lo), <span class="prelude-val">Some</span>(hi)) = (<span class="self">self</span>.front_node(), <span class="self">self</span>.back_node()) {
-            <span class="kw">let </span><span class="kw-2">mut </span>stack = <span class="macro">vec!</span>[(lo, hi)];
-
-            <span class="kw">while let </span><span class="prelude-val">Some</span>((<span class="kw-2">mut </span>lo, <span class="kw-2">mut </span>hi)) = stack.pop() {
-                <span class="kw">let     </span>p = hi;
-                <span class="kw">let </span><span class="kw-2">mut </span>i = lo;
-                <span class="kw">let </span><span class="kw-2">mut </span>j = lo;
-
-                <span class="kw">while </span>j != hi {
-                    <span class="kw">if </span>compare(<span class="self">self</span>.vec[j.<span class="number">0</span>].value.as_ref().unwrap(), 
-                               <span class="self">self</span>.vec[p.<span class="number">0</span>].value.as_ref().unwrap()) == Less {
-                        <span class="kw">if </span>i != j {
-                            <span class="kw">if </span>i == lo {
-                                <span class="self">self</span>.swap(<span class="kw-2">&amp;mut </span>i, <span class="kw-2">&amp;mut </span>j);
-                                lo = i;
-                            } <span class="kw">else </span>{
-                                <span class="self">self</span>.swap(<span class="kw-2">&amp;mut </span>i, <span class="kw-2">&amp;mut </span>j);
-                            }
-                        }
-                        i = <span class="self">self</span>.vec[i.<span class="number">0</span>].next;
-                    }
-                    j = <span class="self">self</span>.vec[j.<span class="number">0</span>].next;
-                }
-                <span class="kw">if </span>i == lo { 
-                    <span class="self">self</span>.swap(<span class="kw-2">&amp;mut </span>i, <span class="kw-2">&amp;mut </span>hi);
-                    lo = i;
-                } <span class="kw">else </span>{
-                    <span class="self">self</span>.swap(<span class="kw-2">&amp;mut </span>i, <span class="kw-2">&amp;mut </span>hi);
-                }
-                <span class="kw">if </span>lo != hi {
-                    <span class="kw">if </span>i != lo {
-                        stack.push((lo, <span class="self">self</span>.vec[i.<span class="number">0</span>].prev));
-                    }
-                    <span class="kw">if </span>i != hi {
-                        stack.push((<span class="self">self</span>.vec[i.<span class="number">0</span>].next, hi));
-                    }
-                }
-            }
-        }
+        <span class="self">self</span>.sort_by_(compare, <span class="bool-val">false</span>);
     }
 
     <span class="doccomment">/// Sorts the elemements in place in using the provided key extraction
-    /// function. See [LinkedVector::sort_unstable()] for more details.
+    /// function. See [sort_unstable()](LinkedVector::sort_unstable) for more
+    /// details.
     /// ```
     /// use linked_vector::*;
     /// let mut lv = LinkedVector::from([1, 2, 3, 4, 5]);
@@ -1968,72 +2043,13 @@
     /// 
     /// assert_eq!(lv.to_vec(), vec![5, 4, 3, 2, 1]);
     /// ```
+    </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>sort_unstable_by_key&lt;K, F&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw-2">mut </span>key: F) 
     <span class="kw">where
         </span>K: Ord,
         F: FnMut(<span class="kw-2">&amp;</span>T) -&gt; K,
     {
-        <span class="self">self</span>.sort_unstable_by(|a, b| key(a).cmp(<span class="kw-2">&amp;</span>key(b)));
-    }
-
-    <span class="doccomment">/// Swaps the elements indicated by the handles, `hnode1` and `hnode2`. Only
-    /// the next and prev fields of nodes are altered. `hnode1` and `hnode2` 
-    /// will be updated to reference the swapped values. This operation 
-    /// completes in O(1) time.
-    /// ```
-    /// use linked_vector::*;
-    /// let mut lv = LinkedVector::new();
-    /// 
-    /// let mut h1 = lv.push_back(42);
-    /// let mut h2 = lv.push_back(43);
-    /// 
-    /// let h1_bak = h1;
-    /// let h2_bak = h2;
-    /// 
-    /// lv.swap(&amp;mut h1, &amp;mut h2);
-    /// 
-    /// assert_eq!(lv[h1], 43);
-    /// assert_eq!(lv[h2], 42);
-    /// assert_eq!(lv.next_node(h1), Some(h2));
-    /// assert_eq!(lv.next_node(h2_bak), Some(h1_bak));
-    /// assert_eq!(lv.get(h1_bak), Some(&amp;42));
-    /// assert_eq!(lv.get(h2_bak), Some(&amp;43));
-    /// ```
-    </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>swap(<span class="kw-2">&amp;mut </span><span class="self">self</span>, hnode1: <span class="kw-2">&amp;mut </span>HNode, hnode2: <span class="kw-2">&amp;mut </span>HNode) {
-        <span class="kw">let </span>h1 = <span class="kw-2">*</span>hnode1;
-        <span class="kw">let </span>h2 = <span class="kw-2">*</span>hnode2;
-        <span class="kw">let </span>prev1 = <span class="self">self</span>.get_(h1).prev;
-        <span class="kw">let </span>next1 = <span class="self">self</span>.get_(h1).next;
-
-        <span class="kw">let </span>prev2 = <span class="self">self</span>.get_(h2).prev;
-        <span class="kw">let </span>next2 = <span class="self">self</span>.get_(h2).next;
-        
-        <span class="self">self</span>.get_mut_(prev1).next = h2;
-        <span class="self">self</span>.get_mut_(prev2).next = h1;
-
-        <span class="kw">if </span>next1 != BAD_HANDLE {
-            <span class="self">self</span>.get_mut_(next1).prev = h2;
-        }
-        <span class="kw">if </span>next2 != BAD_HANDLE {
-            <span class="self">self</span>.get_mut_(next2).prev = h1;
-        }
-        <span class="kw">if </span>prev1 == h2 { <span class="self">self</span>.get_mut_(h2).prev = h1;    }
-        <span class="kw">else           </span>{ <span class="self">self</span>.get_mut_(h2).prev = prev1; }
-        <span class="kw">if </span>prev2 == h1 { <span class="self">self</span>.get_mut_(h1).prev = h2;    }
-        <span class="kw">else           </span>{ <span class="self">self</span>.get_mut_(h1).prev = prev2; }
-        <span class="kw">if </span>next1 == h2 { <span class="self">self</span>.get_mut_(h2).next = h1;    }
-        <span class="kw">else           </span>{ <span class="self">self</span>.get_mut_(h2).next = next1; }
-        <span class="kw">if </span>next2 == h1 { <span class="self">self</span>.get_mut_(h1).next = h2;    }
-        <span class="kw">else           </span>{ <span class="self">self</span>.get_mut_(h1).next = next2; }
-
-        <span class="kw">if      </span><span class="self">self</span>.head == h1 { <span class="self">self</span>.head = h2; } 
-        <span class="kw">else if </span><span class="self">self</span>.head == h2 { <span class="self">self</span>.head = h1; }
-
-        <span class="kw">if      </span>next1 == BAD_HANDLE { <span class="self">self</span>.get_mut_(<span class="self">self</span>.head).prev = h2; }
-        <span class="kw">else if </span>next2 == BAD_HANDLE { <span class="self">self</span>.get_mut_(<span class="self">self</span>.head).prev = h1; }
-
-        swap(hnode1, hnode2);
+        <span class="self">self</span>.sort_by_(|a, b| key(a).cmp(<span class="kw-2">&amp;</span>key(b)), <span class="bool-val">false</span>);
     }
 
     <span class="doccomment">/// Returns a vector containing the elements of the list. This operation
@@ -2138,6 +2154,8 @@
                 } <span class="kw">else </span>{
                     <span class="self">self</span>.get_mut_(hprev).next = hnext;
                 }
+            } <span class="kw">else </span>{
+                <span class="self">self</span>.head = BAD_HANDLE;
             }
             <span class="self">self</span>.len -= <span class="number">1</span>;
             <span class="kw">let </span>value = <span class="self">self</span>.get_mut_(hnode).value.take();
@@ -2176,26 +2194,36 @@
     </span><span class="attr">#[inline]
     </span><span class="kw">fn </span>new_node(<span class="kw-2">&amp;mut </span><span class="self">self</span>, value: T) -&gt; HNode {
         <span class="kw">if let </span><span class="prelude-val">Some</span>(hnode) = <span class="self">self</span>.pop_recyc() {
-            <span class="self">self</span>.vec[hnode.<span class="number">0</span>] = Node::new(value);
             <span class="attr">#[cfg(debug_assertions)]
             </span>{
+                <span class="kw">let </span>gen = <span class="self">self</span>.vec[hnode.<span class="number">0</span>].gen;
+                <span class="self">self</span>.vec[hnode.<span class="number">0</span>] = Node::new(value, gen);
                 <span class="kw">let </span><span class="kw-2">mut </span>hnode = hnode;
-                hnode.<span class="number">1 </span>= <span class="self">self</span>.vec[hnode.<span class="number">0</span>].gen;
+                hnode.<span class="number">1 </span>= gen;
                 hnode 
             }
             <span class="attr">#[cfg(not(debug_assertions))]
-            </span>{ hnode }
+            </span>{ 
+                <span class="self">self</span>.vec[hnode.<span class="number">0</span>] = Node::new(value);
+                hnode
+            }
         } <span class="kw">else </span>{
-            <span class="self">self</span>.vec.push(Node::new(value));
             <span class="attr">#[cfg(debug_assertions)]
-            </span>{ HNode(<span class="self">self</span>.vec.len() - <span class="number">1</span>, <span class="number">0</span>, <span class="self">self</span>.uuid) }
+            </span>{ 
+                <span class="self">self</span>.vec.push(Node::new(value, <span class="number">0</span>));
+                HNode(<span class="self">self</span>.vec.len() - <span class="number">1</span>, <span class="number">0</span>, <span class="self">self</span>.uuid) 
+            }
             <span class="attr">#[cfg(not(debug_assertions))]
-            </span>{ HNode(<span class="self">self</span>.vec.len() - <span class="number">1</span>) }
+            </span>{ 
+                <span class="self">self</span>.vec.push(Node::new(value));
+                HNode(<span class="self">self</span>.vec.len() - <span class="number">1</span>) 
+            }
         }
     }
 
     <span class="doccomment">/// Internal method that returns a handle to a useable node from the recycle
-    /// bin. The node is removed from the bin.
+    /// bin. The node is removed from the bin. Only new_node() should call this.
+    /// Use new_node() if you need a new node instead of this.
     /// 
     </span><span class="attr">#[inline]
     </span><span class="kw">fn </span>pop_recyc(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;HNode&gt; {
@@ -2210,7 +2238,7 @@
     }
 
     <span class="doccomment">/// Pushes a recently discarded node, indicated by the handle,  back into 
-    /// the recycle bin.
+    /// the recycle bin. This can be called by any method that discards a node.
     /// 
     </span><span class="attr">#[inline]
     </span><span class="kw">fn </span>push_recyc(<span class="kw-2">&amp;mut </span><span class="self">self</span>, node: HNode) {
@@ -2224,6 +2252,36 @@
         }
         <span class="attr">#[cfg(debug_assertions)]
         </span>{ <span class="self">self</span>.vec[node.<span class="number">0</span>].gen += <span class="number">1</span>; }
+    }
+
+    <span class="doccomment">/// Sorts the list by the given comparison function. This operation 
+    /// completes in O(2n + n log n) time.
+    /// 
+    </span><span class="kw">fn </span>sort_by_&lt;F&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw-2">mut </span>compare: F, stable: bool) 
+    <span class="kw">where
+        </span>F: FnMut(<span class="kw-2">&amp;</span>T, <span class="kw-2">&amp;</span>T) -&gt; Ordering,
+    {
+        <span class="kw">if </span><span class="self">self</span>.len &lt; <span class="number">2 </span>{ <span class="kw">return</span>; }
+        <span class="kw">let </span><span class="kw-2">mut </span>handles = <span class="self">self</span>.handles().collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;();
+        <span class="kw">if </span>stable {
+            handles.sort_by(|h1, h2| {
+                compare(<span class="self">self</span>.vec[h1.<span class="number">0</span>].value.as_ref().unwrap(), 
+                        <span class="self">self</span>.vec[h2.<span class="number">0</span>].value.as_ref().unwrap())
+            });
+        } <span class="kw">else </span>{
+            handles.sort_unstable_by(|h1, h2| {
+                compare(<span class="self">self</span>.vec[h1.<span class="number">0</span>].value.as_ref().unwrap(), 
+                        <span class="self">self</span>.vec[h2.<span class="number">0</span>].value.as_ref().unwrap())
+            });
+        }
+        <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..<span class="self">self</span>.len - <span class="number">1 </span>{
+            <span class="self">self</span>.vec[handles[i].<span class="number">0</span>].next = handles[i + <span class="number">1</span>];
+            <span class="self">self</span>.vec[handles[i + <span class="number">1</span>].<span class="number">0</span>].prev = handles[i];
+        }
+        <span class="kw">let </span>tail = <span class="kw-2">*</span>handles.last().unwrap();
+        <span class="self">self</span>.head = handles[<span class="number">0</span>];
+        <span class="self">self</span>.vec[<span class="self">self</span>.head.<span class="number">0</span>].prev = tail;
+        <span class="self">self</span>.vec[tail.<span class="number">0</span>].next = BAD_HANDLE;
     }
 }
 
