@@ -6,8 +6,8 @@
 
 - `compact()` method added to `LinkedVector` that produces a new compacted 
   vector.
-- `LinkedVector` gets a few more stable/unstable sort methods: `sort()`, 
-  `sort_by()`, and `sort_by_key()`.
+- `LinkedVector` gets new stable sort methods: `sort()`, `sort_by()`, and 
+  `sort_by_key()`.
 
 ### Changed
 
