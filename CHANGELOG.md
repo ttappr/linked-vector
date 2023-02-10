@@ -7,10 +7,12 @@
 - `compact()` method added to `LinkedVector` that produces a new compacted 
   vector.
 - `LinkedVector` gets a few more stable/unstable sort methods.
+- Stable sort methods: `sort()`, `sort_by()`, and `sort_by_key()`.
 
 ### Changed
 
-- The unstable sort methods are replaced by stable sort methods of similar name.
+- The unstable sort methods reimplemented to use Rust's standard library's built 
+  in sorting routines.
 
 ### Removed
 
