@@ -15,9 +15,12 @@ count queues.
 
 ## Updates
 
-The current release `v1.1.0` is a backward compatible minor revision to 
-`v1.0.0`. More functionality is added to `LinkedVector` and minor changes to 
-`Cursor` have been implemented; see the change log link below for details.
+The current release `v2.0.0` has some minor changes to a few existing methods
+for `LinkedVector` and `Cursor`. See the 
+[Change Log](https://github.com/ttappr/linked-vector/blob/master/CHANGELOG.md) 
+for details. Version `1.1.0` is still available and maintained if you choose not
+to move to version 2 of the API. The changes are relatively minor and mostly
+involve certain getters providing direct access to their related values.
 
 Versioning Conventions:
 - MAJOR version indicates incompatible API changes with previous major version.
@@ -28,12 +31,20 @@ Versioning Conventions:
 
 ## Usage
 
-Edit your Cargo.toml file to include:
+To use `v2`, edit your Cargo.toml file to include:
 
 ```rust, ignore
 [dependencies]
 linked-vector = "2.0"
 ```
+
+Or, for `v1` include:
+
+```rust, ignore
+[dependencies]
+linked-vector = "1.1"
+```
+
 Or run this on the command line from your project folder:
 
 ```console, ignore

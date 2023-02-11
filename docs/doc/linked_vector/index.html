@@ -11,9 +11,12 @@ use of the <code>linked-vector</code> crate is available. The project is for a L
 Frequently Used Cache. <code>LinkedVector</code>’s are used to implement its frequency 
 count queues.</p>
 <h3 id="updates"><a href="#updates">Updates</a></h3>
-<p>The current release <code>v1.1.0</code> is a backward compatible minor revision to 
-<code>v1.0.0</code>. More functionality is added to <code>LinkedVector</code> and minor changes to 
-<code>Cursor</code> have been implemented; see the change log link below for details.</p>
+<p>The current release <code>v2.0.0</code> has some minor changes to a few existing methods
+for <code>LinkedVector</code> and <code>Cursor</code>. See the 
+<a href="https://github.com/ttappr/linked-vector/blob/master/CHANGELOG.md">Change Log</a> 
+for details. Version <code>1.1.0</code> is still available and maintained if you choose not
+to move to version 2 of the API. The changes are relatively minor and mostly
+involve certain getters providing direct access to their related values.</p>
 <p>Versioning Conventions:</p>
 <ul>
 <li>MAJOR version indicates incompatible API changes with previous major version.</li>
@@ -22,10 +25,14 @@ count queues.</p>
 </ul>
 <p><a href="https://github.com/ttappr/linked-vector/blob/master/CHANGELOG.md">Change Log</a></p>
 <h3 id="usage"><a href="#usage">Usage</a></h3>
-<p>Edit your Cargo.toml file to include:</p>
+<p>To use <code>v2</code>, edit your Cargo.toml file to include:</p>
 
 <div class="example-wrap ignore"><div class='tooltip'>ⓘ</div><pre class="rust rust-example-rendered"><code>[dependencies]
 linked-vector = <span class="string">&quot;2.0&quot;</span></code></pre></div>
+<p>Or, for <code>v1</code> include:</p>
+
+<div class="example-wrap ignore"><div class='tooltip'>ⓘ</div><pre class="rust rust-example-rendered"><code>[dependencies]
+linked-vector = <span class="string">&quot;1.1&quot;</span></code></pre></div>
 <p>Or run this on the command line from your project folder:</p>
 <div class="example-wrap"><pre class="language-console, ignore"><code>cargo add linked-vector
 </code></pre></div><h3 id="handles"><a href="#handles">Handles</a></h3>
