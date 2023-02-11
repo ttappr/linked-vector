@@ -1,5 +1,22 @@
 # Changelog
 
+## [v1.1.0] - 2023-02-10
+
+### Added
+
+- `Hash` implemented for `LinkedVector`.
+- `Debug` friendly string representation implemented for `LinkedVector`.
+- More methods added to `LinkedVector`:
+  - `next_value()` allows accessing the value after the given node.
+  - `next_value_mut()` allows mutable access to the value after the given node.
+  - `prev_value()` allows access to the previous value of the given node.
+  - `prev_value_mut()` allows mutable access to the value before the given node.
+
+### Changed
+
+- `Cursor::move_to_start()` is deprecated, use `move_to_front()` instead.
+- `Cursor::move_to_end()` is deprecated, use `move_to_back()` instead.
+
 ## [v1.0.0] - 2023-02-09
 
 ### Added
@@ -21,6 +38,7 @@
 ### Fixed
 
 - Issue where expired handles weren't detected if the node had been recycled.
+
 
 ## [v0.3.0] - 2023-02-08
 

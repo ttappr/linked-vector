@@ -2,9 +2,13 @@
 #![doc = "To Primary Struct: [LinkedVector]"]
 #![doc = include_str!("../README.md")]
 
+use core::fmt;
 use core::iter::{FromIterator, FusedIterator};
 use core::ops::{Index, IndexMut};
-use std::cmp::Ordering;
+use core::cmp::Ordering;
+use core::hash::{Hash, Hasher};
+use core::fmt::Formatter;
+use core::fmt::Debug;
 pub use cursor::*;
 
 #[cfg(test)]
@@ -48,7 +52,6 @@ impl Default for HNode {
 /// The node type used by `LinkedVector`. It holds a value of type `T`, and 
 /// handles to the next and previous nodes in the list.
 /// 
-#[derive(Debug)]
 struct Node<T> {
     value : Option<T>,
     next  : HNode,
@@ -87,7 +90,6 @@ impl<T> Node<T> {
 /// within a vector. This allows for O(1) insertion and removal of elements
 /// from the list, and O(1) access to elements by handle.
 /// 
-#[derive(Debug)]
 pub struct LinkedVector<T> {
     vec   : Vec<Node<T>>,
     head  : HNode,
@@ -493,6 +495,24 @@ impl<T> LinkedVector<T> {
         }
     }    
 
+    /// Returns a reference to the next element's value in the list, or `None` 
+    /// if the given handle is the last node in the list. This operation 
+    /// completes in O(1) time.
+    /// 
+    #[inline]
+    pub fn next_value(&self, node: HNode) -> Option<&T> {
+        self.next_node(node).and_then(|n| self.get_(n).value.as_ref())
+    }
+
+    /// Returns a mutable reference to the next element's value in the list, or
+    /// `None` if the given handle is the last node in the list. This operation
+    /// completes in O(1) time.
+    /// 
+    #[inline]
+    pub fn next_value_mut(&mut self, node: HNode) -> Option<&mut T> {
+        self.next_node(node).and_then(move |n| self.get_mut_(n).value.as_mut())
+    }
+
     /// Returns a handle to the previous node in the list, or `None` if the 
     /// given handle is the first node in the list. This operation completes in
     /// O(1) time.
@@ -512,6 +532,24 @@ impl<T> LinkedVector<T> {
         } else {
             None
         }
+    }
+
+    /// Returns a reference to the previous element's value in the list, or
+    /// `None` if the given handle is the first node in the list. This operation
+    /// completes in O(1) time.
+    /// 
+    #[inline]
+    pub fn prev_value(&self, node: HNode) -> Option<&T> {
+        self.prev_node(node).and_then(|n| self.get_(n).value.as_ref())
+    }
+
+    /// Returns a mutable reference to the previous element's value in the list,
+    /// or `None` if the given handle is the first node in the list. This
+    /// operation completes in O(1) time.
+    /// 
+    #[inline]
+    pub fn prev_value_mut(&mut self, node: HNode) -> Option<&mut T> {
+        self.prev_node(node).and_then(move |n| self.get_mut_(n).value.as_mut())
     }
 
     /// Pops the last element of the vector. Returns `None` if the vector is
@@ -969,6 +1007,18 @@ where
     }
 }
 
+impl<T> Debug for LinkedVector<T> 
+where
+    T: Debug,
+{
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+        write!(f, "LinkedVector(")?;
+        f.debug_list().entries(self.iter()).finish()?;
+        write!(f, ")")?;
+        Ok(())
+    }
+}
+
 impl<T> Default for LinkedVector<T> {
     #[inline]
     fn default() -> Self {
@@ -1027,6 +1077,18 @@ impl<T> FromIterator<T> for LinkedVector<T> {
             lv.push_back(v);
         }
         lv
+    }
+}
+
+impl<T> Hash for LinkedVector<T> 
+where
+    T: Hash,
+{
+    #[inline]
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        for v in self.iter() {
+            v.hash(state);
+        }
     }
 }
 

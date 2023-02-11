@@ -10,6 +10,10 @@ pub trait CursorBase<T> {
     /// 
     fn get(&self) -> Option<&T>;
 
+    /// Returns the handle of the element at the cursor's current position.
+    /// 
+    fn node(&self) -> HNode;
+
     /// Moves the cursor to the specified handle. Returns true if the cursor
     /// was moved, false if the handle was invalid.
     /// 
@@ -27,14 +31,26 @@ pub trait CursorBase<T> {
     /// 
     fn move_prev(&mut self) -> Option<HNode>;
 
+    /// Moves the cursor to the end of the list. Returns the handle of the
+    /// last element if the cursor was moved, None if the list is empty.
+    /// 
+    fn move_to_back(&mut self) -> Option<HNode>;
+
     /// Moves the cursor to the start of the list. Returns the handle of the
     /// first element if the cursor was moved, None if the list is empty.
     /// 
+    fn move_to_front(&mut self) -> Option<HNode>;
+
+    /// Moves the cursor to the start of the list. Returns the handle of the
+    /// first element if the cursor was moved, None if the list is empty.
+    /// 
+    #[deprecated(since = "1.1.0", note = "Use move_to_front() instead.")]
     fn move_to_start(&mut self) -> Option<HNode>;
 
     /// Moves the cursor to the end of the list. Returns the handle of the
     /// last element if the cursor was moved, None if the list is empty.
     /// 
+    #[deprecated(since = "1.1.0", note = "Use move_to_back() instead.")]
     fn move_to_end(&mut self) -> Option<HNode>;
 
     /// Moves the cursor forward by the specified number of elements. Returns
@@ -74,6 +90,10 @@ impl<'a, T> CursorBase<T> for Cursor<'a, T> {
         self.lvec.get(self.handle)
     }
 
+    fn node(&self) -> HNode {
+        self.handle
+    }
+
     fn move_to(&mut self, handle: HNode) -> bool {
         if self.lvec.get(handle).is_some() {
             self.handle = handle;
@@ -97,18 +117,26 @@ impl<'a, T> CursorBase<T> for Cursor<'a, T> {
         })
     }
 
-    fn move_to_start(&mut self) -> Option<HNode> {
+    fn move_to_front(&mut self) -> Option<HNode> {
         self.lvec.front_node().map(|hstart| {
             self.handle = hstart;
             hstart
         })
     }
 
-    fn move_to_end(&mut self) -> Option<HNode> {
+    fn move_to_back(&mut self) -> Option<HNode> {
         self.lvec.back_node().map(|hend| {
             self.handle = hend;
             hend
         })
+    }
+
+    fn move_to_start(&mut self) -> Option<HNode> {
+        self.move_to_front()
+    }
+
+    fn move_to_end(&mut self) -> Option<HNode> {
+        self.move_to_back()
     }
     fn forward(&mut self, n: usize) ->Result<HNode, HNode> {
         for _ in 0..n {
@@ -196,6 +224,10 @@ impl<'a, T> CursorBase<T> for CursorMut<'a, T> {
         self.lvec.get(self.handle)
     }
 
+    fn node(&self) -> HNode {
+        self.handle
+    }
+
     fn move_to(&mut self, handle: HNode) -> bool {
         if self.lvec.get(handle).is_some() {
             self.handle = handle;
@@ -219,18 +251,26 @@ impl<'a, T> CursorBase<T> for CursorMut<'a, T> {
         })
     }
 
-    fn move_to_start(&mut self) -> Option<HNode> {
+    fn move_to_front(&mut self) -> Option<HNode> {
         self.lvec.front_node().map(|hstart| {
             self.handle = hstart;
             hstart
         })
     }
 
-    fn move_to_end(&mut self) -> Option<HNode> {
+    fn move_to_back(&mut self) -> Option<HNode> {
         self.lvec.back_node().map(|hend| {
             self.handle = hend;
             hend
         })
+    }
+
+    fn move_to_start(&mut self) -> Option<HNode> {
+        self.move_to_front()
+    }
+
+    fn move_to_end(&mut self) -> Option<HNode> {
+        self.move_to_back()
     }
 
     fn forward(&mut self, n: usize) -> Result<HNode, HNode> {

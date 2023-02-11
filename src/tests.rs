@@ -1,6 +1,7 @@
 #![allow(unused_variables)]
 
-use std::cmp::Reverse;
+use core::cmp::Reverse;
+use std::collections::HashMap;
 
 use super::*;
 
@@ -133,6 +134,26 @@ fn compact() {
 }
 
 #[test]
+#[should_panic]
+#[cfg(debug_assertions)]
+fn compact_2() {
+    let mut lv1 = LinkedVector::from([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+
+    lv1.remove(lv1.handle(5).unwrap());
+
+    let h4 = lv1.insert(lv1.handle(4).unwrap(), 42);
+
+    assert_eq!(lv1.to_vec(), vec![0, 1, 2, 3, 42, 4, 6, 7, 8, 9]);
+
+    let lv2 = lv1.compact();
+
+    assert_eq!(lv2.to_vec(), vec![0, 1, 2, 3, 42, 4, 6, 7, 8, 9]);
+
+    // Should panic here. Old handle should be foreign to new vector.
+    lv2.get(h4);
+}
+
+#[test]
 fn contains() {
     let mut lv1 = LinkedVector::new();
     lv1.push_back(1);
@@ -153,7 +174,7 @@ fn cursor() {
     
     assert_eq!(cursor.get(), Some(&2));
     
-    let hend = cursor.move_to_end().unwrap();
+    let hend = cursor.move_to_back().unwrap();
     let hbak = cursor.backward(2).unwrap();
     
     assert_eq!(cursor.get(), Some(&5));
@@ -210,10 +231,22 @@ fn cursor_remove() {
     cursor.remove();
     assert_eq!(cursor.get(), Some(&6));
 
-    cursor.move_to_end().unwrap();
+    cursor.move_to_back().unwrap();
     cursor.remove();
     assert_eq!(cursor.get(), Some(&8));
     assert_eq!(lv.to_vec(), vec![1, 2, 3, 4, 6, 7, 8]);
+}
+
+#[test]
+fn debug() {
+    let lv1 = LinkedVector::from([1, 2, 3]);
+    assert_eq!(format!("{:?}", lv1), "LinkedVector([1, 2, 3])");
+
+    let lv2 = LinkedVector::from(["foo", "bar", "baz"]);
+    assert_eq!(format!("{:?}", lv2), r#"LinkedVector(["foo", "bar", "baz"])"#);
+
+    let lv3 = LinkedVector::<i32>::new();
+    assert_eq!(format!("{:?}", lv3), "LinkedVector([])");
 }
 
 #[test]
@@ -375,6 +408,19 @@ fn handles() {
     assert_eq!(it.next(), Some(h2));
     assert_eq!(it.next(), Some(h1));
     assert!(it.next().is_none());
+}
+
+#[test]
+fn hashing() {
+    let mut map = HashMap::new();
+    let     lv1 = LinkedVector::from([1, 2, 3]);
+    let     lv2 = LinkedVector::from([3, 4, 5]);
+
+    map.insert(lv1.clone(), 1);
+    map.insert(lv2.clone(), 2);
+
+    assert_eq!(map.get(&lv1), Some(&1));
+    assert_eq!(map.get(&lv2), Some(&2));
 }
 
 #[test]

@@ -251,6 +251,46 @@
 <a href="#251" id="251">251</a>
 <a href="#252" id="252">252</a>
 <a href="#253" id="253">253</a>
+<a href="#254" id="254">254</a>
+<a href="#255" id="255">255</a>
+<a href="#256" id="256">256</a>
+<a href="#257" id="257">257</a>
+<a href="#258" id="258">258</a>
+<a href="#259" id="259">259</a>
+<a href="#260" id="260">260</a>
+<a href="#261" id="261">261</a>
+<a href="#262" id="262">262</a>
+<a href="#263" id="263">263</a>
+<a href="#264" id="264">264</a>
+<a href="#265" id="265">265</a>
+<a href="#266" id="266">266</a>
+<a href="#267" id="267">267</a>
+<a href="#268" id="268">268</a>
+<a href="#269" id="269">269</a>
+<a href="#270" id="270">270</a>
+<a href="#271" id="271">271</a>
+<a href="#272" id="272">272</a>
+<a href="#273" id="273">273</a>
+<a href="#274" id="274">274</a>
+<a href="#275" id="275">275</a>
+<a href="#276" id="276">276</a>
+<a href="#277" id="277">277</a>
+<a href="#278" id="278">278</a>
+<a href="#279" id="279">279</a>
+<a href="#280" id="280">280</a>
+<a href="#281" id="281">281</a>
+<a href="#282" id="282">282</a>
+<a href="#283" id="283">283</a>
+<a href="#284" id="284">284</a>
+<a href="#285" id="285">285</a>
+<a href="#286" id="286">286</a>
+<a href="#287" id="287">287</a>
+<a href="#288" id="288">288</a>
+<a href="#289" id="289">289</a>
+<a href="#290" id="290">290</a>
+<a href="#291" id="291">291</a>
+<a href="#292" id="292">292</a>
+<a href="#293" id="293">293</a>
 </pre><pre class="rust"><code>
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
@@ -262,6 +302,10 @@
     <span class="doccomment">/// Returns a reference to the element at the cursor&#39;s current position.
     /// 
     </span><span class="kw">fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>T&gt;;
+
+    <span class="doccomment">/// Returns the handle of the element at the cursor&#39;s current position.
+    /// 
+    </span><span class="kw">fn </span>node(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; HNode;
 
     <span class="doccomment">/// Moves the cursor to the specified handle. Returns true if the cursor
     /// was moved, false if the handle was invalid.
@@ -280,14 +324,26 @@
     /// 
     </span><span class="kw">fn </span>move_prev(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;HNode&gt;;
 
+    <span class="doccomment">/// Moves the cursor to the end of the list. Returns the handle of the
+    /// last element if the cursor was moved, None if the list is empty.
+    /// 
+    </span><span class="kw">fn </span>move_to_back(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;HNode&gt;;
+
     <span class="doccomment">/// Moves the cursor to the start of the list. Returns the handle of the
     /// first element if the cursor was moved, None if the list is empty.
     /// 
+    </span><span class="kw">fn </span>move_to_front(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;HNode&gt;;
+
+    <span class="doccomment">/// Moves the cursor to the start of the list. Returns the handle of the
+    /// first element if the cursor was moved, None if the list is empty.
+    /// 
+    </span><span class="attr">#[deprecated(since = <span class="string">&quot;1.1.0&quot;</span>, note = <span class="string">&quot;Use move_to_front() instead.&quot;</span>)]
     </span><span class="kw">fn </span>move_to_start(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;HNode&gt;;
 
     <span class="doccomment">/// Moves the cursor to the end of the list. Returns the handle of the
     /// last element if the cursor was moved, None if the list is empty.
     /// 
+    </span><span class="attr">#[deprecated(since = <span class="string">&quot;1.1.0&quot;</span>, note = <span class="string">&quot;Use move_to_back() instead.&quot;</span>)]
     </span><span class="kw">fn </span>move_to_end(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;HNode&gt;;
 
     <span class="doccomment">/// Moves the cursor forward by the specified number of elements. Returns
@@ -327,6 +383,10 @@
         <span class="self">self</span>.lvec.get(<span class="self">self</span>.handle)
     }
 
+    <span class="kw">fn </span>node(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; HNode {
+        <span class="self">self</span>.handle
+    }
+
     <span class="kw">fn </span>move_to(<span class="kw-2">&amp;mut </span><span class="self">self</span>, handle: HNode) -&gt; bool {
         <span class="kw">if </span><span class="self">self</span>.lvec.get(handle).is_some() {
             <span class="self">self</span>.handle = handle;
@@ -350,18 +410,26 @@
         })
     }
 
-    <span class="kw">fn </span>move_to_start(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;HNode&gt; {
+    <span class="kw">fn </span>move_to_front(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;HNode&gt; {
         <span class="self">self</span>.lvec.front_node().map(|hstart| {
             <span class="self">self</span>.handle = hstart;
             hstart
         })
     }
 
-    <span class="kw">fn </span>move_to_end(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;HNode&gt; {
+    <span class="kw">fn </span>move_to_back(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;HNode&gt; {
         <span class="self">self</span>.lvec.back_node().map(|hend| {
             <span class="self">self</span>.handle = hend;
             hend
         })
+    }
+
+    <span class="kw">fn </span>move_to_start(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;HNode&gt; {
+        <span class="self">self</span>.move_to_front()
+    }
+
+    <span class="kw">fn </span>move_to_end(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;HNode&gt; {
+        <span class="self">self</span>.move_to_back()
     }
     <span class="kw">fn </span>forward(<span class="kw-2">&amp;mut </span><span class="self">self</span>, n: usize) -&gt;<span class="prelude-ty">Result</span>&lt;HNode, HNode&gt; {
         <span class="kw">for _ in </span><span class="number">0</span>..n {
@@ -449,6 +517,10 @@
         <span class="self">self</span>.lvec.get(<span class="self">self</span>.handle)
     }
 
+    <span class="kw">fn </span>node(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; HNode {
+        <span class="self">self</span>.handle
+    }
+
     <span class="kw">fn </span>move_to(<span class="kw-2">&amp;mut </span><span class="self">self</span>, handle: HNode) -&gt; bool {
         <span class="kw">if </span><span class="self">self</span>.lvec.get(handle).is_some() {
             <span class="self">self</span>.handle = handle;
@@ -472,18 +544,26 @@
         })
     }
 
-    <span class="kw">fn </span>move_to_start(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;HNode&gt; {
+    <span class="kw">fn </span>move_to_front(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;HNode&gt; {
         <span class="self">self</span>.lvec.front_node().map(|hstart| {
             <span class="self">self</span>.handle = hstart;
             hstart
         })
     }
 
-    <span class="kw">fn </span>move_to_end(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;HNode&gt; {
+    <span class="kw">fn </span>move_to_back(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;HNode&gt; {
         <span class="self">self</span>.lvec.back_node().map(|hend| {
             <span class="self">self</span>.handle = hend;
             hend
         })
+    }
+
+    <span class="kw">fn </span>move_to_start(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;HNode&gt; {
+        <span class="self">self</span>.move_to_front()
+    }
+
+    <span class="kw">fn </span>move_to_end(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;HNode&gt; {
+        <span class="self">self</span>.move_to_back()
     }
 
     <span class="kw">fn </span>forward(<span class="kw-2">&amp;mut </span><span class="self">self</span>, n: usize) -&gt; <span class="prelude-ty">Result</span>&lt;HNode, HNode&gt; {
@@ -504,4 +584,4 @@
         <span class="prelude-val">Ok</span>(<span class="self">self</span>.handle)
     }
 }</code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="linked_vector" data-themes="" data-resource-suffix="" data-rustdoc-version="1.67.0 (fc594f156 2023-01-24)" data-search-js="search-444266647c4dba98.js" data-settings-js="settings-bebeae96e00e4617.js" data-settings-css="settings-af96d9e2fc13e081.css" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="linked_vector" data-themes="" data-resource-suffix="" data-rustdoc-version="1.67.1 (d5a82bbd2 2023-02-07)" data-search-js="search-444266647c4dba98.js" data-settings-js="settings-bebeae96e00e4617.js" data-settings-css="settings-af96d9e2fc13e081.css" ></div></body></html>
