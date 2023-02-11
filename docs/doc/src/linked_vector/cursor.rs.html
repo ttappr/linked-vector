@@ -302,8 +302,6 @@
 <a href="#302" id="302">302</a>
 <a href="#303" id="303">303</a>
 <a href="#304" id="304">304</a>
-<a href="#305" id="305">305</a>
-<a href="#306" id="306">306</a>
 </pre><pre class="rust"><code>
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
@@ -518,25 +516,23 @@
 
     <span class="doccomment">/// Removes the element at the current position and returns its value. The 
     /// cursor will be moved to the next element if not at the end of the 
-    /// vector, otherwise it moves to the new end. If there was only one item
-    /// in the vector, the cursor&#39;s position is set to `BAD_HANDLE` and should
-    /// no longer be used, or could cause invalid handle panics.
+    /// vector, otherwise it moves to the new end. If the vector is already 
+    /// empty, `None` is returned.
     /// 
-    </span><span class="kw">pub fn </span>remove(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; T {
-        <span class="attr">#[cfg(debug_assertions)]
-        </span><span class="kw">if </span><span class="self">self</span>.lvec.is_empty() {
-            <span class="macro">panic!</span>(<span class="string">&quot;CursorMut::remove() called on empty vector&quot;</span>);
+    </span><span class="kw">pub fn </span>remove(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;T&gt; {
+        <span class="kw">if </span><span class="self">self</span>.lvec.is_empty() {
+            <span class="prelude-val">None
+        </span>} <span class="kw">else </span>{
+            <span class="kw">let </span>hrem = <span class="self">self</span>.handle;
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(hnext) = <span class="self">self</span>.lvec.next_node(<span class="self">self</span>.handle) {
+                <span class="self">self</span>.handle = hnext;
+            } <span class="kw">else if let </span><span class="prelude-val">Some</span>(hprev) = <span class="self">self</span>.lvec.prev_node(<span class="self">self</span>.handle) {
+                <span class="self">self</span>.handle = hprev;
+            } <span class="kw">else </span>{
+                <span class="self">self</span>.handle = BAD_HANDLE;
+            }
+            <span class="prelude-val">Some</span>(<span class="self">self</span>.lvec.remove(hrem))
         }
-
-        <span class="kw">let </span>hrem = <span class="self">self</span>.handle;
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(hnext) = <span class="self">self</span>.lvec.next_node(<span class="self">self</span>.handle) {
-            <span class="self">self</span>.handle = hnext;
-        } <span class="kw">else if let </span><span class="prelude-val">Some</span>(hprev) = <span class="self">self</span>.lvec.prev_node(<span class="self">self</span>.handle) {
-            <span class="self">self</span>.handle = hprev;
-        } <span class="kw">else </span>{
-            <span class="self">self</span>.handle = BAD_HANDLE;
-        }
-        <span class="self">self</span>.lvec.remove(hrem)
     }
 }
 

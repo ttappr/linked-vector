@@ -1447,6 +1447,9 @@
 <a href="#1447" id="1447">1447</a>
 <a href="#1448" id="1448">1448</a>
 <a href="#1449" id="1449">1449</a>
+<a href="#1450" id="1450">1450</a>
+<a href="#1451" id="1451">1451</a>
+<a href="#1452" id="1452">1452</a>
 </pre><pre class="rust"><code>
 <span class="attr">#![doc = <span class="string">&quot;To Primary Struct: [LinkedVector]&quot;</span>]
 #![doc = <span class="macro">include_str!</span>(<span class="string">&quot;../README.md&quot;</span>)]
@@ -2522,7 +2525,10 @@
 }
 
 <span class="kw">impl</span>&lt;T&gt; Default <span class="kw">for </span>LinkedVector&lt;T&gt; {
-    <span class="attr">#[inline]
+    <span class="doccomment">/// Renders the default value for an HNode. This will internally be set
+    /// to `BAD_HANDLE` which is a handle that is invalid.
+    /// 
+    </span><span class="attr">#[inline]
     </span><span class="kw">fn </span>default() -&gt; <span class="self">Self </span>{
         <span class="self">Self</span>::new()
     }
