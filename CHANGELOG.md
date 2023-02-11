@@ -12,14 +12,16 @@
 
 ### Changed
 
-- The following `LinkedVector` methods no longer return an `Option`:
+- The following `LinkedVector` methods no longer return an `Option` and return 
+  their respective values directly:
   - `get()`
   - `get_mut()`
   - `remove()`
-- The following `Cursor`/`CursorMut` methods no longer return an `Option`:
+- The following `Cursor`/`CursorMut` methods no longer return an `Option` and
+  return their respective value directy:
   - `get()`
   - `get_mut()`
-- `Curso::move_to()` now doesn't return a value. The handle passed to it is
+- `Cursor::move_to()` now doesn't return a value. The handle passed to it is
   assumed to be valid, or expect a panic.
 
 
