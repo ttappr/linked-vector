@@ -8,7 +8,7 @@ use crate::*;
 pub trait CursorBase<T> {
     /// Returns a reference to the element at the cursor's current position.
     /// 
-    fn get(&self) -> Option<&T>;
+    fn get(&self) -> &T;
 
     /// Returns the handle of the element at the cursor's current position.
     /// 
@@ -17,7 +17,7 @@ pub trait CursorBase<T> {
     /// Moves the cursor to the specified handle. Returns true if the cursor
     /// was moved, false if the handle was invalid.
     /// 
-    fn move_to(&mut self, handle: HNode) -> bool;
+    fn move_to(&mut self, handle: HNode);
 
     /// Moves the cursor to the next element. Returns the handle of the next
     /// element if the cursor was moved, None if the cursor was already at the
@@ -78,7 +78,9 @@ impl<'a, T> Cursor<'a, T> {
                       handle : HNode) 
         -> Self 
     {
-        lvec.get(handle).expect("Cursor::new() called with invalid handle.");
+        #[cfg(debug_assertions)]
+        lvec.check_handle(handle);
+
         Self {
             lvec,
             handle,
@@ -86,7 +88,7 @@ impl<'a, T> Cursor<'a, T> {
     }
 }
 impl<'a, T> CursorBase<T> for Cursor<'a, T> {
-    fn get(&self) -> Option<&T> {
+    fn get(&self) -> &T {
         self.lvec.get(self.handle)
     }
 
@@ -94,13 +96,11 @@ impl<'a, T> CursorBase<T> for Cursor<'a, T> {
         self.handle
     }
 
-    fn move_to(&mut self, handle: HNode) -> bool {
-        if self.lvec.get(handle).is_some() {
-            self.handle = handle;
-            true
-        } else {
-            false
-        }
+    fn move_to(&mut self, handle: HNode) {
+        #[cfg(debug_assertions)]
+        self.lvec.check_handle(handle);
+
+        self.handle = handle;
     }
 
     fn move_next(&mut self) -> Option<HNode> {
@@ -169,8 +169,9 @@ impl<'a, T> CursorMut<'a, T> {
                       handle : HNode) 
         -> Self 
     {
-        lvec.get(handle)
-            .expect("CursorMut::new() called with invalid handle.");
+        #[cfg(debug_assertions)]
+        lvec.check_handle(handle);
+
         Self {
             lvec,
             handle,
@@ -179,7 +180,7 @@ impl<'a, T> CursorMut<'a, T> {
     /// Returns a mutable reference to the element at the cursor's current
     /// position.
     /// 
-    pub fn get_mut(&mut self) -> Option<&mut T> {
+    pub fn get_mut(&mut self) -> &mut T {
         self.lvec.get_mut(self.handle)
     }
 
@@ -206,7 +207,9 @@ impl<'a, T> CursorMut<'a, T> {
     /// in the vector, the cursor's position is set to `BAD_HANDLE` and should
     /// no longer be used, or could cause invalid handle panics.
     /// 
-    pub fn remove(&mut self) -> Option<T> {
+    pub fn remove(&mut self) -> T {
+        // TODO - Perhaps Cursor should be a special case of trusting handles.
+        //        The Curso could be on an empty list and this sould panic?
         let hrem = self.handle;
         if let Some(hnext) = self.lvec.next_node(self.handle) {
             self.handle = hnext;
@@ -220,7 +223,7 @@ impl<'a, T> CursorMut<'a, T> {
 }
 
 impl<'a, T> CursorBase<T> for CursorMut<'a, T> {
-    fn get(&self) -> Option<&T> {
+    fn get(&self) -> &T {
         self.lvec.get(self.handle)
     }
 
@@ -228,13 +231,11 @@ impl<'a, T> CursorBase<T> for CursorMut<'a, T> {
         self.handle
     }
 
-    fn move_to(&mut self, handle: HNode) -> bool {
-        if self.lvec.get(handle).is_some() {
-            self.handle = handle;
-            true
-        } else {
-            false
-        }
+    fn move_to(&mut self, handle: HNode) {
+        #[cfg(debug_assertions)]
+        self.lvec.check_handle(handle);
+        
+        self.handle = handle;
     }
 
     fn move_next(&mut self) -> Option<HNode> {
