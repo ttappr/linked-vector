@@ -6,6 +6,8 @@ accessible directly in `O(1)` time, and insertions and deletions also operate in
 handles to its previous and next neighbors. So there's no shifting of data when 
 items are inserted or removed.
 
+## LFU Cache Example
+
 An [example project](https://github.com/ttappr/lfu-cache.git) that demonstrates 
 use of the `linked-vector` crate is available. The project is for a Least
 Frequently Used Cache. `LinkedVector`'s are used to implement its frequency 
