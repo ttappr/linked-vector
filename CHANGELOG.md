@@ -1,5 +1,21 @@
 # Changelog
 
+## [v2.0.0] - ????-??-??
+
+### Changed
+
+- The following `LinkedVector` methods no longer return an `Option`:
+  - `get()`
+  - `get_mut()`
+  - `remove()`
+- The following `Cursor`/`CursorMut` methods no longer return an `Option`:
+  - `get()`
+  - `get_mut()`
+  - `remove()`
+- `Curso::move_to()` now doesn't return a value. The handle passed to it is
+  assumed to be valid, or expect a panic.
+
+
 ## [v1.1.0] - 2023-02-10
 
 ### Added
