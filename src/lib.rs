@@ -1073,6 +1073,9 @@ where
 }
 
 impl<T> Default for LinkedVector<T> {
+    /// Renders the default value for an HNode. This will internally be set
+    /// to `BAD_HANDLE` which is a handle that is invalid.
+    /// 
     #[inline]
     fn default() -> Self {
         Self::new()
