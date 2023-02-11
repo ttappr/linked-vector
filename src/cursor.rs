@@ -218,7 +218,9 @@ impl<'a, T> CursorMut<'a, T> {
     /// 
     pub fn remove(&mut self) -> T {
         #[cfg(debug_assertions)]
-        self.lvec.check_handle(self.handle);
+        if self.lvec.is_empty() {
+            panic!("CursorMut::remove() called on empty vector");
+        }
 
         let hrem = self.handle;
         if let Some(hnext) = self.lvec.next_node(self.handle) {
