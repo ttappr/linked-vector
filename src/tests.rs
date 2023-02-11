@@ -134,6 +134,26 @@ fn compact() {
 }
 
 #[test]
+#[should_panic]
+#[cfg(debug_assertions)]
+fn compact_2() {
+    let mut lv1 = LinkedVector::from([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+
+    lv1.remove(lv1.handle(5).unwrap());
+
+    let h4 = lv1.insert(lv1.handle(4).unwrap(), 42);
+
+    assert_eq!(lv1.to_vec(), vec![0, 1, 2, 3, 42, 4, 6, 7, 8, 9]);
+
+    let lv2 = lv1.compact();
+
+    assert_eq!(lv2.to_vec(), vec![0, 1, 2, 3, 42, 4, 6, 7, 8, 9]);
+
+    // Should panic here. Old handle should be foreign to new vector.
+    lv2.get(h4);
+}
+
+#[test]
 fn contains() {
     let mut lv1 = LinkedVector::new();
     lv1.push_back(1);

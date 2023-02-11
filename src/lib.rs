@@ -495,6 +495,24 @@ impl<T> LinkedVector<T> {
         }
     }    
 
+    /// Returns a reference to the next element's value in the list, or `None` 
+    /// if the given handle is the last node in the list. This operation 
+    /// completes in O(1) time.
+    /// 
+    #[inline]
+    pub fn next_value(&self, node: HNode) -> Option<&T> {
+        self.next_node(node).and_then(|n| self.get_(n).value.as_ref())
+    }
+
+    /// Returns a mutable reference to the next element's value in the list, or
+    /// `None` if the given handle is the last node in the list. This operation
+    /// completes in O(1) time.
+    /// 
+    #[inline]
+    pub fn next_value_mut(&mut self, node: HNode) -> Option<&mut T> {
+        self.next_node(node).and_then(move |n| self.get_mut_(n).value.as_mut())
+    }
+
     /// Returns a handle to the previous node in the list, or `None` if the 
     /// given handle is the first node in the list. This operation completes in
     /// O(1) time.
@@ -514,6 +532,24 @@ impl<T> LinkedVector<T> {
         } else {
             None
         }
+    }
+
+    /// Returns a reference to the previous element's value in the list, or
+    /// `None` if the given handle is the first node in the list. This operation
+    /// completes in O(1) time.
+    /// 
+    #[inline]
+    pub fn prev_value(&self, node: HNode) -> Option<&T> {
+        self.prev_node(node).and_then(|n| self.get_(n).value.as_ref())
+    }
+
+    /// Returns a mutable reference to the previous element's value in the list,
+    /// or `None` if the given handle is the first node in the list. This
+    /// operation completes in O(1) time.
+    /// 
+    #[inline]
+    pub fn prev_value_mut(&mut self, node: HNode) -> Option<&mut T> {
+        self.prev_node(node).and_then(move |n| self.get_mut_(n).value.as_mut())
     }
 
     /// Pops the last element of the vector. Returns `None` if the vector is

@@ -15,6 +15,10 @@
   vector.
 - `LinkedVector` gets new stable sort methods: `sort()`, `sort_by()`, and 
   `sort_by_key()`.
+- `next_value()`
+- `next_value_mut()`
+- `prev_value()`
+- `prev_value_mut()`
 
 ### Changed
 
