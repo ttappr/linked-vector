@@ -303,6 +303,7 @@
 <a href="#303" id="303">303</a>
 <a href="#304" id="304">304</a>
 <a href="#305" id="305">305</a>
+<a href="#306" id="306">306</a>
 </pre><pre class="rust"><code>
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
@@ -319,8 +320,7 @@
     /// 
     </span><span class="kw">fn </span>node(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; HNode;
 
-    <span class="doccomment">/// Moves the cursor to the specified handle. Returns true if the cursor
-    /// was moved, false if the handle was invalid.
+    <span class="doccomment">/// Moves the cursor to the specified handle. The handle must be valid.
     /// 
     </span><span class="kw">fn </span>move_to(<span class="kw-2">&amp;mut </span><span class="self">self</span>, handle: HNode);
 
@@ -484,9 +484,9 @@
     }
 
     <span class="doccomment">/// Returns `true` if the vector the cursor is attached to is empty. Since
-    /// a mutable cursor can remove items, this is provided to avoid panics if 
-    /// the cursor is being used to remove items. Attempting other operations
-    /// on an empty vector may result in a panic.
+    /// a mutable cursor can remove items, this is provided as a means to avoid 
+    /// panics if the cursor is being used to remove items. If the underlying 
+    /// vector is empty, other operations may panic.
     /// 
     </span><span class="kw">pub fn </span>is_empty(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
         <span class="self">self</span>.lvec.is_empty()
@@ -524,7 +524,9 @@
     /// 
     </span><span class="kw">pub fn </span>remove(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; T {
         <span class="attr">#[cfg(debug_assertions)]
-        </span><span class="self">self</span>.lvec.check_handle(<span class="self">self</span>.handle);
+        </span><span class="kw">if </span><span class="self">self</span>.lvec.is_empty() {
+            <span class="macro">panic!</span>(<span class="string">&quot;CursorMut::remove() called on empty vector&quot;</span>);
+        }
 
         <span class="kw">let </span>hrem = <span class="self">self</span>.handle;
         <span class="kw">if let </span><span class="prelude-val">Some</span>(hnext) = <span class="self">self</span>.lvec.next_node(<span class="self">self</span>.handle) {
