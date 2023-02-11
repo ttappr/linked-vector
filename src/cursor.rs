@@ -14,8 +14,7 @@ pub trait CursorBase<T> {
     /// 
     fn node(&self) -> HNode;
 
-    /// Moves the cursor to the specified handle. Returns true if the cursor
-    /// was moved, false if the handle was invalid.
+    /// Moves the cursor to the specified handle. The handle must be valid.
     /// 
     fn move_to(&mut self, handle: HNode);
 
@@ -179,9 +178,9 @@ impl<'a, T> CursorMut<'a, T> {
     }
 
     /// Returns `true` if the vector the cursor is attached to is empty. Since
-    /// a mutable cursor can remove items, this is provided to avoid panics if 
-    /// the cursor is being used to remove items. Attempting other operations
-    /// on an empty vector may result in a panic.
+    /// a mutable cursor can remove items, this is provided as a means to avoid 
+    /// panics if the cursor is being used to remove items. If the underlying 
+    /// vector is empty, other operations may panic.
     /// 
     pub fn is_empty(&self) -> bool {
         self.lvec.is_empty()
