@@ -15,10 +15,11 @@ count queues.
 
 ## Updates
 
-The first major release is here! The methods and features of v1.0 `LinkedVector`
-have been finalized and should be compatible with the last release `v0.3.0`. 
-The frequency of releases will now slow down and follow SemVer conventions:
+The current release `v1.1.0` is a backward compatible minor revision to 
+`v1.0.0`. More functionality is added to `LinkedVector` and minor changes to 
+`Cursor` have been implemented; see the change log link below for details.
 
+Versioning Conventions:
 - MAJOR version indicates incompatible API changes with previous major version.
 - MINOR version indicates added functionality in a backwards-compatible manner.
 - PATCH version indicates backwards-compatible bug fixes.
