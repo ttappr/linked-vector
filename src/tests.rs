@@ -174,7 +174,7 @@ fn cursor() {
     
     assert_eq!(cursor.get(), Some(&2));
     
-    let hend = cursor.move_to_end().unwrap();
+    let hend = cursor.move_to_back().unwrap();
     let hbak = cursor.backward(2).unwrap();
     
     assert_eq!(cursor.get(), Some(&5));
@@ -231,7 +231,7 @@ fn cursor_remove() {
     cursor.remove();
     assert_eq!(cursor.get(), Some(&6));
 
-    cursor.move_to_end().unwrap();
+    cursor.move_to_back().unwrap();
     cursor.remove();
     assert_eq!(cursor.get(), Some(&8));
     assert_eq!(lv.to_vec(), vec![1, 2, 3, 4, 6, 7, 8]);
