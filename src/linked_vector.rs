@@ -12,7 +12,7 @@ use core::fmt::Debug;
 pub use cursor::*;
 
 #[cfg(test)]
-mod tests_linked_vector;
+mod tests;
 mod cursor;
 
 #[cfg(debug_assertions)]
@@ -243,7 +243,7 @@ impl<T> LinkedVector<T> {
     /// 
     /// cursor.forward(3);
     /// 
-    /// assert_eq!(cursor.get(), &6);
+    /// assert_eq!(cursor.get(), Some(&6));
     /// ```
     #[inline]
     pub fn cursor(&self, node: HNode) -> Cursor<T> {
@@ -251,9 +251,7 @@ impl<T> LinkedVector<T> {
     }
 
     /// Creates a cursor that holds a mutable reference to the LinkedVector that
-    /// can be used to traverse the list starting at the given node. If the 
-    /// vector is empty, `None` is returned. This operation completes in O(1)
-    /// time.
+    /// can be used to traverse the list starting at the given node.
     /// ```
     /// use linked_vector::*;
     /// let mut lv = LinkedVector::from([1, 2, 3, 4, 5, 6]);
@@ -261,64 +259,15 @@ impl<T> LinkedVector<T> {
     /// 
     /// cursor.forward(3);
     /// 
-    /// assert_eq!(cursor.get(), &4);
+    /// assert_eq!(cursor.get(), Some(&4));
     /// 
-    /// *cursor.get_mut() = 42;
+    /// *cursor.get_mut().unwrap() = 42;
     /// 
     /// assert_eq!(lv.to_vec(), vec![1, 2, 3, 42, 5, 6]);
     /// ```
     #[inline]
     pub fn cursor_mut(&mut self, node: HNode) -> CursorMut<T> {
         CursorMut::new(self, node)
-    }
-
-    /// Returns a Cursor starting at the front element, or `None` if the list is
-    /// empty. If the vector is empty, `None` is returned. This operation
-    /// completes in O(1) time.
-    /// 
-    #[inline]
-    pub fn cursor_back(&self) -> Option<Cursor<T>> {
-        if self.is_empty() {
-            None
-        } else {
-            Some(self.cursor(self.back_node().unwrap()))
-        }
-    }
-
-    /// Returns a Cursor starting at the back element, or `None` if the list is
-    /// empty. This operation completes in O(1) time.
-    /// 
-    #[inline]
-    pub fn cursor_back_mut(&mut self) -> Option<CursorMut<T>> {
-        if self.is_empty() {
-            None
-        } else {
-            Some(self.cursor_mut(self.back_node().unwrap()))
-        }
-    }
-
-    /// Gives a reference to the element at the front of the vector, or `None` 
-    /// if the list is empty. This operation completes in O(1) time.
-    /// 
-    #[inline]
-    pub fn cursor_front(&self) -> Option<Cursor<T>> {
-        if self.is_empty() {
-            None
-        } else {
-            Some(self.cursor(self.front_node().unwrap()))
-        }
-    }
-
-    /// Gives a mutable Cursor starting at the front of the vector, or `None` if
-    /// the list is empty. This operation completes in O(1) time.
-    /// 
-    #[inline]
-    pub fn cursor_front_mut(&mut self) -> Option<CursorMut<T>> {
-        if self.is_empty() {
-            None
-        } else {
-            Some(self.cursor_mut(self.front_node().unwrap()))
-        }
     }
 
     /// Gives a reference to the element at the front of the vector, or `None` 
@@ -353,7 +302,7 @@ impl<T> LinkedVector<T> {
     /// let hnode = lv.push_front(42);
     /// 
     /// assert_eq!(lv.front_node(), Some(hnode));
-    /// assert_eq!(lv.front_node().map(|h| lv.get(h)), Some(&42));
+    /// assert_eq!(lv.front_node().and_then(|h| lv.get(h)), Some(&42));
     /// ```
     #[inline]
     pub fn front_node(&self) -> Option<HNode> {
@@ -379,11 +328,11 @@ impl<T> LinkedVector<T> {
     /// let mut lv = LinkedVector::from([1, 2, 3]);
     /// let hnode = lv.push_front(42);
     /// 
-    /// assert_eq!(lv.get(hnode), &42);
+    /// assert_eq!(lv.get(hnode), Some(&42));
     /// ```
     #[inline]
-    pub fn get(&self, node: HNode) -> &T {
-        self.get_(node).value.as_ref().unwrap()
+    pub fn get(&self, node: HNode) -> Option<&T> {
+        self.get_(node).value.as_ref()
     }
 
     /// Provides a mutable reference to the element indicated by the given
@@ -394,13 +343,13 @@ impl<T> LinkedVector<T> {
     /// let mut lv = LinkedVector::new();
     /// let hnode = lv.push_front(0);
     /// 
-    /// *lv.get_mut(hnode) = 42;
+    /// *lv.get_mut(hnode).unwrap() = 42;
     /// 
-    /// assert_eq!(lv.get(hnode), &42);
+    /// assert_eq!(lv.get(hnode), Some(&42));
     /// ```
     #[inline]
-    pub fn get_mut(&mut self, node: HNode) -> &mut T {
-        self.get_mut_(node).value.as_mut().unwrap()
+    pub fn get_mut(&mut self, node: HNode) -> Option<&mut T> {
+        self.get_mut_(node).value.as_mut()
     }
 
     /// Returns the handle to the node at the given index, or `None` if the
@@ -460,7 +409,7 @@ impl<T> LinkedVector<T> {
     /// let h2 = lv.insert(h1, 43);
     /// 
     /// assert_eq!(lv.next_node(h2), Some(h1));
-    /// assert_eq!(lv.get(h1), &42);
+    /// assert_eq!(lv.get(h1), Some(&42));
     /// ```
     #[inline]
     pub fn insert(&mut self, node: HNode, value: T) -> HNode {
@@ -478,7 +427,7 @@ impl<T> LinkedVector<T> {
     /// let h2 = lv.insert_after(h1, 43);
     /// 
     /// assert_eq!(lv.next_node(h1), Some(h2));
-    /// assert_eq!(lv.get(h2), &43);
+    /// assert_eq!(lv.get(h2), Some(&43));
     /// ```
     #[inline]
     pub fn insert_after(&mut self, node: HNode, value: T) -> HNode {
@@ -682,8 +631,8 @@ impl<T> LinkedVector<T> {
     /// assert_eq!(lv, LinkedVector::from([1, 3]));
     /// ```
     #[inline]
-    pub fn remove(&mut self, node: HNode) -> T {
-        self.remove_(Some(node)).unwrap()
+    pub fn remove(&mut self, node: HNode) -> Option<T> {
+        self.remove_(Some(node))
     }
 
     /// Sorts the elemements in place in ascending order. Previously held 
@@ -929,8 +878,9 @@ impl<T> LinkedVector<T> {
     #[inline(always)]
     fn get_(&self, node: HNode) -> &Node<T> {
         #[cfg(debug_assertions)]
-        self.check_handle(node);
-        
+        { assert!(node.0 != BAD_HANDLE.0, "Handle is invalid.");
+          assert!(node.2 == self.uuid, "Handle is not native.");
+          assert!(node.1 == self.vec[node.0].gen, "Handle has expired."); }
         &self.vec[node.0]
     }
 
@@ -940,16 +890,10 @@ impl<T> LinkedVector<T> {
     #[inline(always)]
     fn get_mut_(&mut self, node: HNode) -> &mut Node<T> {
         #[cfg(debug_assertions)]
-        self.check_handle(node);
-
+        { assert!(node.0 != BAD_HANDLE.0, "Handle is invalid.");
+          assert!(node.2 == self.uuid, "Handle is not native."); 
+          assert!(node.1 == self.vec[node.0].gen, "Handle has expired."); }
         &mut self.vec[node.0]
-    }
-
-    #[cfg(debug_assertions)]
-    fn check_handle(&self, node: HNode) {
-        assert!(node.0 != BAD_HANDLE.0, "Handle is invalid.");
-        assert!(node.2 == self.uuid, "Handle is not native."); 
-        assert!(node.1 == self.vec[node.0].gen, "Handle has expired.");
     }
 
     /// Renders a new element node and returns a handle to it. This operation
@@ -1076,9 +1020,6 @@ where
 }
 
 impl<T> Default for LinkedVector<T> {
-    /// Renders the default value for an HNode. This will internally be set
-    /// to `BAD_HANDLE` which is a handle that is invalid.
-    /// 
     #[inline]
     fn default() -> Self {
         Self::new()
@@ -1156,14 +1097,14 @@ impl<T> Index<HNode> for LinkedVector<T> {
 
     #[inline]
     fn index(&self, handle: HNode) -> &Self::Output {
-        self.get(handle)
+        self.get(handle).expect("Invalid handle")
     }
 }
 
 impl<T> IndexMut<HNode> for LinkedVector<T> {
     #[inline]
     fn index_mut(&mut self, handle: HNode) -> &mut Self::Output {
-        self.get_mut(handle)
+        self.get_mut(handle).expect("Invalid handle")
     }
 }
 
@@ -1290,7 +1231,7 @@ impl<'a, T> Iterator for Iter<'a, T> {
             let hnode = self.hnode;
             self.hnode = self.lv.get_(hnode).next;
             self.len -= 1;
-            Some(self.lv.get(hnode))
+            self.lv.get(hnode)
         } else {
             None
         }
@@ -1313,7 +1254,7 @@ impl<'a, T> DoubleEndedIterator for Iter<'a, T> {
             let node = self.lv.get_(hrev);
             self.hrev = node.prev;
             self.len -= 1;
-            Some(self.lv.get(hrev))
+            self.lv.get(hrev)
         } else {
             None
         }
@@ -1368,7 +1309,7 @@ impl<'a, T> Iterator for IterMut<'a, T> {
             let hnode = self.hnode;
             self.hnode = self.lv.get_(hnode).next;
             self.len -= 1;
-            Some(unsafe{ &mut *(self.lv.get_mut(hnode) as *mut T)})
+            self.lv.get_mut(hnode).map(|p| unsafe { &mut *(p as *mut T) })
         } else {
             None
         }
@@ -1391,7 +1332,7 @@ impl<'a, T> DoubleEndedIterator for IterMut<'a, T> {
             let node = self.lv.get_(hrev);
             self.hrev = node.prev;
             self.len -= 1;
-            Some(unsafe { &mut *(self.lv.get_mut(hrev) as *mut T) })
+            self.lv.get_mut(hrev).map(|p| unsafe { &mut *(p as *mut T) })
         } else {
             None
         }

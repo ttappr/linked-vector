@@ -54,13 +54,17 @@ pub trait CursorBase<T> {
 
     /// Moves the cursor forward by the specified number of elements. Returns
     /// the handle of the element at the new position if the cursor was moved,
-    /// Err(handle) if the cursor was already at the end of the list.
+    /// Err(handle) if the cursor did not move forward by the specified amount.
+    /// The handle at the current position after the move is returned in 
+    /// either Result variant.
     /// 
     fn forward(&mut self, n: usize) -> Result<HNode, HNode>;
 
     /// Moves the cursor backward by the specified number of elements. Returns
     /// the handle of the element at the new position if the cursor was moved,
-    /// Err(handle) if the cursor was already at the start of the list.
+    /// Err(handle) if the cursor did not move backward by the specified amount.
+    /// The handle at the current position after the move is returned in 
+    /// either Result variant.
     /// 
     fn backward(&mut self, n: usize) -> Result<HNode, HNode>;
 }
