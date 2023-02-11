@@ -1394,6 +1394,59 @@
 <a href="#1394" id="1394">1394</a>
 <a href="#1395" id="1395">1395</a>
 <a href="#1396" id="1396">1396</a>
+<a href="#1397" id="1397">1397</a>
+<a href="#1398" id="1398">1398</a>
+<a href="#1399" id="1399">1399</a>
+<a href="#1400" id="1400">1400</a>
+<a href="#1401" id="1401">1401</a>
+<a href="#1402" id="1402">1402</a>
+<a href="#1403" id="1403">1403</a>
+<a href="#1404" id="1404">1404</a>
+<a href="#1405" id="1405">1405</a>
+<a href="#1406" id="1406">1406</a>
+<a href="#1407" id="1407">1407</a>
+<a href="#1408" id="1408">1408</a>
+<a href="#1409" id="1409">1409</a>
+<a href="#1410" id="1410">1410</a>
+<a href="#1411" id="1411">1411</a>
+<a href="#1412" id="1412">1412</a>
+<a href="#1413" id="1413">1413</a>
+<a href="#1414" id="1414">1414</a>
+<a href="#1415" id="1415">1415</a>
+<a href="#1416" id="1416">1416</a>
+<a href="#1417" id="1417">1417</a>
+<a href="#1418" id="1418">1418</a>
+<a href="#1419" id="1419">1419</a>
+<a href="#1420" id="1420">1420</a>
+<a href="#1421" id="1421">1421</a>
+<a href="#1422" id="1422">1422</a>
+<a href="#1423" id="1423">1423</a>
+<a href="#1424" id="1424">1424</a>
+<a href="#1425" id="1425">1425</a>
+<a href="#1426" id="1426">1426</a>
+<a href="#1427" id="1427">1427</a>
+<a href="#1428" id="1428">1428</a>
+<a href="#1429" id="1429">1429</a>
+<a href="#1430" id="1430">1430</a>
+<a href="#1431" id="1431">1431</a>
+<a href="#1432" id="1432">1432</a>
+<a href="#1433" id="1433">1433</a>
+<a href="#1434" id="1434">1434</a>
+<a href="#1435" id="1435">1435</a>
+<a href="#1436" id="1436">1436</a>
+<a href="#1437" id="1437">1437</a>
+<a href="#1438" id="1438">1438</a>
+<a href="#1439" id="1439">1439</a>
+<a href="#1440" id="1440">1440</a>
+<a href="#1441" id="1441">1441</a>
+<a href="#1442" id="1442">1442</a>
+<a href="#1443" id="1443">1443</a>
+<a href="#1444" id="1444">1444</a>
+<a href="#1445" id="1445">1445</a>
+<a href="#1446" id="1446">1446</a>
+<a href="#1447" id="1447">1447</a>
+<a href="#1448" id="1448">1448</a>
+<a href="#1449" id="1449">1449</a>
 </pre><pre class="rust"><code>
 <span class="attr">#![doc = <span class="string">&quot;To Primary Struct: [LinkedVector]&quot;</span>]
 #![doc = <span class="macro">include_str!</span>(<span class="string">&quot;../README.md&quot;</span>)]
@@ -1639,7 +1692,7 @@
     /// 
     /// cursor.forward(3);
     /// 
-    /// assert_eq!(cursor.get(), Some(&amp;6));
+    /// assert_eq!(cursor.get(), &amp;6);
     /// ```
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>cursor(<span class="kw-2">&amp;</span><span class="self">self</span>, node: HNode) -&gt; Cursor&lt;T&gt; {
@@ -1655,15 +1708,63 @@
     /// 
     /// cursor.forward(3);
     /// 
-    /// assert_eq!(cursor.get(), Some(&amp;4));
+    /// assert_eq!(cursor.get(), &amp;4);
     /// 
-    /// *cursor.get_mut().unwrap() = 42;
+    /// *cursor.get_mut() = 42;
     /// 
     /// assert_eq!(lv.to_vec(), vec![1, 2, 3, 42, 5, 6]);
     /// ```
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>cursor_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>, node: HNode) -&gt; CursorMut&lt;T&gt; {
         CursorMut::new(<span class="self">self</span>, node)
+    }
+
+    <span class="doccomment">/// Returns a Cursor starting at the front element, or `None` if the list is
+    /// empty. This operation completes in O(1) time.
+    /// 
+    </span><span class="attr">#[inline]
+    </span><span class="kw">pub fn </span>cursor_back(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;Cursor&lt;T&gt;&gt; {
+        <span class="kw">if </span><span class="self">self</span>.is_empty() {
+            <span class="prelude-val">None
+        </span>} <span class="kw">else </span>{
+            <span class="prelude-val">Some</span>(<span class="self">self</span>.cursor(<span class="self">self</span>.back_node().unwrap()))
+        }
+    }
+
+    <span class="doccomment">/// Returns a Cursor starting at the back element, or `None` if the list is
+    /// empty. This operation completes in O(1) time.
+    /// 
+    </span><span class="attr">#[inline]
+    </span><span class="kw">pub fn </span>cursor_back_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;CursorMut&lt;T&gt;&gt; {
+        <span class="kw">if </span><span class="self">self</span>.is_empty() {
+            <span class="prelude-val">None
+        </span>} <span class="kw">else </span>{
+            <span class="prelude-val">Some</span>(<span class="self">self</span>.cursor_mut(<span class="self">self</span>.back_node().unwrap()))
+        }
+    }
+
+    <span class="doccomment">/// Gives a reference to the element at the front of the vector, or `None` 
+    /// if the list is empty. This operation completes in O(1) time.
+    /// 
+    </span><span class="attr">#[inline]
+    </span><span class="kw">pub fn </span>cursor_front(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;Cursor&lt;T&gt;&gt; {
+        <span class="kw">if </span><span class="self">self</span>.is_empty() {
+            <span class="prelude-val">None
+        </span>} <span class="kw">else </span>{
+            <span class="prelude-val">Some</span>(<span class="self">self</span>.cursor(<span class="self">self</span>.front_node().unwrap()))
+        }
+    }
+
+    <span class="doccomment">/// Gives a mutable Cursor starting at the front of the vector, or `None` if
+    /// the list is empty. This operation completes in O(1) time.
+    /// 
+    </span><span class="attr">#[inline]
+    </span><span class="kw">pub fn </span>cursor_front_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;CursorMut&lt;T&gt;&gt; {
+        <span class="kw">if </span><span class="self">self</span>.is_empty() {
+            <span class="prelude-val">None
+        </span>} <span class="kw">else </span>{
+            <span class="prelude-val">Some</span>(<span class="self">self</span>.cursor_mut(<span class="self">self</span>.front_node().unwrap()))
+        }
     }
 
     <span class="doccomment">/// Gives a reference to the element at the front of the vector, or `None` 
@@ -1698,7 +1799,7 @@
     /// let hnode = lv.push_front(42);
     /// 
     /// assert_eq!(lv.front_node(), Some(hnode));
-    /// assert_eq!(lv.front_node().and_then(|h| lv.get(h)), Some(&amp;42));
+    /// assert_eq!(lv.front_node().map(|h| lv.get(h)), Some(&amp;42));
     /// ```
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>front_node(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;HNode&gt; {
@@ -1724,11 +1825,11 @@
     /// let mut lv = LinkedVector::from([1, 2, 3]);
     /// let hnode = lv.push_front(42);
     /// 
-    /// assert_eq!(lv.get(hnode), Some(&amp;42));
+    /// assert_eq!(lv.get(hnode), &amp;42);
     /// ```
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, node: HNode) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>T&gt; {
-        <span class="self">self</span>.get_(node).value.as_ref()
+    </span><span class="kw">pub fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, node: HNode) -&gt; <span class="kw-2">&amp;</span>T {
+        <span class="self">self</span>.get_(node).value.as_ref().unwrap()
     }
 
     <span class="doccomment">/// Provides a mutable reference to the element indicated by the given
@@ -1739,13 +1840,13 @@
     /// let mut lv = LinkedVector::new();
     /// let hnode = lv.push_front(0);
     /// 
-    /// *lv.get_mut(hnode).unwrap() = 42;
+    /// *lv.get_mut(hnode) = 42;
     /// 
-    /// assert_eq!(lv.get(hnode), Some(&amp;42));
+    /// assert_eq!(lv.get(hnode), &amp;42);
     /// ```
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>get_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>, node: HNode) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;mut </span>T&gt; {
-        <span class="self">self</span>.get_mut_(node).value.as_mut()
+    </span><span class="kw">pub fn </span>get_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>, node: HNode) -&gt; <span class="kw-2">&amp;mut </span>T {
+        <span class="self">self</span>.get_mut_(node).value.as_mut().unwrap()
     }
 
     <span class="doccomment">/// Returns the handle to the node at the given index, or `None` if the
@@ -1805,7 +1906,7 @@
     /// let h2 = lv.insert(h1, 43);
     /// 
     /// assert_eq!(lv.next_node(h2), Some(h1));
-    /// assert_eq!(lv.get(h1), Some(&amp;42));
+    /// assert_eq!(lv.get(h1), &amp;42);
     /// ```
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>insert(<span class="kw-2">&amp;mut </span><span class="self">self</span>, node: HNode, value: T) -&gt; HNode {
@@ -1823,7 +1924,7 @@
     /// let h2 = lv.insert_after(h1, 43);
     /// 
     /// assert_eq!(lv.next_node(h1), Some(h2));
-    /// assert_eq!(lv.get(h2), Some(&amp;43));
+    /// assert_eq!(lv.get(h2), &amp;43);
     /// ```
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>insert_after(<span class="kw-2">&amp;mut </span><span class="self">self</span>, node: HNode, value: T) -&gt; HNode {
@@ -2027,8 +2128,8 @@
     /// assert_eq!(lv, LinkedVector::from([1, 3]));
     /// ```
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>remove(<span class="kw-2">&amp;mut </span><span class="self">self</span>, node: HNode) -&gt; <span class="prelude-ty">Option</span>&lt;T&gt; {
-        <span class="self">self</span>.remove_(<span class="prelude-val">Some</span>(node))
+    </span><span class="kw">pub fn </span>remove(<span class="kw-2">&amp;mut </span><span class="self">self</span>, node: HNode) -&gt; T {
+        <span class="self">self</span>.remove_(<span class="prelude-val">Some</span>(node)).unwrap()
     }
 
     <span class="doccomment">/// Sorts the elemements in place in ascending order. Previously held 
@@ -2274,9 +2375,8 @@
     </span><span class="attr">#[inline(always)]
     </span><span class="kw">fn </span>get_(<span class="kw-2">&amp;</span><span class="self">self</span>, node: HNode) -&gt; <span class="kw-2">&amp;</span>Node&lt;T&gt; {
         <span class="attr">#[cfg(debug_assertions)]
-        </span>{ <span class="macro">assert!</span>(node.<span class="number">0 </span>!= BAD_HANDLE.<span class="number">0</span>, <span class="string">&quot;Handle is invalid.&quot;</span>);
-          <span class="macro">assert!</span>(node.<span class="number">2 </span>== <span class="self">self</span>.uuid, <span class="string">&quot;Handle is not native.&quot;</span>);
-          <span class="macro">assert!</span>(node.<span class="number">1 </span>== <span class="self">self</span>.vec[node.<span class="number">0</span>].gen, <span class="string">&quot;Handle has expired.&quot;</span>); }
+        </span><span class="self">self</span>.check_handle(node);
+        
         <span class="kw-2">&amp;</span><span class="self">self</span>.vec[node.<span class="number">0</span>]
     }
 
@@ -2286,10 +2386,16 @@
     </span><span class="attr">#[inline(always)]
     </span><span class="kw">fn </span>get_mut_(<span class="kw-2">&amp;mut </span><span class="self">self</span>, node: HNode) -&gt; <span class="kw-2">&amp;mut </span>Node&lt;T&gt; {
         <span class="attr">#[cfg(debug_assertions)]
-        </span>{ <span class="macro">assert!</span>(node.<span class="number">0 </span>!= BAD_HANDLE.<span class="number">0</span>, <span class="string">&quot;Handle is invalid.&quot;</span>);
-          <span class="macro">assert!</span>(node.<span class="number">2 </span>== <span class="self">self</span>.uuid, <span class="string">&quot;Handle is not native.&quot;</span>); 
-          <span class="macro">assert!</span>(node.<span class="number">1 </span>== <span class="self">self</span>.vec[node.<span class="number">0</span>].gen, <span class="string">&quot;Handle has expired.&quot;</span>); }
+        </span><span class="self">self</span>.check_handle(node);
+
         <span class="kw-2">&amp;mut </span><span class="self">self</span>.vec[node.<span class="number">0</span>]
+    }
+
+    <span class="attr">#[cfg(debug_assertions)]
+    </span><span class="kw">fn </span>check_handle(<span class="kw-2">&amp;</span><span class="self">self</span>, node: HNode) {
+        <span class="macro">assert!</span>(node.<span class="number">0 </span>!= BAD_HANDLE.<span class="number">0</span>, <span class="string">&quot;Handle is invalid.&quot;</span>);
+        <span class="macro">assert!</span>(node.<span class="number">2 </span>== <span class="self">self</span>.uuid, <span class="string">&quot;Handle is not native.&quot;</span>); 
+        <span class="macro">assert!</span>(node.<span class="number">1 </span>== <span class="self">self</span>.vec[node.<span class="number">0</span>].gen, <span class="string">&quot;Handle has expired.&quot;</span>);
     }
 
     <span class="doccomment">/// Renders a new element node and returns a handle to it. This operation
@@ -2493,14 +2599,14 @@
 
     <span class="attr">#[inline]
     </span><span class="kw">fn </span>index(<span class="kw-2">&amp;</span><span class="self">self</span>, handle: HNode) -&gt; <span class="kw-2">&amp;</span><span class="self">Self</span>::Output {
-        <span class="self">self</span>.get(handle).expect(<span class="string">&quot;Invalid handle&quot;</span>)
+        <span class="self">self</span>.get(handle)
     }
 }
 
 <span class="kw">impl</span>&lt;T&gt; IndexMut&lt;HNode&gt; <span class="kw">for </span>LinkedVector&lt;T&gt; {
     <span class="attr">#[inline]
     </span><span class="kw">fn </span>index_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>, handle: HNode) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self</span>::Output {
-        <span class="self">self</span>.get_mut(handle).expect(<span class="string">&quot;Invalid handle&quot;</span>)
+        <span class="self">self</span>.get_mut(handle)
     }
 }
 
@@ -2627,7 +2733,7 @@
             <span class="kw">let </span>hnode = <span class="self">self</span>.hnode;
             <span class="self">self</span>.hnode = <span class="self">self</span>.lv.get_(hnode).next;
             <span class="self">self</span>.len -= <span class="number">1</span>;
-            <span class="self">self</span>.lv.get(hnode)
+            <span class="prelude-val">Some</span>(<span class="self">self</span>.lv.get(hnode))
         } <span class="kw">else </span>{
             <span class="prelude-val">None
         </span>}
@@ -2650,7 +2756,7 @@
             <span class="kw">let </span>node = <span class="self">self</span>.lv.get_(hrev);
             <span class="self">self</span>.hrev = node.prev;
             <span class="self">self</span>.len -= <span class="number">1</span>;
-            <span class="self">self</span>.lv.get(hrev)
+            <span class="prelude-val">Some</span>(<span class="self">self</span>.lv.get(hrev))
         } <span class="kw">else </span>{
             <span class="prelude-val">None
         </span>}
@@ -2705,7 +2811,7 @@
             <span class="kw">let </span>hnode = <span class="self">self</span>.hnode;
             <span class="self">self</span>.hnode = <span class="self">self</span>.lv.get_(hnode).next;
             <span class="self">self</span>.len -= <span class="number">1</span>;
-            <span class="self">self</span>.lv.get_mut(hnode).map(|p| <span class="kw">unsafe </span>{ <span class="kw-2">&amp;mut *</span>(p <span class="kw">as </span><span class="kw-2">*mut </span>T) })
+            <span class="prelude-val">Some</span>(<span class="kw">unsafe</span>{ <span class="kw-2">&amp;mut *</span>(<span class="self">self</span>.lv.get_mut(hnode) <span class="kw">as </span><span class="kw-2">*mut </span>T)})
         } <span class="kw">else </span>{
             <span class="prelude-val">None
         </span>}
@@ -2728,7 +2834,7 @@
             <span class="kw">let </span>node = <span class="self">self</span>.lv.get_(hrev);
             <span class="self">self</span>.hrev = node.prev;
             <span class="self">self</span>.len -= <span class="number">1</span>;
-            <span class="self">self</span>.lv.get_mut(hrev).map(|p| <span class="kw">unsafe </span>{ <span class="kw-2">&amp;mut *</span>(p <span class="kw">as </span><span class="kw-2">*mut </span>T) })
+            <span class="prelude-val">Some</span>(<span class="kw">unsafe </span>{ <span class="kw-2">&amp;mut *</span>(<span class="self">self</span>.lv.get_mut(hrev) <span class="kw">as </span><span class="kw-2">*mut </span>T) })
         } <span class="kw">else </span>{
             <span class="prelude-val">None
         </span>}

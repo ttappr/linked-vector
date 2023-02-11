@@ -177,6 +177,16 @@ impl<'a, T> CursorMut<'a, T> {
             handle,
         }
     }
+
+    /// Returns `true` if the vector the cursor is attached to is empty. Since
+    /// a mutable cursor can remove items, this is provided to avoid panics if 
+    /// the cursor is being used to remove items. Attempting other operations
+    /// on an empty vector may result in a panic.
+    /// 
+    pub fn is_empty(&self) -> bool {
+        self.lvec.is_empty()
+    }
+
     /// Returns a mutable reference to the element at the cursor's current
     /// position.
     /// 
@@ -208,8 +218,9 @@ impl<'a, T> CursorMut<'a, T> {
     /// no longer be used, or could cause invalid handle panics.
     /// 
     pub fn remove(&mut self) -> T {
-        // TODO - Perhaps Cursor should be a special case of trusting handles.
-        //        The Curso could be on an empty list and this sould panic?
+        #[cfg(debug_assertions)]
+        self.lvec.check_handle(self.handle);
+
         let hrem = self.handle;
         if let Some(hnext) = self.lvec.next_node(self.handle) {
             self.handle = hnext;

@@ -291,6 +291,18 @@
 <a href="#291" id="291">291</a>
 <a href="#292" id="292">292</a>
 <a href="#293" id="293">293</a>
+<a href="#294" id="294">294</a>
+<a href="#295" id="295">295</a>
+<a href="#296" id="296">296</a>
+<a href="#297" id="297">297</a>
+<a href="#298" id="298">298</a>
+<a href="#299" id="299">299</a>
+<a href="#300" id="300">300</a>
+<a href="#301" id="301">301</a>
+<a href="#302" id="302">302</a>
+<a href="#303" id="303">303</a>
+<a href="#304" id="304">304</a>
+<a href="#305" id="305">305</a>
 </pre><pre class="rust"><code>
 <span class="kw">use crate</span>::<span class="kw-2">*</span>;
 
@@ -301,7 +313,7 @@
 </span><span class="kw">pub trait </span>CursorBase&lt;T&gt; {
     <span class="doccomment">/// Returns a reference to the element at the cursor&#39;s current position.
     /// 
-    </span><span class="kw">fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>T&gt;;
+    </span><span class="kw">fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>T;
 
     <span class="doccomment">/// Returns the handle of the element at the cursor&#39;s current position.
     /// 
@@ -310,7 +322,7 @@
     <span class="doccomment">/// Moves the cursor to the specified handle. Returns true if the cursor
     /// was moved, false if the handle was invalid.
     /// 
-    </span><span class="kw">fn </span>move_to(<span class="kw-2">&amp;mut </span><span class="self">self</span>, handle: HNode) -&gt; bool;
+    </span><span class="kw">fn </span>move_to(<span class="kw-2">&amp;mut </span><span class="self">self</span>, handle: HNode);
 
     <span class="doccomment">/// Moves the cursor to the next element. Returns the handle of the next
     /// element if the cursor was moved, None if the cursor was already at the
@@ -371,7 +383,9 @@
                       handle : HNode) 
         -&gt; <span class="self">Self 
     </span>{
-        lvec.get(handle).expect(<span class="string">&quot;Cursor::new() called with invalid handle.&quot;</span>);
+        <span class="attr">#[cfg(debug_assertions)]
+        </span>lvec.check_handle(handle);
+
         <span class="self">Self </span>{
             lvec,
             handle,
@@ -379,7 +393,7 @@
     }
 }
 <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T&gt; CursorBase&lt;T&gt; <span class="kw">for </span>Cursor&lt;<span class="lifetime">&#39;a</span>, T&gt; {
-    <span class="kw">fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>T&gt; {
+    <span class="kw">fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>T {
         <span class="self">self</span>.lvec.get(<span class="self">self</span>.handle)
     }
 
@@ -387,13 +401,11 @@
         <span class="self">self</span>.handle
     }
 
-    <span class="kw">fn </span>move_to(<span class="kw-2">&amp;mut </span><span class="self">self</span>, handle: HNode) -&gt; bool {
-        <span class="kw">if </span><span class="self">self</span>.lvec.get(handle).is_some() {
-            <span class="self">self</span>.handle = handle;
-            <span class="bool-val">true
-        </span>} <span class="kw">else </span>{
-            <span class="bool-val">false
-        </span>}
+    <span class="kw">fn </span>move_to(<span class="kw-2">&amp;mut </span><span class="self">self</span>, handle: HNode) {
+        <span class="attr">#[cfg(debug_assertions)]
+        </span><span class="self">self</span>.lvec.check_handle(handle);
+
+        <span class="self">self</span>.handle = handle;
     }
 
     <span class="kw">fn </span>move_next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;HNode&gt; {
@@ -462,17 +474,28 @@
                       handle : HNode) 
         -&gt; <span class="self">Self 
     </span>{
-        lvec.get(handle)
-            .expect(<span class="string">&quot;CursorMut::new() called with invalid handle.&quot;</span>);
+        <span class="attr">#[cfg(debug_assertions)]
+        </span>lvec.check_handle(handle);
+
         <span class="self">Self </span>{
             lvec,
             handle,
         }
     }
+
+    <span class="doccomment">/// Returns `true` if the vector the cursor is attached to is empty. Since
+    /// a mutable cursor can remove items, this is provided to avoid panics if 
+    /// the cursor is being used to remove items. Attempting other operations
+    /// on an empty vector may result in a panic.
+    /// 
+    </span><span class="kw">pub fn </span>is_empty(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
+        <span class="self">self</span>.lvec.is_empty()
+    }
+
     <span class="doccomment">/// Returns a mutable reference to the element at the cursor&#39;s current
     /// position.
     /// 
-    </span><span class="kw">pub fn </span>get_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;mut </span>T&gt; {
+    </span><span class="kw">pub fn </span>get_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>T {
         <span class="self">self</span>.lvec.get_mut(<span class="self">self</span>.handle)
     }
 
@@ -499,7 +522,10 @@
     /// in the vector, the cursor&#39;s position is set to `BAD_HANDLE` and should
     /// no longer be used, or could cause invalid handle panics.
     /// 
-    </span><span class="kw">pub fn </span>remove(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;T&gt; {
+    </span><span class="kw">pub fn </span>remove(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; T {
+        <span class="attr">#[cfg(debug_assertions)]
+        </span><span class="self">self</span>.lvec.check_handle(<span class="self">self</span>.handle);
+
         <span class="kw">let </span>hrem = <span class="self">self</span>.handle;
         <span class="kw">if let </span><span class="prelude-val">Some</span>(hnext) = <span class="self">self</span>.lvec.next_node(<span class="self">self</span>.handle) {
             <span class="self">self</span>.handle = hnext;
@@ -513,7 +539,7 @@
 }
 
 <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T&gt; CursorBase&lt;T&gt; <span class="kw">for </span>CursorMut&lt;<span class="lifetime">&#39;a</span>, T&gt; {
-    <span class="kw">fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>T&gt; {
+    <span class="kw">fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>T {
         <span class="self">self</span>.lvec.get(<span class="self">self</span>.handle)
     }
 
@@ -521,13 +547,11 @@
         <span class="self">self</span>.handle
     }
 
-    <span class="kw">fn </span>move_to(<span class="kw-2">&amp;mut </span><span class="self">self</span>, handle: HNode) -&gt; bool {
-        <span class="kw">if </span><span class="self">self</span>.lvec.get(handle).is_some() {
-            <span class="self">self</span>.handle = handle;
-            <span class="bool-val">true
-        </span>} <span class="kw">else </span>{
-            <span class="bool-val">false
-        </span>}
+    <span class="kw">fn </span>move_to(<span class="kw-2">&amp;mut </span><span class="self">self</span>, handle: HNode) {
+        <span class="attr">#[cfg(debug_assertions)]
+        </span><span class="self">self</span>.lvec.check_handle(handle);
+        
+        <span class="self">self</span>.handle = handle;
     }
 
     <span class="kw">fn </span>move_next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;HNode&gt; {

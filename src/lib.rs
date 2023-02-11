@@ -270,6 +270,54 @@ impl<T> LinkedVector<T> {
         CursorMut::new(self, node)
     }
 
+    /// Returns a Cursor starting at the front element, or `None` if the list is
+    /// empty. This operation completes in O(1) time.
+    /// 
+    #[inline]
+    pub fn cursor_back(&self) -> Option<Cursor<T>> {
+        if self.is_empty() {
+            None
+        } else {
+            Some(self.cursor(self.back_node().unwrap()))
+        }
+    }
+
+    /// Returns a Cursor starting at the back element, or `None` if the list is
+    /// empty. This operation completes in O(1) time.
+    /// 
+    #[inline]
+    pub fn cursor_back_mut(&mut self) -> Option<CursorMut<T>> {
+        if self.is_empty() {
+            None
+        } else {
+            Some(self.cursor_mut(self.back_node().unwrap()))
+        }
+    }
+
+    /// Gives a reference to the element at the front of the vector, or `None` 
+    /// if the list is empty. This operation completes in O(1) time.
+    /// 
+    #[inline]
+    pub fn cursor_front(&self) -> Option<Cursor<T>> {
+        if self.is_empty() {
+            None
+        } else {
+            Some(self.cursor(self.front_node().unwrap()))
+        }
+    }
+
+    /// Gives a mutable Cursor starting at the front of the vector, or `None` if
+    /// the list is empty. This operation completes in O(1) time.
+    /// 
+    #[inline]
+    pub fn cursor_front_mut(&mut self) -> Option<CursorMut<T>> {
+        if self.is_empty() {
+            None
+        } else {
+            Some(self.cursor_mut(self.front_node().unwrap()))
+        }
+    }
+
     /// Gives a reference to the element at the front of the vector, or `None` 
     /// if the list is empty. This operation completes in O(1) time.
     /// 
