@@ -2,6 +2,14 @@
 
 ## [v2.0.0] - ????-??-??
 
+### Added
+
+- Methods added to `LinkedVector`:
+  - `cursor_front()`
+  - `cursor_back()`
+  - `cursor_front_mut()`
+  - `cursor_back_mut()`
+
 ### Changed
 
 - The following `LinkedVector` methods no longer return an `Option`:
@@ -11,7 +19,6 @@
 - The following `Cursor`/`CursorMut` methods no longer return an `Option`:
   - `get()`
   - `get_mut()`
-  - `remove()`
 - `Curso::move_to()` now doesn't return a value. The handle passed to it is
   assumed to be valid, or expect a panic.
 
