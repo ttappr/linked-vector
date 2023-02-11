@@ -212,25 +212,23 @@ impl<'a, T> CursorMut<'a, T> {
 
     /// Removes the element at the current position and returns its value. The 
     /// cursor will be moved to the next element if not at the end of the 
-    /// vector, otherwise it moves to the new end. If there was only one item
-    /// in the vector, the cursor's position is set to `BAD_HANDLE` and should
-    /// no longer be used, or could cause invalid handle panics.
+    /// vector, otherwise it moves to the new end. If the vector is already 
+    /// empty, `None` is returned.
     /// 
-    pub fn remove(&mut self) -> T {
-        #[cfg(debug_assertions)]
+    pub fn remove(&mut self) -> Option<T> {
         if self.lvec.is_empty() {
-            panic!("CursorMut::remove() called on empty vector");
-        }
-
-        let hrem = self.handle;
-        if let Some(hnext) = self.lvec.next_node(self.handle) {
-            self.handle = hnext;
-        } else if let Some(hprev) = self.lvec.prev_node(self.handle) {
-            self.handle = hprev;
+            None
         } else {
-            self.handle = BAD_HANDLE;
+            let hrem = self.handle;
+            if let Some(hnext) = self.lvec.next_node(self.handle) {
+                self.handle = hnext;
+            } else if let Some(hprev) = self.lvec.prev_node(self.handle) {
+                self.handle = hprev;
+            } else {
+                self.handle = BAD_HANDLE;
+            }
+            Some(self.lvec.remove(hrem))
         }
-        self.lvec.remove(hrem)
     }
 }
 
