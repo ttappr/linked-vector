@@ -14,7 +14,9 @@
 - The new feature flag, `"optionless-accessors"` has been added. With this
   enabled certain accessor methods of `LinkedVector` and `Cursor` return their
   respective values directly not wrapped in an `Option`.
-
+- The new feature flag, `"cursor-remove"`, enables `CursorMut::remove()`. It
+  is off by defaul. Users should explicitly enable it so they're aware of its
+  dangers.
 ### Changed
 
 - With the feature flag, `"optionless-accessors"` enabled, the following 
@@ -30,7 +32,8 @@
   - `get_mut()`
 - `Cursor::move_to()` with `"optionless-accessors"` doesn't return a value. The 
   handle passed to it is assumed to be valid, or expect a panic.
-
+- `CursorMut::remove()` is now switched on with the `"cursor-remove"` feature 
+  flag. It is off by default.
 
 ## [v1.1.0] - 2023-02-10
 

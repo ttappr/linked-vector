@@ -108,6 +108,7 @@ fn cursor_insert() {
 }
 
 #[test]
+#[cfg(feature = "cursor-remove")]
 fn cursor_remove() {
     let mut lv = LinkedVector::from([1, 2, 3, 4, 5, 6, 7, 8, 9]);
     let h5 = lv.handle(4).unwrap();

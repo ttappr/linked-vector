@@ -15,7 +15,16 @@ count queues.
 
 ## Updates
 
-The current release `v1.2.0` has a new `"optionless-accessors"` feature that can 
+Version `v1.2.0` is a minor revision backward compatibile the prior `v1.x.x`
+versions. Users however, must enable the `"cursor-remove"` feature explicitly.
+This turns on the `CursorMut::remove()` method. If you weren't using 
+`Cursor::remove()` before, then nothing needs to be done. Otherwise, you can 
+update your `Cargo.toml` file to include the feature, 
+[see usage notes below](#usage). 
+
+### Feature: "optionless-accessors"
+
+Version `v1.2.0` has added a new `"optionless-accessors"` feature that can 
 be enabled which implements some minor changes to a few existing methods for 
 `LinkedVector` and `Cursor`. It is encouraged that this feature be enabled as 
 it addresses certain nonsensical aspects of a few API methods.
@@ -27,8 +36,19 @@ doesn't make sense to return an `Option`. This feature is disabled by default
 so as not to break backward compatibility, but can be easily turned on; 
 [see Usage notes](#usage)
 
+### Feature: "cursor-remove"
 
-Versioning Conventions:
+The `LinkedVector` API disallows creating a cursor for an empty vector. If you 
+have a cursor to a vector, then it's assumed it has items to traverse and/or
+modify. Removing items can pose a slight danger in that the cursor's internal
+reference to the current node becomes meaningless if all the items are removed.
+So to ensure users are aware of this, the `"cursor-remove"` feature needs to be 
+explicitly turned on. To verify whether you've emptied a vector through a 
+cursor, the cursor provides an `is_empty()` method. Also the `remove()` method
+returns an `Option` where a `None` indicates there are no more items to remove.
+
+
+### Versioning Conventions:
 - MAJOR version indicates incompatible API changes with previous major version.
 - MINOR version indicates added functionality in a backwards-compatible manner.
 - PATCH version indicates backwards-compatible bug fixes.
@@ -37,14 +57,16 @@ Versioning Conventions:
 
 ## Usage
 
-To use the "optionless-accessors" feature, edit your Cargo.toml file to include:
+To use the `"optionless-accessors"` and `"cursor-remove"` features, edit your 
+Cargo.toml file to include:
 
 ```rust, ignore
 [dependencies]
-linked-vector = { version = "1.2", features = ["optionless-accessors"] }
+linked-vector = { version = "1.2", features = ["cursor-remove", "optionless-accessors"] }
 ```
 
-Or, for backward compatibility with existing `v1.1.0` code include:
+Or, to use `v1.2.0` with backward compatibility with existing `v1.1.0` code 
+include:
 
 ```rust, ignore
 [dependencies]
@@ -54,7 +76,7 @@ linked-vector = "1.2"
 Or run this on the command line from your project folder:
 
 ```console, ignore
-cargo add linked-vector --features optionless-accessors
+cargo add linked-vector --features "cursor-remove, optionless-accessors"
 ```
 or without the new feature:
 
@@ -62,6 +84,7 @@ or without the new feature:
 cargo add linked-vector
 ```
 
+# Feature Summary
 ## Handles
 
 Items in a `LinkedVector` are directly accessible via handles, which are 
