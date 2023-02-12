@@ -11,14 +11,14 @@ use of the <code>linked-vector</code> crate is available. The project is for a L
 Frequently Used Cache. <code>LinkedVector</code>’s are used to implement its frequency 
 count queues.</p>
 <h3 id="updates"><a href="#updates">Updates</a></h3>
-<p>Version <code>v1.2.1</code> is a minor revision backward compatibile the prior <code>v1.x.x</code>
+<p>Version <code>v1.2.x</code> is a minor revision backward compatibile the prior <code>v1.x.x</code>
 versions. Users however, must enable the <code>&quot;cursor-remove&quot;</code> feature explicitly.
 This turns on the <code>CursorMut::remove()</code> method. If you weren’t using 
 <code>Cursor::remove()</code> before, then nothing needs to be done. Otherwise, you can 
 update your <code>Cargo.toml</code> file to include the feature, 
 <a href="#usage">see usage notes below</a>. </p>
 <h4 id="feature-optionless-accessors"><a href="#feature-optionless-accessors">Feature: “optionless-accessors”</a></h4>
-<p>Version <code>v1.2.1</code> has added a new <code>&quot;optionless-accessors&quot;</code> feature that can 
+<p>Version <code>v1.2.0</code> added a new <code>&quot;optionless-accessors&quot;</code> feature that can 
 be enabled which implements some minor changes to a few existing methods for 
 <code>LinkedVector</code> and <code>Cursor</code>. It is encouraged that this feature be enabled as 
 it addresses certain nonsensical aspects of a few API methods.</p>
@@ -26,7 +26,7 @@ it addresses certain nonsensical aspects of a few API methods.</p>
 that take a handle return direct references to their values instead of an 
 <code>Option</code> variant. These commands would fail on a bad handle anyway, so it 
 doesn’t make sense to return an <code>Option</code>. This feature is disabled by default 
-so as not to break backward compatibility, but can be easily turned on; 
+so as not to break backward compatibility, but can be easily turned on, 
 <a href="#usage">see Usage notes</a></p>
 <h4 id="feature-cursor-remove"><a href="#feature-cursor-remove">Feature: “cursor-remove”</a></h4>
 <p>The <code>LinkedVector</code> API disallows creating a cursor for an empty vector. If you 
@@ -153,8 +153,8 @@ cursor.move_next();
 
 <span class="macro">assert_eq!</span>(<span class="kw-2">*</span>cursor, <span class="number">2</span>);
 
-<span class="kw">let </span>hend = cursor.move_to_end().unwrap();
-<span class="kw">let </span>hbak = cursor.backward(<span class="number">3</span>).unwrap();
+<span class="kw">let </span>hend = cursor.move_to_end().expect(<span class="string">&quot;Moving to end&quot;</span>);
+<span class="kw">let </span>hbak = cursor.backward(<span class="number">3</span>).expect(<span class="string">&quot;Moving back 3&quot;</span>);
 
 <span class="macro">assert_eq!</span>(<span class="kw-2">*</span>cursor, <span class="number">4</span>);
 <span class="macro">assert_eq!</span>(lv[hend], <span class="number">7</span>);

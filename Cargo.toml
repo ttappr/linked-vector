@@ -16,9 +16,8 @@ categories = ["data-structures"]
 
 # Certain accesors like `get()` and `get_mut()` that take a handle as a 
 # parameter would panic on a bad handle anyway, so it doesn't make sense that
-# they return an `Option`. This feature changes the `Option` return value from 
-# those methods to return a reference to the element related to the handle 
-# instead.
+# they return an `Option`. This feature changes the `Option` return values for 
+# those methods to direct references to their values.
 optionless-accessors = []
 
 # This feature enables the `remove()` method of `CursorMut`. Care should be 

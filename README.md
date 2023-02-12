@@ -15,7 +15,7 @@ count queues.
 
 ## Updates
 
-Version `v1.2.1` is a minor revision backward compatibile the prior `v1.x.x`
+Version `v1.2.x` is a minor revision backward compatibile the prior `v1.x.x`
 versions. Users however, must enable the `"cursor-remove"` feature explicitly.
 This turns on the `CursorMut::remove()` method. If you weren't using 
 `Cursor::remove()` before, then nothing needs to be done. Otherwise, you can 
@@ -24,7 +24,7 @@ update your `Cargo.toml` file to include the feature,
 
 ### Feature: "optionless-accessors"
 
-Version `v1.2.1` has added a new `"optionless-accessors"` feature that can 
+Version `v1.2.0` added a new `"optionless-accessors"` feature that can 
 be enabled which implements some minor changes to a few existing methods for 
 `LinkedVector` and `Cursor`. It is encouraged that this feature be enabled as 
 it addresses certain nonsensical aspects of a few API methods.
@@ -33,7 +33,7 @@ With this feature enabled, methods such as `get(hnode)` and `get_mut(hnode)`
 that take a handle return direct references to their values instead of an 
 `Option` variant. These commands would fail on a bad handle anyway, so it 
 doesn't make sense to return an `Option`. This feature is disabled by default 
-so as not to break backward compatibility, but can be easily turned on; 
+so as not to break backward compatibility, but can be easily turned on, 
 [see Usage notes](#usage)
 
 ### Feature: "cursor-remove"
@@ -200,8 +200,8 @@ cursor.move_next();
 
 assert_eq!(*cursor, 2);
 
-let hend = cursor.move_to_end().unwrap();
-let hbak = cursor.backward(3).unwrap();
+let hend = cursor.move_to_end().expect("Moving to end");
+let hbak = cursor.backward(3).expect("Moving back 3");
 
 assert_eq!(*cursor, 4);
 assert_eq!(lv[hend], 7);
