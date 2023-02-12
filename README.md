@@ -15,12 +15,17 @@ count queues.
 
 ## Updates
 
-The current release `v2.0.0` has some minor changes to a few existing methods
-for `LinkedVector` and `Cursor`. See the 
-[Change Log](https://github.com/ttappr/linked-vector/blob/master/CHANGELOG.md) 
-for details. Version `1.1.0` is still available and maintained if you choose not
-to move to version 2 of the API. The changes are relatively minor and mostly
-involve certain getters providing direct access to their related values.
+The current release `v1.2.0` has a new "optionless-accessors" feature that can 
+be enabled which implements some minor changes to a few existing methods for 
+`LinkedVector` and `Cursor`. 
+
+With this feature enabled, methods such as `get(hnode)` and `get_mut(hnode)`
+that take a handle return direct references to their values instead of an 
+`Option` variant. These commands would fail on a bad handle anyway, so it 
+doesn't make sense to return an `Option`. This feature is disabled by default 
+so as not to break backward compatibility, but can be easily turned on; 
+[see Usage notes](#usage)
+
 
 Versioning Conventions:
 - MAJOR version indicates incompatible API changes with previous major version.
@@ -31,21 +36,26 @@ Versioning Conventions:
 
 ## Usage
 
-To use `v2`, edit your Cargo.toml file to include:
+To use the "optionless-accessors" feature, edit your Cargo.toml file to include:
 
 ```rust, ignore
 [dependencies]
-linked-vector = "2.0"
+linked-vector = { version = "1.2", features = ["optionless-accessors"] }
 ```
 
-Or, for `v1` include:
+Or, for backward compatibility with existing `v1.1.0` code include:
 
 ```rust, ignore
 [dependencies]
-linked-vector = "1.1"
+linked-vector = "1.2"
 ```
 
 Or run this on the command line from your project folder:
+
+```console, ignore
+cargo add linked-vector --features optionless-accessors
+```
+or without the new feature:
 
 ```console, ignore
 cargo add linked-vector

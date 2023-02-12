@@ -27,7 +27,7 @@ pub trait CursorBase<T> {
     fn move_to(&mut self, handle: HNode);
 
     #[cfg(not(feature = "optionless-accessors"))]
-    fn move_to(&mut self, handle: HNode) -> Option<HNode>;
+    fn move_to(&mut self, handle: HNode) -> bool;
 
     /// Moves the cursor to the next element. Returns the handle of the next
     /// element if the cursor was moved, None if the cursor was already at the
@@ -109,7 +109,11 @@ impl<'a, T> CursorBase<T> for Cursor<'a, T> {
 
     #[cfg(not(feature = "optionless-accessors"))]
     fn get(&self) -> Option<&T> {
-        self.lvec.get(self.handle)
+        if self.lvec.is_mpty() {
+            None
+        } else {
+            Some(self.lvec.get(self.handle))
+        }
     }
 
     fn node(&self) -> HNode {
@@ -125,13 +129,16 @@ impl<'a, T> CursorBase<T> for Cursor<'a, T> {
     }
 
     #[cfg(not(feature = "optionless-accessors"))]
-    fn move_to(&mut self, handle: HNode) -> Option<HNode> {
+    fn move_to(&mut self, handle: HNode) -> bool {
         #[cfg(debug_assertions)]
         self.lvec.check_handle(handle);
-
-        let hprev = self.handle;
-        self.handle = handle;
-        Some(hprev)
+        
+        if self.lvec.is_empty() {
+            return false;
+        } else {
+            self.handle = handle;
+            true
+        }
     }
 
     fn move_next(&mut self) -> Option<HNode> {
@@ -236,7 +243,11 @@ impl<'a, T> CursorMut<'a, T> {
 
     #[cfg(not(feature = "optionless-accessors"))]
     pub fn get_mut(&mut self) -> Option<&mut T> {
-        self.lvec.get_mut(self.handle)
+        if self.lvec.is_empty() {
+            None
+        } else {
+            Some(self.lvec.get_mut(self.handle))
+        }
     }
 
     /// Inserts a new element at the cursor's current position. The cursor
@@ -306,15 +317,15 @@ impl<'a, T> CursorBase<T> for CursorMut<'a, T> {
     }
 
     #[cfg(not(feature = "optionless-accessors"))]
-    fn move_to(&mut self, handle: HNode) -> Option<HNode> {
+    fn move_to(&mut self, handle: HNode) -> bool {
         #[cfg(debug_assertions)]
         self.lvec.check_handle(handle);
         
         if self.lvec.is_empty() {
-            None
+            false
         } else {
             self.handle = handle;
-            Some(self.handle)
+            true
         }
     }
 

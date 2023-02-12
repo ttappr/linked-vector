@@ -386,6 +386,17 @@
 <a href="#386" id="386">386</a>
 <a href="#387" id="387">387</a>
 <a href="#388" id="388">388</a>
+<a href="#389" id="389">389</a>
+<a href="#390" id="390">390</a>
+<a href="#391" id="391">391</a>
+<a href="#392" id="392">392</a>
+<a href="#393" id="393">393</a>
+<a href="#394" id="394">394</a>
+<a href="#395" id="395">395</a>
+<a href="#396" id="396">396</a>
+<a href="#397" id="397">397</a>
+<a href="#398" id="398">398</a>
+<a href="#399" id="399">399</a>
 </pre><pre class="rust"><code>
 <span class="kw">use </span>core::ops::Deref;
 <span class="kw">use </span>core::ops::DerefMut;
@@ -415,7 +426,7 @@
     </span><span class="kw">fn </span>move_to(<span class="kw-2">&amp;mut </span><span class="self">self</span>, handle: HNode);
 
     <span class="attr">#[cfg(not(feature = <span class="string">&quot;optionless-accessors&quot;</span>))]
-    </span><span class="kw">fn </span>move_to(<span class="kw-2">&amp;mut </span><span class="self">self</span>, handle: HNode) -&gt; <span class="prelude-ty">Option</span>&lt;HNode&gt;;
+    </span><span class="kw">fn </span>move_to(<span class="kw-2">&amp;mut </span><span class="self">self</span>, handle: HNode) -&gt; bool;
 
     <span class="doccomment">/// Moves the cursor to the next element. Returns the handle of the next
     /// element if the cursor was moved, None if the cursor was already at the
@@ -497,7 +508,11 @@
 
     <span class="attr">#[cfg(not(feature = <span class="string">&quot;optionless-accessors&quot;</span>))]
     </span><span class="kw">fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>T&gt; {
-        <span class="self">self</span>.lvec.get(<span class="self">self</span>.handle)
+        <span class="kw">if </span><span class="self">self</span>.lvec.is_mpty() {
+            <span class="prelude-val">None
+        </span>} <span class="kw">else </span>{
+            <span class="prelude-val">Some</span>(<span class="self">self</span>.lvec.get(<span class="self">self</span>.handle))
+        }
     }
 
     <span class="kw">fn </span>node(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; HNode {
@@ -513,13 +528,16 @@
     }
 
     <span class="attr">#[cfg(not(feature = <span class="string">&quot;optionless-accessors&quot;</span>))]
-    </span><span class="kw">fn </span>move_to(<span class="kw-2">&amp;mut </span><span class="self">self</span>, handle: HNode) -&gt; <span class="prelude-ty">Option</span>&lt;HNode&gt; {
+    </span><span class="kw">fn </span>move_to(<span class="kw-2">&amp;mut </span><span class="self">self</span>, handle: HNode) -&gt; bool {
         <span class="attr">#[cfg(debug_assertions)]
         </span><span class="self">self</span>.lvec.check_handle(handle);
-
-        <span class="kw">let </span>hprev = <span class="self">self</span>.handle;
-        <span class="self">self</span>.handle = handle;
-        <span class="prelude-val">Some</span>(hprev)
+        
+        <span class="kw">if </span><span class="self">self</span>.lvec.is_empty() {
+            <span class="kw">return </span><span class="bool-val">false</span>;
+        } <span class="kw">else </span>{
+            <span class="self">self</span>.handle = handle;
+            <span class="bool-val">true
+        </span>}
     }
 
     <span class="kw">fn </span>move_next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;HNode&gt; {
@@ -624,7 +642,11 @@
 
     <span class="attr">#[cfg(not(feature = <span class="string">&quot;optionless-accessors&quot;</span>))]
     </span><span class="kw">pub fn </span>get_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;mut </span>T&gt; {
-        <span class="self">self</span>.lvec.get_mut(<span class="self">self</span>.handle)
+        <span class="kw">if </span><span class="self">self</span>.lvec.is_empty() {
+            <span class="prelude-val">None
+        </span>} <span class="kw">else </span>{
+            <span class="prelude-val">Some</span>(<span class="self">self</span>.lvec.get_mut(<span class="self">self</span>.handle))
+        }
     }
 
     <span class="doccomment">/// Inserts a new element at the cursor&#39;s current position. The cursor
@@ -694,16 +716,16 @@
     }
 
     <span class="attr">#[cfg(not(feature = <span class="string">&quot;optionless-accessors&quot;</span>))]
-    </span><span class="kw">fn </span>move_to(<span class="kw-2">&amp;mut </span><span class="self">self</span>, handle: HNode) -&gt; <span class="prelude-ty">Option</span>&lt;HNode&gt; {
+    </span><span class="kw">fn </span>move_to(<span class="kw-2">&amp;mut </span><span class="self">self</span>, handle: HNode) -&gt; bool {
         <span class="attr">#[cfg(debug_assertions)]
         </span><span class="self">self</span>.lvec.check_handle(handle);
         
         <span class="kw">if </span><span class="self">self</span>.lvec.is_empty() {
-            <span class="prelude-val">None
+            <span class="bool-val">false
         </span>} <span class="kw">else </span>{
             <span class="self">self</span>.handle = handle;
-            <span class="prelude-val">Some</span>(<span class="self">self</span>.handle)
-        }
+            <span class="bool-val">true
+        </span>}
     }
 
     <span class="kw">fn </span>move_next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;HNode&gt; {

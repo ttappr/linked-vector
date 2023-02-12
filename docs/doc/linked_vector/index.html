@@ -11,12 +11,15 @@ use of the <code>linked-vector</code> crate is available. The project is for a L
 Frequently Used Cache. <code>LinkedVector</code>’s are used to implement its frequency 
 count queues.</p>
 <h3 id="updates"><a href="#updates">Updates</a></h3>
-<p>The current release <code>v2.0.0</code> has some minor changes to a few existing methods
-for <code>LinkedVector</code> and <code>Cursor</code>. See the 
-<a href="https://github.com/ttappr/linked-vector/blob/master/CHANGELOG.md">Change Log</a> 
-for details. Version <code>1.1.0</code> is still available and maintained if you choose not
-to move to version 2 of the API. The changes are relatively minor and mostly
-involve certain getters providing direct access to their related values.</p>
+<p>The current release <code>v1.2.0</code> has a new “optionless-accessors” feature that can 
+be enabled which implements some minor changes to a few existing methods for 
+<code>LinkedVector</code> and <code>Cursor</code>. </p>
+<p>With this feature enabled, methods such as <code>get(hnode)</code> and <code>get_mut(hnode)</code>
+that take a handle return direct references to their values instead of an 
+<code>Option</code> variant. These commands would fail on a bad handle anyway, so it 
+doesn’t make sense to return an <code>Option</code>. This feature is disabled by default 
+so as not to break backward compatibility, but can be easily turned on; 
+<a href="#usage">see Usage notes</a></p>
 <p>Versioning Conventions:</p>
 <ul>
 <li>MAJOR version indicates incompatible API changes with previous major version.</li>
@@ -25,15 +28,18 @@ involve certain getters providing direct access to their related values.</p>
 </ul>
 <p><a href="https://github.com/ttappr/linked-vector/blob/master/CHANGELOG.md">Change Log</a></p>
 <h3 id="usage"><a href="#usage">Usage</a></h3>
-<p>To use <code>v2</code>, edit your Cargo.toml file to include:</p>
+<p>To use the “optionless-accessors” feature, edit your Cargo.toml file to include:</p>
 
 <div class="example-wrap ignore"><div class='tooltip'>ⓘ</div><pre class="rust rust-example-rendered"><code>[dependencies]
-linked-vector = <span class="string">&quot;2.0&quot;</span></code></pre></div>
-<p>Or, for <code>v1</code> include:</p>
+linked-vector = { version = <span class="string">&quot;1.2&quot;</span>, features = [<span class="string">&quot;optionless-accessors&quot;</span>] }</code></pre></div>
+<p>Or, for backward compatibility with existing <code>v1.1.0</code> code include:</p>
 
 <div class="example-wrap ignore"><div class='tooltip'>ⓘ</div><pre class="rust rust-example-rendered"><code>[dependencies]
-linked-vector = <span class="string">&quot;1.1&quot;</span></code></pre></div>
+linked-vector = <span class="string">&quot;1.2&quot;</span></code></pre></div>
 <p>Or run this on the command line from your project folder:</p>
+<div class="example-wrap"><pre class="language-console, ignore"><code>cargo add linked-vector --features optionless-accessors
+</code></pre></div>
+<p>or without the new feature:</p>
 <div class="example-wrap"><pre class="language-console, ignore"><code>cargo add linked-vector
 </code></pre></div><h3 id="handles"><a href="#handles">Handles</a></h3>
 <p>Items in a <code>LinkedVector</code> are directly accessible via handles, which are 
