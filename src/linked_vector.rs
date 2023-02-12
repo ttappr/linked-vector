@@ -389,8 +389,15 @@ impl<T> LinkedVector<T> {
     /// assert_eq!(lv.get(hnode), &42);
     /// ```
     #[inline]
+    #[cfg(feature = "optionless-accessors")]
     pub fn get(&self, node: HNode) -> &T {
         self.get_(node).value.as_ref().unwrap()
+    }
+
+    #[inline]
+    #[cfg(not(feature = "optionless-accessors"))]
+    pub fn get(&self, node: HNode) -> Option<&T> {
+        self.get_(node).value.as_ref()
     }
 
     /// Provides a mutable reference to the element indicated by the given
@@ -406,8 +413,15 @@ impl<T> LinkedVector<T> {
     /// assert_eq!(lv.get(hnode), &42);
     /// ```
     #[inline]
+    #[cfg(feature = "optionless-accessors")]
     pub fn get_mut(&mut self, node: HNode) -> &mut T {
         self.get_mut_(node).value.as_mut().unwrap()
+    }
+
+    #[inline]
+    #[cfg(not(feature = "optionless-accessors"))]
+    pub fn get_mut(&mut self, node: HNode) -> Option<&mut T> {
+        self.get_mut_(node).value.as_mut()
     }
 
     /// Returns the handle to the node at the given index, or `None` if the
@@ -689,8 +703,15 @@ impl<T> LinkedVector<T> {
     /// assert_eq!(lv, LinkedVector::from([1, 3]));
     /// ```
     #[inline]
+    #[cfg(feature = "optionless-accessors")]
     pub fn remove(&mut self, node: HNode) -> T {
         self.remove_(Some(node)).unwrap()
+    }
+
+    #[inline]
+    #[cfg(not(feature = "optionless-accessors"))]
+    pub fn remove(&mut self, node: HNode) -> Option<T> {
+        self.remove_(Some(node))
     }
 
     /// Sorts the elemements in place in ascending order. Previously held 

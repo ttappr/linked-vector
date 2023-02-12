@@ -11,7 +11,11 @@ use crate::linked_vector::*;
 pub trait CursorBase<T> {
     /// Returns a reference to the element at the cursor's current position.
     /// 
+    #[cfg(feature = "optionless-accessors")]
     fn get(&self) -> &T;
+
+    #[cfg(not(feature = "optionless-accessors"))]
+    fn get(&self) -> Option<&T>;
 
     /// Returns the handle of the element at the cursor's current position.
     /// 
@@ -19,7 +23,11 @@ pub trait CursorBase<T> {
 
     /// Moves the cursor to the specified handle. The handle must be valid.
     /// 
+    #[cfg(feature = "optionless-accessors")]
     fn move_to(&mut self, handle: HNode);
+
+    #[cfg(not(feature = "optionless-accessors"))]
+    fn move_to(&mut self, handle: HNode) -> Option<HNode>;
 
     /// Moves the cursor to the next element. Returns the handle of the next
     /// element if the cursor was moved, None if the cursor was already at the
@@ -94,7 +102,13 @@ impl<'a, T> Cursor<'a, T> {
     }
 }
 impl<'a, T> CursorBase<T> for Cursor<'a, T> {
+    #[cfg(feature = "optionless-accessors")]
     fn get(&self) -> &T {
+        self.lvec.get(self.handle)
+    }
+
+    #[cfg(not(feature = "optionless-accessors"))]
+    fn get(&self) -> Option<&T> {
         self.lvec.get(self.handle)
     }
 
@@ -102,11 +116,22 @@ impl<'a, T> CursorBase<T> for Cursor<'a, T> {
         self.handle
     }
 
+    #[cfg(feature = "optionless-accessors")]
     fn move_to(&mut self, handle: HNode) {
         #[cfg(debug_assertions)]
         self.lvec.check_handle(handle);
 
         self.handle = handle;
+    }
+
+    #[cfg(not(feature = "optionless-accessors"))]
+    fn move_to(&mut self, handle: HNode) -> Option<HNode> {
+        #[cfg(debug_assertions)]
+        self.lvec.check_handle(handle);
+
+        let hprev = self.handle;
+        self.handle = handle;
+        Some(hprev)
     }
 
     fn move_next(&mut self) -> Option<HNode> {
@@ -204,7 +229,13 @@ impl<'a, T> CursorMut<'a, T> {
     /// Returns a mutable reference to the element at the cursor's current
     /// position.
     /// 
+    #[cfg(feature = "optionless-accessors")]
     pub fn get_mut(&mut self) -> &mut T {
+        self.lvec.get_mut(self.handle)
+    }
+
+    #[cfg(not(feature = "optionless-accessors"))]
+    pub fn get_mut(&mut self) -> Option<&mut T> {
         self.lvec.get_mut(self.handle)
     }
 
@@ -248,19 +279,43 @@ impl<'a, T> CursorMut<'a, T> {
 }
 
 impl<'a, T> CursorBase<T> for CursorMut<'a, T> {
+    #[cfg(feature = "optionless-accessors")]
     fn get(&self) -> &T {
         self.lvec.get(self.handle)
+    }
+
+    #[cfg(not(feature = "optionless-accessors"))]
+    fn get(&self) -> Option<&T> {
+        if self.lvec.is_empty() {
+            None
+        } else {
+            Some(self.lvec.get(self.handle))
+        }
     }
 
     fn node(&self) -> HNode {
         self.handle
     }
 
+    #[cfg(feature = "optionless-accessors")]
     fn move_to(&mut self, handle: HNode) {
         #[cfg(debug_assertions)]
         self.lvec.check_handle(handle);
         
         self.handle = handle;
+    }
+
+    #[cfg(not(feature = "optionless-accessors"))]
+    fn move_to(&mut self, handle: HNode) -> Option<HNode> {
+        #[cfg(debug_assertions)]
+        self.lvec.check_handle(handle);
+        
+        if self.lvec.is_empty() {
+            None
+        } else {
+            self.handle = handle;
+            Some(self.handle)
+        }
     }
 
     fn move_next(&mut self) -> Option<HNode> {

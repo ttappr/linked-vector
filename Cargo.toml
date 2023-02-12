@@ -1,6 +1,6 @@
 [package]
 name = "linked-vector"
-version = "2.0.0"
+version = "1.2.0"
 edition = "2021"
 license = "MIT"
 authors = ["tmtappr@gmail.com"]
@@ -11,6 +11,11 @@ readme = "README.md"
 exclude = ["docs", "TODO.md"]
 keywords = ["linked", "list", "vector"]
 categories = ["data-structures"]
+
+[features]
+default = ["optionless-accessors", "cursor-remove"]
+optionless-accessors = []
+cursor-remove = []
 
 [dependencies]
 
@@ -23,3 +28,4 @@ features = [
 ]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
