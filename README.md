@@ -17,7 +17,8 @@ count queues.
 
 The current release `v1.2.0` has a new `"optionless-accessors"` feature that can 
 be enabled which implements some minor changes to a few existing methods for 
-`LinkedVector` and `Cursor`. 
+`LinkedVector` and `Cursor`. It is encouraged that this feature be enabled as 
+it addresses certain nonsensical aspects of a few API methods.
 
 With this feature enabled, methods such as `get(hnode)` and `get_mut(hnode)`
 that take a handle return direct references to their values instead of an 
