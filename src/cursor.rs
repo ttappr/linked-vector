@@ -1,5 +1,5 @@
 
-use crate::*;
+use crate::linked_vector::*;
 
 /// A cursor is a position within a linked vector. It can be used to traverse
 /// the list in either direction, and to access the element at the current

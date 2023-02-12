@@ -1,6 +1,4 @@
 
-#![doc = "To Primary Struct: [LinkedVector]"]
-#![doc = include_str!("../README.md")]
 
 use core::fmt;
 use core::iter::{FromIterator, FusedIterator};
@@ -9,23 +7,20 @@ use core::cmp::Ordering;
 use core::hash::{Hash, Hasher};
 use core::fmt::Formatter;
 use core::fmt::Debug;
-pub use cursor::*;
 
-#[cfg(test)]
-mod tests_linked_vector;
-mod cursor;
+use crate::cursor::*;
 
 #[cfg(debug_assertions)]
 use uuid::{uuid, Uuid};
 
 #[cfg(not(debug_assertions))]
-const BAD_HANDLE : HNode = HNode(usize::MAX);
+pub(crate) const BAD_HANDLE : HNode = HNode(usize::MAX);
 
 #[cfg(debug_assertions)]
-const BAD_HANDLE : HNode = 
-        HNode(usize::MAX, 
-              usize::MAX, 
-              uuid!("deadbeef-dead-beef-dead-beefdeadbeef"));
+pub(crate) const BAD_HANDLE : HNode = 
+                    HNode(usize::MAX, 
+                        usize::MAX, 
+                        uuid!("deadbeef-dead-beef-dead-beefdeadbeef"));
 
 /// A handle to a node within a `LinkedVector`. Internally, it holds an index
 /// into the vector holding the LinkedVector's nodes.
@@ -52,7 +47,7 @@ impl Default for HNode {
 /// The node type used by `LinkedVector`. It holds a value of type `T`, and 
 /// handles to the next and previous nodes in the list.
 /// 
-struct Node<T> {
+pub(crate) struct Node<T> {
     value : Option<T>,
     next  : HNode,
     prev  : HNode,
@@ -83,6 +78,18 @@ impl<T> Node<T> {
             next  : BAD_HANDLE, 
             prev  : BAD_HANDLE, 
         }
+    }
+
+    #[cfg(test)]
+    #[inline(always)]
+    pub(crate) fn next(&self) -> HNode {
+        self.next
+    }
+
+    #[cfg(test)]
+    #[inline(always)]
+    pub(crate) fn prev(&self) -> HNode {
+        self.prev
     }
 }
 
@@ -856,7 +863,7 @@ impl<T> LinkedVector<T> {
     /// to the newly inserted element. This operation completes in O(1) time.
     /// 
     #[inline]
-    fn insert_(&mut self, node: Option<HNode>, value: T) -> HNode {
+    pub(crate) fn insert_(&mut self, node: Option<HNode>, value: T) -> HNode {
         if self.is_empty() {
             #[cfg(debug_assertions)]
             assert!(node.is_none(), "Empty list has no handles.");
@@ -893,7 +900,7 @@ impl<T> LinkedVector<T> {
     /// O(1) time.
     /// 
     #[inline]
-    fn remove_(&mut self, node: Option<HNode>) -> Option<T> {
+    pub(crate) fn remove_(&mut self, node: Option<HNode>) -> Option<T> {
         if self.is_empty() {
             #[cfg(debug_assertions)]
             assert!(node.is_none(), "Empty list has no handles.");
@@ -927,7 +934,7 @@ impl<T> LinkedVector<T> {
     /// operation completes in O(1) time.
     /// 
     #[inline(always)]
-    fn get_(&self, node: HNode) -> &Node<T> {
+    pub(crate) fn get_(&self, node: HNode) -> &Node<T> {
         #[cfg(debug_assertions)]
         self.check_handle(node);
         
@@ -938,7 +945,7 @@ impl<T> LinkedVector<T> {
     /// `node`. This operation completes in O(1) time.
     /// 
     #[inline(always)]
-    fn get_mut_(&mut self, node: HNode) -> &mut Node<T> {
+    pub(crate) fn get_mut_(&mut self, node: HNode) -> &mut Node<T> {
         #[cfg(debug_assertions)]
         self.check_handle(node);
 
@@ -946,7 +953,7 @@ impl<T> LinkedVector<T> {
     }
 
     #[cfg(debug_assertions)]
-    fn check_handle(&self, node: HNode) {
+    pub(crate) fn check_handle(&self, node: HNode) {
         assert!(node.0 != BAD_HANDLE.0, "Handle is invalid.");
         assert!(node.2 == self.uuid, "Handle is not native."); 
         assert!(node.1 == self.vec[node.0].gen, "Handle has expired.");
