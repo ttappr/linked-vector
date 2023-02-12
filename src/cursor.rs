@@ -1,4 +1,7 @@
 
+use core::ops::Deref;
+use core::ops::DerefMut;
+
 use crate::linked_vector::*;
 
 /// A cursor is a position within a linked vector. It can be used to traverse
@@ -159,6 +162,14 @@ impl<'a, T> CursorBase<T> for Cursor<'a, T> {
     }
 }
 
+impl<'a, T> Deref for Cursor<'a, T> {
+    type Target = T;
+
+    fn deref(&self) -> &Self::Target {
+        self.get()
+    }
+}
+
 /// A cursor which can read and write the elements of the list.
 /// 
 pub struct CursorMut<'a, T> {
@@ -304,5 +315,19 @@ impl<'a, T> CursorBase<T> for CursorMut<'a, T> {
             }
         }
         Ok(self.handle)
+    }
+}
+
+impl<'a, T> Deref for CursorMut<'a, T> {
+    type Target = T;
+
+    fn deref(&self) -> &Self::Target {
+        self.get()
+    }
+}
+
+impl<'a, T> DerefMut for CursorMut<'a, T> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        self.get_mut()
     }
 }

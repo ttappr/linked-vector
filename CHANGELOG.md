@@ -9,6 +9,8 @@
   - `cursor_back()`
   - `cursor_front_mut()`
   - `cursor_back_mut()`
+- `Cursor` & `CursorMut` now support the `Deref` and `DerefMut` traits, so
+  pointer-like syntax is possible.
 
 ### Changed
 

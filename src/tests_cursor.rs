@@ -76,3 +76,33 @@ fn cursor_remove() {
     assert_eq!(cursor.get(), &8);
     assert_eq!(lv.to_vec(), vec![1, 2, 3, 4, 6, 7, 8]);
 }
+
+#[test]
+fn cursor_deref() {
+    let lv = LinkedVector::from([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+    let h5 = lv.handle(4).unwrap();
+    let mut cursor = lv.cursor(h5);
+
+    assert_eq!(*cursor, 5);
+
+    cursor.forward(2).expect("Should move forward 2.");
+
+    assert_eq!(*cursor, 7);
+}
+
+#[test]
+fn cursor_mut_deref() {
+    let mut lv = LinkedVector::from([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+    let h5 = lv.handle(4).unwrap();
+    let mut cursor = lv.cursor_mut(h5);
+
+    assert_eq!(*cursor, 5);
+    *cursor = 10;
+    assert_eq!(*cursor, 10);
+    
+    cursor.forward(2).expect("Should move forward 2.");
+
+    assert_eq!(*cursor, 7);
+
+    assert_eq!(lv.to_vec(), vec![1, 2, 3, 4, 10, 6, 7, 8, 9]);
+}
