@@ -24,7 +24,7 @@ update your `Cargo.toml` file to include the feature,
 
 ### Feature: "optionless-accessors"
 
-Version `v1.2.0` has added a new `"optionless-accessors"` feature that can 
+Version `v1.2.1` has added a new `"optionless-accessors"` feature that can 
 be enabled which implements some minor changes to a few existing methods for 
 `LinkedVector` and `Cursor`. It is encouraged that this feature be enabled as 
 it addresses certain nonsensical aspects of a few API methods.
