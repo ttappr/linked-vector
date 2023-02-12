@@ -168,29 +168,29 @@ fn cursor() {
     let lv = LinkedVector::from([1, 2, 3, 4, 5, 6, 7]);
     let mut cursor = lv.cursor(lv.front_node().unwrap());
     
-    assert_eq!(cursor.get(), Some(&1));
+    assert_eq!(cursor.get(), &1);
     
     cursor.move_next();
     
-    assert_eq!(cursor.get(), Some(&2));
+    assert_eq!(cursor.get(), &2);
     
     let hend = cursor.move_to_back().unwrap();
     let hbak = cursor.backward(2).unwrap();
     
-    assert_eq!(cursor.get(), Some(&5));
-    assert_eq!(lv.get(hend), Some(&7));
-    assert_eq!(lv.get(hbak), Some(&5));
+    assert_eq!(cursor.get(), &5);
+    assert_eq!(lv.get(hend), &7);
+    assert_eq!(lv.get(hbak), &5);
     
     let mut cursor = lv.cursor(hbak);
     
     match cursor.backward(20) {
         Ok(handle) => panic!("Should move to beginning on overshoot."),
-        Err(handle) => assert_eq!(lv.get(handle), Some(&1)),
+        Err(handle) => assert_eq!(lv.get(handle), &1),
     }
 
     match cursor.forward(20) {
         Ok(handle) => panic!("Should move to end on overshoot."),
-        Err(handle) => assert_eq!(lv.get(handle), Some(&7)),
+        Err(handle) => assert_eq!(lv.get(handle), &7),
     }
 }
 
@@ -200,14 +200,14 @@ fn cursor_2() {
     let h5 = lv.handle(4).unwrap();
     let mut cursor = lv.cursor(h5);
 
-    assert_eq!(cursor.get(), Some(&5));
+    assert_eq!(cursor.get(), &5);
     
     let h6 = cursor.move_next().unwrap();
 
     assert_eq!(lv[h6], 6);
 
     cursor.forward(2).expect("Should move forward 2.");
-    assert_eq!(cursor.get(), Some(&8));
+    assert_eq!(cursor.get(), &8);
 }
 
 #[test]
@@ -229,11 +229,11 @@ fn cursor_remove() {
     let mut cursor = lv.cursor_mut(h5);
 
     cursor.remove();
-    assert_eq!(cursor.get(), Some(&6));
+    assert_eq!(cursor.get(), &6);
 
     cursor.move_to_back().unwrap();
     cursor.remove();
-    assert_eq!(cursor.get(), Some(&8));
+    assert_eq!(cursor.get(), &8);
     assert_eq!(lv.to_vec(), vec![1, 2, 3, 4, 6, 7, 8]);
 }
 
@@ -354,9 +354,9 @@ fn get() {
     let h1 = lv1.push_back(1);
     let h2 = lv1.push_back(2);
     let h3 = lv1.push_back(3);
-    assert_eq!(lv1.get(h1), Some(&1));
-    assert_eq!(lv1.get(h2), Some(&2));
-    assert_eq!(lv1.get(h3), Some(&3));
+    assert_eq!(lv1.get(h1), &1);
+    assert_eq!(lv1.get(h2), &2);
+    assert_eq!(lv1.get(h3), &3);
     assert_eq!(lv1.len(), 3);
 }
 
@@ -366,12 +366,12 @@ fn get_mut() {
     let h1 = lv1.push_back(1);
     let h2 = lv1.push_back(2);
     let h3 = lv1.push_back(3);
-    *lv1.get_mut(h1).unwrap() = 4;
-    *lv1.get_mut(h2).unwrap() = 5;
-    *lv1.get_mut(h3).unwrap() = 6;
-    assert_eq!(lv1.get(h1), Some(&4));
-    assert_eq!(lv1.get(h2), Some(&5));
-    assert_eq!(lv1.get(h3), Some(&6));
+    *lv1.get_mut(h1) = 4;
+    *lv1.get_mut(h2) = 5;
+    *lv1.get_mut(h3) = 6;
+    assert_eq!(lv1.get(h1), &4);
+    assert_eq!(lv1.get(h2), &5);
+    assert_eq!(lv1.get(h3), &6);
     assert_eq!(lv1.len(), 3);
 }
 
@@ -719,7 +719,7 @@ fn push_front() {
 fn remove() {
     let mut lv1 = LinkedVector::from([1, 2, 3, 4, 5, 6, 7, 8, 9]);
     let h = lv1.handle(6).unwrap();
-    assert_eq!(lv1.remove(h), Some(7));
+    assert_eq!(lv1.remove(h), 7);
     assert_eq!(lv1.to_vec(), vec![1, 2, 3, 4, 5, 6, 8, 9]);
 }
 
