@@ -1481,6 +1481,35 @@
 <a href="#1481" id="1481">1481</a>
 <a href="#1482" id="1482">1482</a>
 <a href="#1483" id="1483">1483</a>
+<a href="#1484" id="1484">1484</a>
+<a href="#1485" id="1485">1485</a>
+<a href="#1486" id="1486">1486</a>
+<a href="#1487" id="1487">1487</a>
+<a href="#1488" id="1488">1488</a>
+<a href="#1489" id="1489">1489</a>
+<a href="#1490" id="1490">1490</a>
+<a href="#1491" id="1491">1491</a>
+<a href="#1492" id="1492">1492</a>
+<a href="#1493" id="1493">1493</a>
+<a href="#1494" id="1494">1494</a>
+<a href="#1495" id="1495">1495</a>
+<a href="#1496" id="1496">1496</a>
+<a href="#1497" id="1497">1497</a>
+<a href="#1498" id="1498">1498</a>
+<a href="#1499" id="1499">1499</a>
+<a href="#1500" id="1500">1500</a>
+<a href="#1501" id="1501">1501</a>
+<a href="#1502" id="1502">1502</a>
+<a href="#1503" id="1503">1503</a>
+<a href="#1504" id="1504">1504</a>
+<a href="#1505" id="1505">1505</a>
+<a href="#1506" id="1506">1506</a>
+<a href="#1507" id="1507">1507</a>
+<a href="#1508" id="1508">1508</a>
+<a href="#1509" id="1509">1509</a>
+<a href="#1510" id="1510">1510</a>
+<a href="#1511" id="1511">1511</a>
+<a href="#1512" id="1512">1512</a>
 </pre><pre class="rust"><code>
 
 <span class="kw">use </span>core::fmt;
@@ -1733,7 +1762,7 @@
     /// 
     /// cursor.forward(3);
     /// 
-    /// assert_eq!(cursor.get(), &amp;6);
+    /// assert_eq!(cursor.get(), Some(&amp;6));
     /// ```
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>cursor(<span class="kw-2">&amp;</span><span class="self">self</span>, node: HNode) -&gt; Cursor&lt;T&gt; {
@@ -1751,9 +1780,9 @@
     /// 
     /// cursor.forward(3);
     /// 
-    /// assert_eq!(cursor.get(), &amp;4);
+    /// assert_eq!(cursor.get(), Some(&amp;4));
     /// 
-    /// *cursor.get_mut() = 42;
+    /// *cursor.get_mut().unwrap() = 42;
     /// 
     /// assert_eq!(lv.to_vec(), vec![1, 2, 3, 42, 5, 6]);
     /// ```
@@ -1843,7 +1872,7 @@
     /// let hnode = lv.push_front(42);
     /// 
     /// assert_eq!(lv.front_node(), Some(hnode));
-    /// assert_eq!(lv.front_node().map(|h| lv.get(h)), Some(&amp;42));
+    /// assert_eq!(lv.front_node().map(|h| lv.get(h)).unwrap(), Some(&amp;42));
     /// ```
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>front_node(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;HNode&gt; {
@@ -1964,7 +1993,7 @@
     /// let h2 = lv.insert(h1, 43);
     /// 
     /// assert_eq!(lv.next_node(h2), Some(h1));
-    /// assert_eq!(lv.get(h1), &amp;42);
+    /// assert_eq!(lv.get(h1), Some(&amp;42));
     /// ```
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>insert(<span class="kw-2">&amp;mut </span><span class="self">self</span>, node: HNode, value: T) -&gt; HNode {
@@ -1982,7 +2011,7 @@
     /// let h2 = lv.insert_after(h1, 43);
     /// 
     /// assert_eq!(lv.next_node(h1), Some(h2));
-    /// assert_eq!(lv.get(h2), &amp;43);
+    /// assert_eq!(lv.get(h2), Some(&amp;43));
     /// ```
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>insert_after(<span class="kw-2">&amp;mut </span><span class="self">self</span>, node: HNode, value: T) -&gt; HNode {
@@ -2667,14 +2696,22 @@
 
     <span class="attr">#[inline]
     </span><span class="kw">fn </span>index(<span class="kw-2">&amp;</span><span class="self">self</span>, handle: HNode) -&gt; <span class="kw-2">&amp;</span><span class="self">Self</span>::Output {
-        <span class="self">self</span>.get(handle)
+        <span class="attr">#[cfg(feature = <span class="string">&quot;optionless-accessors&quot;</span>)]
+        </span>{ <span class="self">self</span>.get(handle) }
+
+        <span class="attr">#[cfg(not(feature = <span class="string">&quot;optionless-accessors&quot;</span>))]
+        </span>{ <span class="self">self</span>.get(handle).unwrap() }
     }
 }
 
 <span class="kw">impl</span>&lt;T&gt; IndexMut&lt;HNode&gt; <span class="kw">for </span>LinkedVector&lt;T&gt; {
     <span class="attr">#[inline]
     </span><span class="kw">fn </span>index_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>, handle: HNode) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self</span>::Output {
-        <span class="self">self</span>.get_mut(handle)
+        <span class="attr">#[cfg(feature = <span class="string">&quot;optionless-accessors&quot;</span>)]
+        </span>{ <span class="self">self</span>.get_mut(handle) }
+
+        <span class="attr">#[cfg(not(feature = <span class="string">&quot;optionless-accessors&quot;</span>))]
+        </span>{ <span class="self">self</span>.get_mut(handle).unwrap() }
     }
 }
 
@@ -2801,7 +2838,11 @@
             <span class="kw">let </span>hnode = <span class="self">self</span>.hnode;
             <span class="self">self</span>.hnode = <span class="self">self</span>.lv.get_(hnode).next;
             <span class="self">self</span>.len -= <span class="number">1</span>;
-            <span class="prelude-val">Some</span>(<span class="self">self</span>.lv.get(hnode))
+            <span class="attr">#[cfg(feature = <span class="string">&quot;optionless-accessors&quot;</span>)]
+            </span>{ <span class="prelude-val">Some</span>(<span class="self">self</span>.lv.get(hnode)) }
+
+            <span class="attr">#[cfg(not(feature = <span class="string">&quot;optionless-accessors&quot;</span>))]
+            </span>{ <span class="self">self</span>.lv.get(hnode) }
         } <span class="kw">else </span>{
             <span class="prelude-val">None
         </span>}
@@ -2824,7 +2865,11 @@
             <span class="kw">let </span>node = <span class="self">self</span>.lv.get_(hrev);
             <span class="self">self</span>.hrev = node.prev;
             <span class="self">self</span>.len -= <span class="number">1</span>;
-            <span class="prelude-val">Some</span>(<span class="self">self</span>.lv.get(hrev))
+            <span class="attr">#[cfg(feature = <span class="string">&quot;optionless-accessors&quot;</span>)]
+            </span>{ <span class="prelude-val">Some</span>(<span class="self">self</span>.lv.get(hrev)) }
+
+            <span class="attr">#[cfg(not(feature = <span class="string">&quot;optionless-accessors&quot;</span>))]
+            </span>{ <span class="self">self</span>.lv.get(hrev) }
         } <span class="kw">else </span>{
             <span class="prelude-val">None
         </span>}
@@ -2879,7 +2924,13 @@
             <span class="kw">let </span>hnode = <span class="self">self</span>.hnode;
             <span class="self">self</span>.hnode = <span class="self">self</span>.lv.get_(hnode).next;
             <span class="self">self</span>.len -= <span class="number">1</span>;
-            <span class="prelude-val">Some</span>(<span class="kw">unsafe</span>{ <span class="kw-2">&amp;mut *</span>(<span class="self">self</span>.lv.get_mut(hnode) <span class="kw">as </span><span class="kw-2">*mut </span>T)})
+            <span class="attr">#[cfg(feature = <span class="string">&quot;optionless-accessors&quot;</span>)]
+            </span>{ <span class="prelude-val">Some</span>(<span class="kw">unsafe </span>{ <span class="kw-2">&amp;mut *</span>(<span class="self">self</span>.lv.get_mut(hnode) <span class="kw">as </span><span class="kw-2">*mut </span>T) }) }
+
+            <span class="attr">#[cfg(not(feature = <span class="string">&quot;optionless-accessors&quot;</span>))]
+            </span>{ 
+            <span class="prelude-val">Some</span>(<span class="kw">unsafe </span>{ <span class="kw-2">&amp;mut *</span>(<span class="self">self</span>.lv.get_mut(hnode).unwrap() <span class="kw">as </span><span class="kw-2">*mut </span>T)}) 
+            }
         } <span class="kw">else </span>{
             <span class="prelude-val">None
         </span>}
@@ -2902,7 +2953,14 @@
             <span class="kw">let </span>node = <span class="self">self</span>.lv.get_(hrev);
             <span class="self">self</span>.hrev = node.prev;
             <span class="self">self</span>.len -= <span class="number">1</span>;
-            <span class="prelude-val">Some</span>(<span class="kw">unsafe </span>{ <span class="kw-2">&amp;mut *</span>(<span class="self">self</span>.lv.get_mut(hrev) <span class="kw">as </span><span class="kw-2">*mut </span>T) })
+            <span class="attr">#[cfg(feature = <span class="string">&quot;optionless-accessors&quot;</span>)]
+            </span>{ <span class="prelude-val">Some</span>(<span class="kw">unsafe </span>{ <span class="kw-2">&amp;mut *</span>(<span class="self">self</span>.lv.get_mut(hrev) <span class="kw">as </span><span class="kw-2">*mut </span>T) }) }
+
+            <span class="comment">// TODO - compare this version with 1.1 version.
+            </span><span class="attr">#[cfg(not(feature = <span class="string">&quot;optionless-accessors&quot;</span>))]
+            </span>{
+            <span class="prelude-val">Some</span>(<span class="kw">unsafe </span>{ <span class="kw-2">&amp;mut *</span>(<span class="self">self</span>.lv.get_mut(hrev).unwrap() <span class="kw">as </span><span class="kw-2">*mut </span>T) })
+            }
         } <span class="kw">else </span>{
             <span class="prelude-val">None
         </span>}

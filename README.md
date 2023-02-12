@@ -38,14 +38,14 @@ Versioning Conventions:
 
 To use the "optionless-accessors" feature, edit your Cargo.toml file to include:
 
-```rust, ignore
+```rust, no_run
 [dependencies]
 linked-vector = { version = "1.2", features = ["optionless-accessors"] }
 ```
 
 Or, for backward compatibility with existing `v1.1.0` code include:
 
-```rust, ignore
+```rust, no_run
 [dependencies]
 linked-vector = "1.2"
 ```
@@ -77,7 +77,7 @@ let mut lv = LinkedVector::new();
 let handle_1 = lv.push_back(1);
 let handle_2 = lv.push_back(2);
 
-*lv.get_mut(handle_1) = 42;
+*lv.get_mut(handle_1).unwrap() = 42;
 lv[handle_2] = 99;
 
 assert_eq!(lv[handle_1], 42);
@@ -169,18 +169,18 @@ let hfront = lv.front_node().unwrap();
 
 let mut cursor = lv.cursor(hfront);
 
-assert_eq!(cursor.get(), &1);
+assert_eq!(cursor.get(), Some(&1));
 
 cursor.move_next();
 
-assert_eq!(cursor.get(), &2);
+assert_eq!(cursor.get(), Some(&2));
 
 let hend = cursor.move_to_end().unwrap();
 let hbak = cursor.backward(3).unwrap();
 
-assert_eq!(cursor.get(), &4);
-assert_eq!(lv.get(hend), &7);
-assert_eq!(lv.get(hbak), &4);
+assert_eq!(cursor.get(), Some(&4));
+assert_eq!(lv.get(hend), Some(&7));
+assert_eq!(lv.get(hbak), Some(&4));
 ```
 ## Iterators
 

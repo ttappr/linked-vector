@@ -280,10 +280,21 @@ fn get() {
     let h1 = lv1.push_back(1);
     let h2 = lv1.push_back(2);
     let h3 = lv1.push_back(3);
-    assert_eq!(lv1.get(h1), &1);
-    assert_eq!(lv1.get(h2), &2);
-    assert_eq!(lv1.get(h3), &3);
-    assert_eq!(lv1.len(), 3);
+
+    #[cfg(feature = "optionless-accessors")]
+    {
+        assert_eq!(lv1.get(h1), &1);
+        assert_eq!(lv1.get(h2), &2);
+        assert_eq!(lv1.get(h3), &3);
+        assert_eq!(lv1.len(), 3);
+    }
+    #[cfg(not(feature = "optionless-accessors"))]
+    {
+        assert_eq!(lv1.get(h1), Some(&1));
+        assert_eq!(lv1.get(h2), Some(&2));
+        assert_eq!(lv1.get(h3), Some(&3));
+        assert_eq!(lv1.len(), 3);
+    }
 }
 
 #[test]
@@ -292,13 +303,28 @@ fn get_mut() {
     let h1 = lv1.push_back(1);
     let h2 = lv1.push_back(2);
     let h3 = lv1.push_back(3);
-    *lv1.get_mut(h1) = 4;
-    *lv1.get_mut(h2) = 5;
-    *lv1.get_mut(h3) = 6;
-    assert_eq!(lv1.get(h1), &4);
-    assert_eq!(lv1.get(h2), &5);
-    assert_eq!(lv1.get(h3), &6);
-    assert_eq!(lv1.len(), 3);
+
+    #[cfg(feature = "optionless-accessors")]
+    {
+        *lv1.get_mut(h1) = 4;
+        *lv1.get_mut(h2) = 5;
+        *lv1.get_mut(h3) = 6;
+        assert_eq!(lv1.get(h1), &4);
+        assert_eq!(lv1.get(h2), &5);
+        assert_eq!(lv1.get(h3), &6);
+        assert_eq!(lv1.len(), 3);
+    }
+
+    #[cfg(not(feature = "optionless-accessors"))]
+    {
+        *lv1.get_mut(h1).unwrap() = 4;
+        *lv1.get_mut(h2).unwrap() = 5;
+        *lv1.get_mut(h3).unwrap() = 6;
+        assert_eq!(lv1.get(h1), Some(&4));
+        assert_eq!(lv1.get(h2), Some(&5));
+        assert_eq!(lv1.get(h3), Some(&6));
+        assert_eq!(lv1.len(), 3);
+    }
 }
 
 #[test]
@@ -645,7 +671,13 @@ fn push_front() {
 fn remove() {
     let mut lv1 = LinkedVector::from([1, 2, 3, 4, 5, 6, 7, 8, 9]);
     let h = lv1.handle(6).unwrap();
-    assert_eq!(lv1.remove(h), 7);
+    
+    #[cfg(feature = "optionless-accessors")]
+    { assert_eq!(lv1.remove(h), 7); }
+    
+    #[cfg(not(feature = "optionless-accessors"))]
+    { assert_eq!(lv1.remove(h), Some(7)); }
+
     assert_eq!(lv1.to_vec(), vec![1, 2, 3, 4, 5, 6, 8, 9]);
 }
 

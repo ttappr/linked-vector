@@ -11,7 +11,7 @@ use of the <code>linked-vector</code> crate is available. The project is for a L
 Frequently Used Cache. <code>LinkedVector</code>’s are used to implement its frequency 
 count queues.</p>
 <h3 id="updates"><a href="#updates">Updates</a></h3>
-<p>The current release <code>v1.2.0</code> has a new “optionless-accessors” feature that can 
+<p>The current release <code>v1.2.0</code> has a new <code>&quot;optionless-accessors&quot;</code> feature that can 
 be enabled which implements some minor changes to a few existing methods for 
 <code>LinkedVector</code> and <code>Cursor</code>. </p>
 <p>With this feature enabled, methods such as <code>get(hnode)</code> and <code>get_mut(hnode)</code>
@@ -30,11 +30,11 @@ so as not to break backward compatibility, but can be easily turned on;
 <h3 id="usage"><a href="#usage">Usage</a></h3>
 <p>To use the “optionless-accessors” feature, edit your Cargo.toml file to include:</p>
 
-<div class="example-wrap ignore"><div class='tooltip'>ⓘ</div><pre class="rust rust-example-rendered"><code>[dependencies]
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>[dependencies]
 linked-vector = { version = <span class="string">&quot;1.2&quot;</span>, features = [<span class="string">&quot;optionless-accessors&quot;</span>] }</code></pre></div>
 <p>Or, for backward compatibility with existing <code>v1.1.0</code> code include:</p>
 
-<div class="example-wrap ignore"><div class='tooltip'>ⓘ</div><pre class="rust rust-example-rendered"><code>[dependencies]
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>[dependencies]
 linked-vector = <span class="string">&quot;1.2&quot;</span></code></pre></div>
 <p>Or run this on the command line from your project folder:</p>
 <div class="example-wrap"><pre class="language-console, ignore"><code>cargo add linked-vector --features optionless-accessors
@@ -55,7 +55,7 @@ model.</p>
 <span class="kw">let </span>handle_1 = lv.push_back(<span class="number">1</span>);
 <span class="kw">let </span>handle_2 = lv.push_back(<span class="number">2</span>);
 
-<span class="kw-2">*</span>lv.get_mut(handle_1) = <span class="number">42</span>;
+<span class="kw-2">*</span>lv.get_mut(handle_1).unwrap() = <span class="number">42</span>;
 lv[handle_2] = <span class="number">99</span>;
 
 <span class="macro">assert_eq!</span>(lv[handle_1], <span class="number">42</span>);
@@ -128,18 +128,18 @@ or several via <code>forward(n_times)</code> and <code>backward(n_ntimes)</code>
 
 <span class="kw">let </span><span class="kw-2">mut </span>cursor = lv.cursor(hfront);
 
-<span class="macro">assert_eq!</span>(cursor.get(), <span class="kw-2">&amp;</span><span class="number">1</span>);
+<span class="macro">assert_eq!</span>(cursor.get(), <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="number">1</span>));
 
 cursor.move_next();
 
-<span class="macro">assert_eq!</span>(cursor.get(), <span class="kw-2">&amp;</span><span class="number">2</span>);
+<span class="macro">assert_eq!</span>(cursor.get(), <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="number">2</span>));
 
 <span class="kw">let </span>hend = cursor.move_to_end().unwrap();
 <span class="kw">let </span>hbak = cursor.backward(<span class="number">3</span>).unwrap();
 
-<span class="macro">assert_eq!</span>(cursor.get(), <span class="kw-2">&amp;</span><span class="number">4</span>);
-<span class="macro">assert_eq!</span>(lv.get(hend), <span class="kw-2">&amp;</span><span class="number">7</span>);
-<span class="macro">assert_eq!</span>(lv.get(hbak), <span class="kw-2">&amp;</span><span class="number">4</span>);</code></pre></div>
+<span class="macro">assert_eq!</span>(cursor.get(), <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="number">4</span>));
+<span class="macro">assert_eq!</span>(lv.get(hend), <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="number">7</span>));
+<span class="macro">assert_eq!</span>(lv.get(hbak), <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="number">4</span>));</code></pre></div>
 <h3 id="iterators"><a href="#iterators">Iterators</a></h3>
 <p><code>LinkedVector</code> implements the standard set of double-ended iterators. They can
 be instantiated directly via methods such as <code>iter()</code>, or implicitly.</p>
