@@ -1,5 +1,40 @@
 # Changelog
 
+## [v1.2.0] - 2023-02-11
+
+### Added
+
+- Methods added to `LinkedVector`:
+  - `cursor_front()`
+  - `cursor_back()`
+  - `cursor_front_mut()`
+  - `cursor_back_mut()`
+- `Cursor` & `CursorMut` now support the `Deref` and `DerefMut` traits, so
+  pointer-like syntax is possible.
+- The new feature flag, `"optionless-accessors"` has been added. With this
+  enabled certain accessor methods of `LinkedVector` and `Cursor` return their
+  respective values directly not wrapped in an `Option`.
+- The new feature flag, `"cursor-remove"`, enables `CursorMut::remove()`. It
+  is off by defaul. Users should explicitly enable if they want to use the 
+  `remove()` command.
+### Changed
+
+- With the feature flag, `"optionless-accessors"` enabled, the following 
+  `LinkedVector` methods no longer return an `Option` and return their 
+  respective values directly:
+  - `get()`
+  - `get_mut()`
+  - `remove()`
+- With the feature flag, `"optionless-accessors"` enabled, the following 
+  `Cursor`/`CursorMut` methods no longer return an `Option` and return their 
+  respective value directy:
+  - `get()`
+  - `get_mut()`
+- `Cursor::move_to()` with `"optionless-accessors"` doesn't return a value. The 
+  handle passed to it is assumed to be valid, or expect a panic.
+- `CursorMut::remove()` is now switched on with the `"cursor-remove"` feature 
+  flag. It is off by default.
+
 ## [v1.1.0] - 2023-02-10
 
 ### Added

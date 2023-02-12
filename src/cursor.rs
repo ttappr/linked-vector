@@ -1,5 +1,8 @@
 
-use crate::*;
+use core::ops::Deref;
+use core::ops::DerefMut;
+
+use crate::linked_vector::*;
 
 /// A cursor is a position within a linked vector. It can be used to traverse
 /// the list in either direction, and to access the element at the current
@@ -8,15 +11,22 @@ use crate::*;
 pub trait CursorBase<T> {
     /// Returns a reference to the element at the cursor's current position.
     /// 
+    #[cfg(feature = "optionless-accessors")]
+    fn get(&self) -> &T;
+
+    #[cfg(not(feature = "optionless-accessors"))]
     fn get(&self) -> Option<&T>;
 
     /// Returns the handle of the element at the cursor's current position.
     /// 
     fn node(&self) -> HNode;
 
-    /// Moves the cursor to the specified handle. Returns true if the cursor
-    /// was moved, false if the handle was invalid.
+    /// Moves the cursor to the specified handle. The handle must be valid.
     /// 
+    #[cfg(feature = "optionless-accessors")]
+    fn move_to(&mut self, handle: HNode);
+
+    #[cfg(not(feature = "optionless-accessors"))]
     fn move_to(&mut self, handle: HNode) -> bool;
 
     /// Moves the cursor to the next element. Returns the handle of the next
@@ -55,13 +65,17 @@ pub trait CursorBase<T> {
 
     /// Moves the cursor forward by the specified number of elements. Returns
     /// the handle of the element at the new position if the cursor was moved,
-    /// Err(handle) if the cursor was already at the end of the list.
+    /// Err(handle) if the cursor did not move forward by the specified amount.
+    /// The handle at the current position after the move is returned in 
+    /// either Result variant.
     /// 
     fn forward(&mut self, n: usize) -> Result<HNode, HNode>;
 
     /// Moves the cursor backward by the specified number of elements. Returns
     /// the handle of the element at the new position if the cursor was moved,
-    /// Err(handle) if the cursor was already at the start of the list.
+    /// Err(handle) if the cursor did not move backward by the specified amount.
+    /// The handle at the current position after the move is returned in 
+    /// either Result variant.
     /// 
     fn backward(&mut self, n: usize) -> Result<HNode, HNode>;
 }
@@ -78,7 +92,9 @@ impl<'a, T> Cursor<'a, T> {
                       handle : HNode) 
         -> Self 
     {
-        lvec.get(handle).expect("Cursor::new() called with invalid handle.");
+        #[cfg(debug_assertions)]
+        lvec.check_handle(handle);
+
         Self {
             lvec,
             handle,
@@ -86,20 +102,42 @@ impl<'a, T> Cursor<'a, T> {
     }
 }
 impl<'a, T> CursorBase<T> for Cursor<'a, T> {
-    fn get(&self) -> Option<&T> {
+    #[cfg(feature = "optionless-accessors")]
+    fn get(&self) -> &T {
         self.lvec.get(self.handle)
+    }
+
+    #[cfg(not(feature = "optionless-accessors"))]
+    fn get(&self) -> Option<&T> {
+        if self.lvec.is_empty() {
+            None
+        } else {
+            self.lvec.get(self.handle)
+        }
     }
 
     fn node(&self) -> HNode {
         self.handle
     }
 
+    #[cfg(feature = "optionless-accessors")]
+    fn move_to(&mut self, handle: HNode) {
+        #[cfg(debug_assertions)]
+        self.lvec.check_handle(handle);
+
+        self.handle = handle;
+    }
+
+    #[cfg(not(feature = "optionless-accessors"))]
     fn move_to(&mut self, handle: HNode) -> bool {
-        if self.lvec.get(handle).is_some() {
+        #[cfg(debug_assertions)]
+        self.lvec.check_handle(handle);
+        
+        if self.lvec.is_empty() {
+            return false;
+        } else {
             self.handle = handle;
             true
-        } else {
-            false
         }
     }
 
@@ -156,6 +194,18 @@ impl<'a, T> CursorBase<T> for Cursor<'a, T> {
     }
 }
 
+impl<'a, T> Deref for Cursor<'a, T> {
+    type Target = T;
+
+    fn deref(&self) -> &Self::Target {
+        #[cfg(feature = "optionless-accessors")]
+        { self.get() }
+
+        #[cfg(not(feature = "optionless-accessors"))]
+        { self.get().unwrap() }
+    }
+}
+
 /// A cursor which can read and write the elements of the list.
 /// 
 pub struct CursorMut<'a, T> {
@@ -169,18 +219,39 @@ impl<'a, T> CursorMut<'a, T> {
                       handle : HNode) 
         -> Self 
     {
-        lvec.get(handle)
-            .expect("CursorMut::new() called with invalid handle.");
+        #[cfg(debug_assertions)]
+        lvec.check_handle(handle);
+
         Self {
             lvec,
             handle,
         }
     }
+
+    /// Returns `true` if the vector the cursor is attached to is empty. Since
+    /// a mutable cursor can remove items, this is provided as a means to avoid 
+    /// panics if the cursor is being used to remove items. If the underlying 
+    /// vector is empty, other operations may panic.
+    /// 
+    pub fn is_empty(&self) -> bool {
+        self.lvec.is_empty()
+    }
+
     /// Returns a mutable reference to the element at the cursor's current
     /// position.
     /// 
-    pub fn get_mut(&mut self) -> Option<&mut T> {
+    #[cfg(feature = "optionless-accessors")]
+    pub fn get_mut(&mut self) -> &mut T {
         self.lvec.get_mut(self.handle)
+    }
+
+    #[cfg(not(feature = "optionless-accessors"))]
+    pub fn get_mut(&mut self) -> Option<&mut T> {
+        if self.lvec.is_empty() {
+            None
+        } else {
+            self.lvec.get_mut(self.handle)
+        }
     }
 
     /// Inserts a new element at the cursor's current position. The cursor
@@ -202,38 +273,68 @@ impl<'a, T> CursorMut<'a, T> {
 
     /// Removes the element at the current position and returns its value. The 
     /// cursor will be moved to the next element if not at the end of the 
-    /// vector, otherwise it moves to the new end. If there was only one item
-    /// in the vector, the cursor's position is set to `BAD_HANDLE` and should
-    /// no longer be used, or could cause invalid handle panics.
+    /// vector, otherwise it moves to the new end. If the vector is already 
+    /// empty, `None` is returned.
     /// 
+    #[cfg(feature = "cursor-remove")]
     pub fn remove(&mut self) -> Option<T> {
-        let hrem = self.handle;
-        if let Some(hnext) = self.lvec.next_node(self.handle) {
-            self.handle = hnext;
-        } else if let Some(hprev) = self.lvec.prev_node(self.handle) {
-            self.handle = hprev;
+        if self.lvec.is_empty() {
+            None
         } else {
-            self.handle = BAD_HANDLE;
+            let hrem = self.handle;
+            if let Some(hnext) = self.lvec.next_node(self.handle) {
+                self.handle = hnext;
+            } else if let Some(hprev) = self.lvec.prev_node(self.handle) {
+                self.handle = hprev;
+            } else {
+                self.handle = BAD_HANDLE;
+            }
+            #[cfg(not(feature = "optionless-accessors"))]
+            { self.lvec.remove(hrem) }
+
+            #[cfg(feature = "optionless-accessors")]
+            { Some(self.lvec.remove(hrem)) }
         }
-        self.lvec.remove(hrem)
     }
 }
 
 impl<'a, T> CursorBase<T> for CursorMut<'a, T> {
-    fn get(&self) -> Option<&T> {
+    #[cfg(feature = "optionless-accessors")]
+    fn get(&self) -> &T {
         self.lvec.get(self.handle)
+    }
+
+    #[cfg(not(feature = "optionless-accessors"))]
+    fn get(&self) -> Option<&T> {
+        if self.lvec.is_empty() {
+            None
+        } else {
+            self.lvec.get(self.handle)
+        }
     }
 
     fn node(&self) -> HNode {
         self.handle
     }
 
+    #[cfg(feature = "optionless-accessors")]
+    fn move_to(&mut self, handle: HNode) {
+        #[cfg(debug_assertions)]
+        self.lvec.check_handle(handle);
+        
+        self.handle = handle;
+    }
+
+    #[cfg(not(feature = "optionless-accessors"))]
     fn move_to(&mut self, handle: HNode) -> bool {
-        if self.lvec.get(handle).is_some() {
+        #[cfg(debug_assertions)]
+        self.lvec.check_handle(handle);
+        
+        if self.lvec.is_empty() {
+            false
+        } else {
             self.handle = handle;
             true
-        } else {
-            false
         }
     }
 
@@ -289,5 +390,27 @@ impl<'a, T> CursorBase<T> for CursorMut<'a, T> {
             }
         }
         Ok(self.handle)
+    }
+}
+
+impl<'a, T> Deref for CursorMut<'a, T> {
+    type Target = T;
+
+    fn deref(&self) -> &Self::Target {
+        #[cfg(feature = "optionless-accessors")]
+        { self.get() }
+
+        #[cfg(not(feature = "optionless-accessors"))]
+        { self.get().unwrap() }
+    }
+}
+
+impl<'a, T> DerefMut for CursorMut<'a, T> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        #[cfg(feature = "optionless-accessors")]
+        { self.get_mut() }
+
+        #[cfg(not(feature = "optionless-accessors"))]
+        { self.get_mut().unwrap() }
     }
 }
