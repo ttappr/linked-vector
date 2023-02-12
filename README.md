@@ -15,7 +15,7 @@ count queues.
 
 ## Updates
 
-The current release `v1.2.0` has a new "optionless-accessors" feature that can 
+The current release `v1.2.0` has a new `"optionless-accessors"` feature that can 
 be enabled which implements some minor changes to a few existing methods for 
 `LinkedVector` and `Cursor`. 
 

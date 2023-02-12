@@ -109,10 +109,10 @@ impl<'a, T> CursorBase<T> for Cursor<'a, T> {
 
     #[cfg(not(feature = "optionless-accessors"))]
     fn get(&self) -> Option<&T> {
-        if self.lvec.is_mpty() {
+        if self.lvec.is_empty() {
             None
         } else {
-            Some(self.lvec.get(self.handle))
+            self.lvec.get(self.handle)
         }
     }
 
@@ -198,7 +198,11 @@ impl<'a, T> Deref for Cursor<'a, T> {
     type Target = T;
 
     fn deref(&self) -> &Self::Target {
-        self.get()
+        #[cfg(feature = "optionless-accessors")]
+        { self.get() }
+
+        #[cfg(not(feature = "optionless-accessors"))]
+        { self.get().unwrap() }
     }
 }
 
@@ -246,7 +250,7 @@ impl<'a, T> CursorMut<'a, T> {
         if self.lvec.is_empty() {
             None
         } else {
-            Some(self.lvec.get_mut(self.handle))
+            self.lvec.get_mut(self.handle)
         }
     }
 
@@ -272,6 +276,7 @@ impl<'a, T> CursorMut<'a, T> {
     /// vector, otherwise it moves to the new end. If the vector is already 
     /// empty, `None` is returned.
     /// 
+    #[cfg(feature = "cursor-remove")]
     pub fn remove(&mut self) -> Option<T> {
         if self.lvec.is_empty() {
             None
@@ -284,7 +289,11 @@ impl<'a, T> CursorMut<'a, T> {
             } else {
                 self.handle = BAD_HANDLE;
             }
-            Some(self.lvec.remove(hrem))
+            #[cfg(not(feature = "optionless-accessors"))]
+            { self.lvec.remove(hrem) }
+
+            #[cfg(feature = "optionless-accessors")]
+            { Some(self.lvec.remove(hrem)) }
         }
     }
 }
@@ -300,7 +309,7 @@ impl<'a, T> CursorBase<T> for CursorMut<'a, T> {
         if self.lvec.is_empty() {
             None
         } else {
-            Some(self.lvec.get(self.handle))
+            self.lvec.get(self.handle)
         }
     }
 
@@ -388,12 +397,20 @@ impl<'a, T> Deref for CursorMut<'a, T> {
     type Target = T;
 
     fn deref(&self) -> &Self::Target {
-        self.get()
+        #[cfg(feature = "optionless-accessors")]
+        { self.get() }
+
+        #[cfg(not(feature = "optionless-accessors"))]
+        { self.get().unwrap() }
     }
 }
 
 impl<'a, T> DerefMut for CursorMut<'a, T> {
     fn deref_mut(&mut self) -> &mut Self::Target {
-        self.get_mut()
+        #[cfg(feature = "optionless-accessors")]
+        { self.get_mut() }
+
+        #[cfg(not(feature = "optionless-accessors"))]
+        { self.get_mut().unwrap() }
     }
 }

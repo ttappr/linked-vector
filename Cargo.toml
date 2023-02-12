@@ -13,7 +13,7 @@ keywords = ["linked", "list", "vector"]
 categories = ["data-structures"]
 
 [features]
-default = ["optionless-accessors", "cursor-remove"]
+default = ["cursor-remove"]
 optionless-accessors = []
 cursor-remove = []
 
