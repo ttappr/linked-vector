@@ -1,5 +1,16 @@
 # Changelog
 
+## [v1.2.1] - 2023-02-12
+
+### Added
+
+- Notes added to doc comments referencing the Usage section of the landing page
+  for methods affected by feature flags.
+
+### Changed
+
+- Fixed example code in doc comments to not depend on feature flags.
+
 ## [v1.2.0] - 2023-02-11
 
 ### Added

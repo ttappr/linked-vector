@@ -15,7 +15,7 @@ count queues.
 
 ## Updates
 
-Version `v1.2.0` is a minor revision backward compatibile the prior `v1.x.x`
+Version `v1.2.1` is a minor revision backward compatibile the prior `v1.x.x`
 versions. Users however, must enable the `"cursor-remove"` feature explicitly.
 This turns on the `CursorMut::remove()` method. If you weren't using 
 `Cursor::remove()` before, then nothing needs to be done. Otherwise, you can 
