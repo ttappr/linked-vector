@@ -724,7 +724,7 @@ impl<T> LinkedVector<T> {
     /// Removes the element indicated by the handle, `node`. Returns the element
     /// if the handle is valid, or panics otherwise. This operation completes in
     /// O(1) time. With the `optionless-accessors` feature disabled, this method
-    /// returns sthe value wrapped in an `Option`. This feature is disabled by
+    /// returns the value wrapped in an `Option`. This feature is disabled by
     /// default, see [usage notes](./index.html#usage).
     /// ```
     /// use linked_vector::*;
