@@ -268,22 +268,11 @@ impl<T> LinkedVector<T> {
     /// 
     /// cursor.forward(3);
     /// 
-    /// #[cfg(not(feature = "optionless-accessors"))]
-    /// {
-    ///     assert_eq!(cursor.get(), Some(&4));
+    /// assert_eq!(*cursor, 4);
     /// 
-    ///     *cursor.get_mut().unwrap() = 42;
+    /// *cursor = 42;
     /// 
-    ///     assert_eq!(lv.to_vec(), vec![1, 2, 3, 42, 5, 6]);
-    /// }
-    /// #[cfg(feature = "optionless-accessors")]
-    /// {
-    ///     assert_eq!(cursor.get(), &4);
-    /// 
-    ///     *cursor.get_mut() = 42;
-    /// 
-    ///     assert_eq!(lv.to_vec(), vec![1, 2, 3, 42, 5, 6]);
-    /// }
+    /// assert_eq!(lv.to_vec(), vec![1, 2, 3, 42, 5, 6]);
     /// ```
     #[inline]
     pub fn cursor_mut(&mut self, node: HNode) -> CursorMut<T> {
@@ -370,16 +359,8 @@ impl<T> LinkedVector<T> {
     /// let mut lv = LinkedVector::from([1, 2, 3]);
     /// let hnode = lv.push_front(42);
     /// 
-    /// #[cfg(not(feature = "optionless-accessors"))]
-    /// {
-    ///     assert_eq!(lv.front_node(), Some(hnode));
-    ///     assert_eq!(lv.front_node().map(|h| lv.get(h)).unwrap(), Some(&42));
-    /// }
-    /// #[cfg(feature = "optionless-accessors")]
-    /// {
-    ///     assert_eq!(lv.front_node(), Some(hnode));
-    ///     assert_eq!(lv.front_node().map(|h| lv.get(h)), Some(&42));
-    /// }
+    /// assert_eq!(lv.front_node(), Some(hnode));
+    /// assert_eq!(lv.front(), Some(&42));
     /// ```
     #[inline]
     pub fn front_node(&self) -> Option<HNode> {
@@ -391,7 +372,7 @@ impl<T> LinkedVector<T> {
     }
 
     /// Returns a handle to the last node in the list, or `None` if the list is
-    /// empty. This operation completes in O(1) time.
+    /// empty. This operation completes in O(1) time. 
     /// 
     #[inline]
     pub fn back_node(&self) -> Option<HNode> {
@@ -399,7 +380,10 @@ impl<T> LinkedVector<T> {
     }
 
     /// Provides a reference to the element indicated by the given handle. This
-    /// operation completes in O(1) time.
+    /// operation completes in O(1) time. If the  `"optionless-accessors"` 
+    /// feature is disabled, this operation returns the reference wrapped in an
+    /// `Option`. This feature is disabled by 
+    /// default, see [usage notes](./index.html#usage).
     /// ```
     /// use linked_vector::*;
     /// let mut lv = LinkedVector::from([1, 2, 3]);
@@ -414,7 +398,10 @@ impl<T> LinkedVector<T> {
     }
 
     /// Provides a reference to the element indicated by the given handle, or
-    /// `None` if the handle is invalid. This operation completes in O(1) time.
+    /// `None` if the handle is invalid. With the "optionless-accesors" feature,
+    /// this method returns its reference directly - no `Option`, 
+    /// see [usage notes](./index.html#usage). This operation completes in 
+    /// O(1) time.
     /// ```
     /// use linked_vector::*;
     /// let mut lv = LinkedVector::from([1, 2, 3]);
@@ -429,7 +416,10 @@ impl<T> LinkedVector<T> {
     }
 
     /// Provides a mutable reference to the element indicated by the given
-    /// handle. This operation completes in O(1) time.
+    /// handle. This operation completes in O(1) time. If the 
+    /// `"optionless-accessors"` feature is disabled, this operation returns the
+    /// reference wrapped in an `Option`. This feature is disabled by default, 
+    /// see [usage notes](./index.html#usage).
     /// ```
     /// use linked_vector::*;
     /// let mut lv = LinkedVector::new();
@@ -446,8 +436,10 @@ impl<T> LinkedVector<T> {
     }
 
     /// Provides a mutable reference to the element indicated by the given
-    /// handle, or `None` if the handle is invalid. This operation completes in
-    /// O(1) time.
+    /// handle, or `None` if the handle is invalid. With the 
+    /// "optionless-accessors" feature enabled, this method returns its 
+    /// reference directly - no `Option`, see [usage notes](./index.html#usage). 
+    /// This operation completes in O(1) time.
     /// ```
     /// use linked_vector::*;
     /// let mut lv = LinkedVector::new();
@@ -731,7 +723,9 @@ impl<T> LinkedVector<T> {
 
     /// Removes the element indicated by the handle, `node`. Returns the element
     /// if the handle is valid, or panics otherwise. This operation completes in
-    /// O(1) time.
+    /// O(1) time. With the `optionless-accessors` feature disabled, this method
+    /// returns sthe value wrapped in an `Option`. This feature is disabled by
+    /// default, see [usage notes](./index.html#usage).
     /// ```
     /// use linked_vector::*;
     /// let mut lv = LinkedVector::from([1, 2, 3]);
@@ -749,7 +743,9 @@ impl<T> LinkedVector<T> {
 
     /// Removes the element indicated by the handle, `node`. Returns the element
     /// if the handle is valid, or `None` otherwise. This operation completes in
-    /// O(1) time.
+    /// O(1) time. With the `"optionless-accessors"` feature enabled, this 
+    /// method returns its value directly, not wrapped in an `Option`,
+    /// see [usage notes](./index.html#usage).
     /// ```
     /// use linked_vector::*;
     /// let mut lv = LinkedVector::from([1, 2, 3]);
@@ -1560,4 +1556,3 @@ impl<T> DoubleEndedIterator for IntoIter<T> {
 impl<T> ExactSizeIterator for IntoIter<T> {}
 
 impl<T> FusedIterator for IntoIter<T> {}
-

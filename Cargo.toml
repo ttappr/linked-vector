@@ -1,6 +1,6 @@
 [package]
 name = "linked-vector"
-version = "1.2.0"
+version = "1.2.1"
 edition = "2021"
 license = "MIT"
 authors = ["tmtappr@gmail.com"]
@@ -13,8 +13,17 @@ keywords = ["linked", "list", "vector"]
 categories = ["data-structures"]
 
 [features]
-#default = ["cursor-remove", "optionless-accessors"]
+
+# Certain accesors like `get()` and `get_mut()` that take a handle as a 
+# parameter would panic on a bad handle anyway, so it doesn't make sense that
+# they return an `Option`. This feature changes the `Option` return value from 
+# those methods to return a reference to the element related to the handle 
+# instead.
 optionless-accessors = []
+
+# This feature enables the `remove()` method of `CursorMut`. Care should be 
+# taken to ensure the `LinkedVector` a `CursorMut` is attached to isn't empty
+# before performing other operations after `remove()` has drained it.
 cursor-remove = []
 
 [dependencies]
@@ -27,5 +36,4 @@ features = [
     "macro-diagnostics", # Enable better diagnostics for compile-time UUIDs
 ]
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

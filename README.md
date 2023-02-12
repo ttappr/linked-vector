@@ -42,6 +42,7 @@ The `LinkedVector` API disallows creating a cursor for an empty vector. If you
 have a cursor to a vector, then it's assumed it has items to traverse and/or
 modify. Removing items can pose a slight danger in that the cursor's internal
 reference to the current node becomes meaningless if all the items are removed.
+
 So to ensure users are aware of this, the `"cursor-remove"` feature needs to be 
 explicitly turned on. To verify whether you've emptied a vector through a 
 cursor, the cursor provides an `is_empty()` method. Also the `remove()` method
@@ -78,7 +79,7 @@ Or run this on the command line from your project folder:
 ```console, ignore
 cargo add linked-vector --features "cursor-remove, optionless-accessors"
 ```
-or without the new feature:
+or without the new features:
 
 ```console, ignore
 cargo add linked-vector
