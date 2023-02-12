@@ -1,6 +1,6 @@
 # Changelog
 
-## [v1.2.0] - ????-??-??
+## [v1.2.0] - 2023-02-11
 
 ### Added
 
@@ -15,8 +15,8 @@
   enabled certain accessor methods of `LinkedVector` and `Cursor` return their
   respective values directly not wrapped in an `Option`.
 - The new feature flag, `"cursor-remove"`, enables `CursorMut::remove()`. It
-  is off by defaul. Users should explicitly enable it so they're aware of its
-  dangers.
+  is off by defaul. Users should explicitly enable if they want to use the 
+  `remove()` command.
 ### Changed
 
 - With the feature flag, `"optionless-accessors"` enabled, the following 
