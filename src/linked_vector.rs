@@ -250,7 +250,7 @@ impl<T> LinkedVector<T> {
     /// 
     /// cursor.forward(3);
     /// 
-    /// assert_eq!(cursor.get(), Some(&6));
+    /// assert_eq!(*cursor, 6);
     /// ```
     #[inline]
     pub fn cursor(&self, node: HNode) -> Cursor<T> {
@@ -268,11 +268,22 @@ impl<T> LinkedVector<T> {
     /// 
     /// cursor.forward(3);
     /// 
-    /// assert_eq!(cursor.get(), Some(&4));
+    /// #[cfg(not(feature = "optionless-accessors"))]
+    /// {
+    ///     assert_eq!(cursor.get(), Some(&4));
     /// 
-    /// *cursor.get_mut().unwrap() = 42;
+    ///     *cursor.get_mut().unwrap() = 42;
     /// 
-    /// assert_eq!(lv.to_vec(), vec![1, 2, 3, 42, 5, 6]);
+    ///     assert_eq!(lv.to_vec(), vec![1, 2, 3, 42, 5, 6]);
+    /// }
+    /// #[cfg(feature = "optionless-accessors")]
+    /// {
+    ///     assert_eq!(cursor.get(), &4);
+    /// 
+    ///     *cursor.get_mut() = 42;
+    /// 
+    ///     assert_eq!(lv.to_vec(), vec![1, 2, 3, 42, 5, 6]);
+    /// }
     /// ```
     #[inline]
     pub fn cursor_mut(&mut self, node: HNode) -> CursorMut<T> {
@@ -359,8 +370,16 @@ impl<T> LinkedVector<T> {
     /// let mut lv = LinkedVector::from([1, 2, 3]);
     /// let hnode = lv.push_front(42);
     /// 
-    /// assert_eq!(lv.front_node(), Some(hnode));
-    /// assert_eq!(lv.front_node().map(|h| lv.get(h)).unwrap(), Some(&42));
+    /// #[cfg(not(feature = "optionless-accessors"))]
+    /// {
+    ///     assert_eq!(lv.front_node(), Some(hnode));
+    ///     assert_eq!(lv.front_node().map(|h| lv.get(h)).unwrap(), Some(&42));
+    /// }
+    /// #[cfg(feature = "optionless-accessors")]
+    /// {
+    ///     assert_eq!(lv.front_node(), Some(hnode));
+    ///     assert_eq!(lv.front_node().map(|h| lv.get(h)), Some(&42));
+    /// }
     /// ```
     #[inline]
     pub fn front_node(&self) -> Option<HNode> {
@@ -401,7 +420,7 @@ impl<T> LinkedVector<T> {
     /// let mut lv = LinkedVector::from([1, 2, 3]);
     /// let hnode = lv.push_front(42);
     /// 
-    /// assert_eq!(lv.get(hnode), &42);
+    /// assert_eq!(lv.get(hnode), Some(&42));
     /// ```    
     #[inline]
     #[cfg(not(feature = "optionless-accessors"))]
@@ -434,9 +453,9 @@ impl<T> LinkedVector<T> {
     /// let mut lv = LinkedVector::new();
     /// let hnode = lv.push_front(0);
     /// 
-    /// *lv.get_mut(hnode) = 42;
+    /// *lv.get_mut(hnode).unwrap() = 42;
     /// 
-    /// assert_eq!(lv.get(hnode), &42);
+    /// assert_eq!(lv[hnode], 42);
     /// ```
     #[inline]
     #[cfg(not(feature = "optionless-accessors"))]
@@ -501,7 +520,7 @@ impl<T> LinkedVector<T> {
     /// let h2 = lv.insert(h1, 43);
     /// 
     /// assert_eq!(lv.next_node(h2), Some(h1));
-    /// assert_eq!(lv.get(h1), Some(&42));
+    /// assert_eq!(lv[h1], 42);
     /// ```
     #[inline]
     pub fn insert(&mut self, node: HNode, value: T) -> HNode {
@@ -519,7 +538,7 @@ impl<T> LinkedVector<T> {
     /// let h2 = lv.insert_after(h1, 43);
     /// 
     /// assert_eq!(lv.next_node(h1), Some(h2));
-    /// assert_eq!(lv.get(h2), Some(&43));
+    /// assert_eq!(lv[h2], 43);
     /// ```
     #[inline]
     pub fn insert_after(&mut self, node: HNode, value: T) -> HNode {
