@@ -881,6 +881,9 @@ impl<T> LinkedVector<T> {
     /// 
     #[inline]
     pub(crate) fn insert_(&mut self, node: Option<HNode>, value: T) -> HNode {
+        #[cfg(debug_assertions)]
+        if let Some(h) = node { self.check_handle(h); }
+
         if self.is_empty() {
             #[cfg(debug_assertions)]
             assert!(node.is_none(), "Empty list has no handles.");
@@ -919,6 +922,9 @@ impl<T> LinkedVector<T> {
     /// 
     #[inline]
     pub(crate) fn remove_(&mut self, node: Option<HNode>) -> Option<T> {
+        #[cfg(debug_assertions)]
+        if let Some(h) = node { self.check_handle(h); }
+
         if self.is_empty() {
             #[cfg(debug_assertions)]
             assert!(node.is_none(), "Empty list has no handles.");
