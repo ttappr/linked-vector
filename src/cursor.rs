@@ -19,7 +19,7 @@ pub trait CursorBase<T> {
     /// Returns a reference to the element at the cursor's current position,
     /// or `None` if the underlying vector is empty. Enable the 
     /// `"optionless-accessors"` feature to remove the `Option` from the return 
-    /// type, see [usage notes](./index.html#usage).
+    /// type, see [usage notes](./index.html#feature-optionless-accessors).
     /// 
     #[cfg(not(feature = "optionless-accessors"))]
     fn get(&self) -> Option<&T>;
@@ -31,7 +31,7 @@ pub trait CursorBase<T> {
     /// Moves the cursor to the specified handle. The handle must be valid. If
     /// the feature, `"optionless-accessors"`, is disabled, the return type is
     /// `bool`. This feature is disabled by default, see 
-    /// [usage notes](./index.html#usage).
+    /// [usage notes](./index.html#feature-optionless-accessors).
     /// 
     #[cfg(feature = "optionless-accessors")]
     fn move_to(&mut self, handle: HNode);
@@ -39,7 +39,8 @@ pub trait CursorBase<T> {
     /// Moves the cursor to the specified handle. The handle must be valid. 
     /// Returns true if the move was successful. If the `"optionless-accessors"`
     /// feature is enabled, this method doesn't return a value. This feature is
-    /// disabled by default, see [usage notes](./index.html#usage).
+    /// disabled by default, see 
+    /// [usage notes](./index.html#feature-optionless-accessors).
     /// 
     #[cfg(not(feature = "optionless-accessors"))]
     fn move_to(&mut self, handle: HNode) -> bool;
@@ -221,7 +222,10 @@ impl<'a, T> Deref for Cursor<'a, T> {
     }
 }
 
-/// A cursor which can read and write the elements of the list.
+/// A cursor which can read and write the elements of the list. `CursorMut`
+/// supports a `remove()` method which removes the element at the current
+/// position of the cursor. This feature is turned on with the `"cursor-remove"`
+/// feature, see [usage notes](./index.html#feature-cursor-remove).
 /// 
 pub struct CursorMut<'a, T> {
     lvec   : &'a mut LinkedVector<T>,
@@ -255,7 +259,8 @@ impl<'a, T> CursorMut<'a, T> {
     /// Returns a mutable reference to the element at the cursor's current
     /// position. If the `optionless-accessors` feature is disabled, this will
     /// return an `Option` holding the reference, or `None`. This feature is
-    /// disabled by default, see [usage notes](./index.html#usage).
+    /// disabled by default, see 
+    /// [usage notes](./index.html#feature-optionless-accessors).
     /// 
     #[cfg(feature = "optionless-accessors")]
     pub fn get_mut(&mut self) -> &mut T {
@@ -266,7 +271,7 @@ impl<'a, T> CursorMut<'a, T> {
     /// position, or `None` if the underlying vector is empty. If the 
     /// `optionless-accessors` feature is enabled, this will return a reference
     /// directly. This feature is disabled by default, see 
-    /// [usage notes](./index.html#usage).
+    /// [usage notes](./index.html#feature-optionless-accessors).
     /// 
     #[cfg(not(feature = "optionless-accessors"))]
     pub fn get_mut(&mut self) -> Option<&mut T> {
@@ -298,7 +303,8 @@ impl<'a, T> CursorMut<'a, T> {
     /// cursor will be moved to the next element if not at the end of the 
     /// vector, otherwise it moves to the new end. If the vector is already 
     /// empty, `None` is returned. The `"cursor-remove"` feature must be
-    /// enabled to use this method, see [usage notes](./index.html#usage).
+    /// enabled to use this method, see 
+    /// [usage notes](./index.html#feature-cursor-remove).
     /// 
     #[cfg(feature = "cursor-remove")]
     pub fn remove(&mut self) -> Option<T> {

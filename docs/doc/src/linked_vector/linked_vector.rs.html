@@ -1556,6 +1556,7 @@
 <a href="#1556" id="1556">1556</a>
 <a href="#1557" id="1557">1557</a>
 <a href="#1558" id="1558">1558</a>
+<a href="#1559" id="1559">1559</a>
 </pre><pre class="rust"><code>
 
 <span class="kw">use </span>core::fmt;
@@ -1941,7 +1942,7 @@
     /// operation completes in O(1) time. If the  `&quot;optionless-accessors&quot;` 
     /// feature is disabled, this operation returns the reference wrapped in an
     /// `Option`. This feature is disabled by 
-    /// default, see [usage notes](./index.html#usage).
+    /// default, see [usage notes](./index.html#feature-optionless-accessors).
     /// ```
     /// use linked_vector::*;
     /// let mut lv = LinkedVector::from([1, 2, 3]);
@@ -1958,8 +1959,8 @@
     <span class="doccomment">/// Provides a reference to the element indicated by the given handle, or
     /// `None` if the handle is invalid. With the &quot;optionless-accesors&quot; feature,
     /// this method returns its reference directly - no `Option`, 
-    /// see [usage notes](./index.html#usage). This operation completes in 
-    /// O(1) time.
+    /// see [usage notes](./index.html#feature-optionless-accessors). This 
+    /// operation completes in O(1) time.
     /// ```
     /// use linked_vector::*;
     /// let mut lv = LinkedVector::from([1, 2, 3]);
@@ -1977,7 +1978,7 @@
     /// handle. This operation completes in O(1) time. If the 
     /// `&quot;optionless-accessors&quot;` feature is disabled, this operation returns the
     /// reference wrapped in an `Option`. This feature is disabled by default, 
-    /// see [usage notes](./index.html#usage).
+    /// see [usage notes](./index.html#feature-optionless-accessors).
     /// ```
     /// use linked_vector::*;
     /// let mut lv = LinkedVector::new();
@@ -1996,7 +1997,8 @@
     <span class="doccomment">/// Provides a mutable reference to the element indicated by the given
     /// handle, or `None` if the handle is invalid. With the 
     /// &quot;optionless-accessors&quot; feature enabled, this method returns its 
-    /// reference directly - no `Option`, see [usage notes](./index.html#usage). 
+    /// reference directly - no `Option`, see 
+    /// [usage notes](./index.html#feature-optionless-accessors). 
     /// This operation completes in O(1) time.
     /// ```
     /// use linked_vector::*;
@@ -2283,7 +2285,7 @@
     /// if the handle is valid, or panics otherwise. This operation completes in
     /// O(1) time. With the `optionless-accessors` feature disabled, this method
     /// returns the value wrapped in an `Option`. This feature is disabled by
-    /// default, see [usage notes](./index.html#usage).
+    /// default, see [usage notes](./index.html#feature-optionless-accessors).
     /// ```
     /// use linked_vector::*;
     /// let mut lv = LinkedVector::from([1, 2, 3]);
@@ -2303,7 +2305,7 @@
     /// if the handle is valid, or `None` otherwise. This operation completes in
     /// O(1) time. With the `&quot;optionless-accessors&quot;` feature enabled, this 
     /// method returns its value directly, not wrapped in an `Option`,
-    /// see [usage notes](./index.html#usage).
+    /// see [usage notes](./index.html#feature-optionless-accessors).
     /// ```
     /// use linked_vector::*;
     /// let mut lv = LinkedVector::from([1, 2, 3]);

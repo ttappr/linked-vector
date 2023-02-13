@@ -438,6 +438,12 @@
 <a href="#438" id="438">438</a>
 <a href="#439" id="439">439</a>
 <a href="#440" id="440">440</a>
+<a href="#441" id="441">441</a>
+<a href="#442" id="442">442</a>
+<a href="#443" id="443">443</a>
+<a href="#444" id="444">444</a>
+<a href="#445" id="445">445</a>
+<a href="#446" id="446">446</a>
 </pre><pre class="rust"><code>
 <span class="kw">use </span>core::ops::Deref;
 <span class="kw">use </span>core::ops::DerefMut;
@@ -459,7 +465,7 @@
     <span class="doccomment">/// Returns a reference to the element at the cursor&#39;s current position,
     /// or `None` if the underlying vector is empty. Enable the 
     /// `&quot;optionless-accessors&quot;` feature to remove the `Option` from the return 
-    /// type, see [usage notes](./index.html#usage).
+    /// type, see [usage notes](./index.html#feature-optionless-accessors).
     /// 
     </span><span class="attr">#[cfg(not(feature = <span class="string">&quot;optionless-accessors&quot;</span>))]
     </span><span class="kw">fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>T&gt;;
@@ -471,7 +477,7 @@
     <span class="doccomment">/// Moves the cursor to the specified handle. The handle must be valid. If
     /// the feature, `&quot;optionless-accessors&quot;`, is disabled, the return type is
     /// `bool`. This feature is disabled by default, see 
-    /// [usage notes](./index.html#usage).
+    /// [usage notes](./index.html#feature-optionless-accessors).
     /// 
     </span><span class="attr">#[cfg(feature = <span class="string">&quot;optionless-accessors&quot;</span>)]
     </span><span class="kw">fn </span>move_to(<span class="kw-2">&amp;mut </span><span class="self">self</span>, handle: HNode);
@@ -479,7 +485,8 @@
     <span class="doccomment">/// Moves the cursor to the specified handle. The handle must be valid. 
     /// Returns true if the move was successful. If the `&quot;optionless-accessors&quot;`
     /// feature is enabled, this method doesn&#39;t return a value. This feature is
-    /// disabled by default, see [usage notes](./index.html#usage).
+    /// disabled by default, see 
+    /// [usage notes](./index.html#feature-optionless-accessors).
     /// 
     </span><span class="attr">#[cfg(not(feature = <span class="string">&quot;optionless-accessors&quot;</span>))]
     </span><span class="kw">fn </span>move_to(<span class="kw-2">&amp;mut </span><span class="self">self</span>, handle: HNode) -&gt; bool;
@@ -661,7 +668,10 @@
     }
 }
 
-<span class="doccomment">/// A cursor which can read and write the elements of the list.
+<span class="doccomment">/// A cursor which can read and write the elements of the list. `CursorMut`
+/// supports a `remove()` method which removes the element at the current
+/// position of the cursor. This feature is turned on with the `&quot;cursor-remove&quot;`
+/// feature, see [usage notes](./index.html#feature-cursor-remove).
 /// 
 </span><span class="kw">pub struct </span>CursorMut&lt;<span class="lifetime">&#39;a</span>, T&gt; {
     lvec   : <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>LinkedVector&lt;T&gt;,
@@ -695,7 +705,8 @@
     <span class="doccomment">/// Returns a mutable reference to the element at the cursor&#39;s current
     /// position. If the `optionless-accessors` feature is disabled, this will
     /// return an `Option` holding the reference, or `None`. This feature is
-    /// disabled by default, see [usage notes](./index.html#usage).
+    /// disabled by default, see 
+    /// [usage notes](./index.html#feature-optionless-accessors).
     /// 
     </span><span class="attr">#[cfg(feature = <span class="string">&quot;optionless-accessors&quot;</span>)]
     </span><span class="kw">pub fn </span>get_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>T {
@@ -706,7 +717,7 @@
     /// position, or `None` if the underlying vector is empty. If the 
     /// `optionless-accessors` feature is enabled, this will return a reference
     /// directly. This feature is disabled by default, see 
-    /// [usage notes](./index.html#usage).
+    /// [usage notes](./index.html#feature-optionless-accessors).
     /// 
     </span><span class="attr">#[cfg(not(feature = <span class="string">&quot;optionless-accessors&quot;</span>))]
     </span><span class="kw">pub fn </span>get_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;mut </span>T&gt; {
@@ -738,7 +749,8 @@
     /// cursor will be moved to the next element if not at the end of the 
     /// vector, otherwise it moves to the new end. If the vector is already 
     /// empty, `None` is returned. The `&quot;cursor-remove&quot;` feature must be
-    /// enabled to use this method, see [usage notes](./index.html#usage).
+    /// enabled to use this method, see 
+    /// [usage notes](./index.html#feature-cursor-remove).
     /// 
     </span><span class="attr">#[cfg(feature = <span class="string">&quot;cursor-remove&quot;</span>)]
     </span><span class="kw">pub fn </span>remove(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;T&gt; {
