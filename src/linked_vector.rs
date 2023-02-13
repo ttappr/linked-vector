@@ -44,61 +44,14 @@ impl Default for HNode {
     }
 }
 
-/// The node type used by `LinkedVector`. It holds a value of type `T`, and 
-/// handles to the next and previous nodes in the list.
-/// 
-pub(crate) struct Node<T> {
-    value : Option<T>,
-    next  : HNode,
-    prev  : HNode,
-
-    // This field is used to detect expired handles. In debug mode if
-    // a handle's 2nd field doesn't match this, it's expried. When
-    // a node is added to the recycle list via. `push_recyc()`, this 
-    // number is incremented.
-    #[cfg(debug_assertions)]
-    gen   : usize,
-}
-impl<T> Node<T> {
-    #[cfg(debug_assertions)]
-    #[inline]
-    fn new(value: T, gen: usize) -> Self {
-        Self { 
-            value : Some(value), 
-            next  : BAD_HANDLE, 
-            prev  : BAD_HANDLE, 
-            gen,
-        }
-    }
-    #[cfg(not(debug_assertions))]
-    #[inline]
-    fn new(value: T) -> Self {
-        Self { 
-            value : Some(value), 
-            next  : BAD_HANDLE, 
-            prev  : BAD_HANDLE, 
-        }
-    }
-
-    #[cfg(test)]
-    #[inline(always)]
-    pub(crate) fn next(&self) -> HNode {
-        self.next
-    }
-
-    #[cfg(test)]
-    #[inline(always)]
-    pub(crate) fn prev(&self) -> HNode {
-        self.prev
-    }
-}
-
 /// A doubly-linked list that uses handles to refer to elements that exist
 /// within a vector. This allows for O(1) insertion and removal of elements
 /// from the list, and O(1) access to elements by handle.
 /// 
 pub struct LinkedVector<T> {
-    vec   : Vec<Node<T>>,
+    data  : Vec<Option<T>>,
+    next  : Vec<HNode>,
+    prev  : Vec<HNode>,
     head  : HNode,
     recyc : HNode,
     len   : usize,
@@ -107,6 +60,13 @@ pub struct LinkedVector<T> {
     // 3rd field doesn't match this, it's foreign.
     #[cfg(debug_assertions)]
     uuid  : Uuid,
+
+    // This field is used to detect expired handles. In debug mode if
+    // a handle's 2nd field doesn't match this, it's expried. When
+    // a node is added to the recycle list via. `push_recyc()`, this 
+    // number is incremented.
+    #[cfg(debug_assertions)]
+    gen   : Vec<usize>,
 }
 
 impl<T> LinkedVector<T> {
@@ -116,13 +76,18 @@ impl<T> LinkedVector<T> {
     #[must_use]
     pub fn new() -> Self {
         Self { 
-            vec   : Vec::new(), 
+            data  : Vec::new(), 
+            next  : Vec::new(),
+            prev  : Vec::new(),
             recyc : BAD_HANDLE, 
             head  : BAD_HANDLE, 
             len   : 0, 
 
             #[cfg(debug_assertions)]
-            uuid  : uuid::Uuid::new_v4() 
+            uuid  : uuid::Uuid::new_v4(),
+
+            #[cfg(debug_assertions)]
+            gen   : Vec::new(),
         }
     }
 
@@ -132,13 +97,18 @@ impl<T> LinkedVector<T> {
     #[must_use]
     pub fn with_capacity(size: usize) -> Self {
         Self { 
-            vec   : Vec::with_capacity(size), 
+            data  : Vec::with_capacity(size), 
+            next  : Vec::with_capacity(size),
+            prev  : Vec::with_capacity(size),
             recyc : BAD_HANDLE, 
             head  : BAD_HANDLE, 
             len   : 0, 
 
             #[cfg(debug_assertions)]
-            uuid  : uuid::Uuid::new_v4() 
+            uuid  : uuid::Uuid::new_v4(),
+
+            #[cfg(debug_assertions)]
+            gen   : Vec::with_capacity(size),
         }
     }
 
@@ -171,11 +141,7 @@ impl<T> LinkedVector<T> {
     /// ```
     #[inline]
     pub fn back(&self) -> Option<&T> {
-        if self.is_empty() {
-            None
-        } else {
-            self.back_().unwrap().value.as_ref()
-        }
+        self.back_node().and_then(|node| self.data[node.0].as_ref())
     }
 
     /// Gives a mutable reference to the element back element, or `None` if the
@@ -190,11 +156,7 @@ impl<T> LinkedVector<T> {
     /// ```
     #[inline]
     pub fn back_mut(&mut self) -> Option<&mut T> {
-        if self.is_empty() {
-            None
-        } else {
-            self.get_mut_(self.get_(self.head).prev).value.as_mut()
-        }
+        self.back_node().and_then(|node| self.data[node.0].as_mut())
     }
 
     /// Returns the total number of elements the vector can hold without 
@@ -202,14 +164,20 @@ impl<T> LinkedVector<T> {
     /// 
     #[inline]
     pub fn capacity(&self) -> usize {
-        self.vec.capacity()
+        self.data.capacity()
     }
 
     /// Removes all elements from the list.
     /// 
     #[inline]
     pub fn clear(&mut self) {
-        self.vec.clear();
+        self.data.clear();
+        self.next.clear();
+        self.prev.clear();
+
+        #[cfg(debug_assertions)]
+        self.gen.clear();
+
         self.len = 0;
         self.head = BAD_HANDLE;
         self.recyc = BAD_HANDLE;
@@ -336,7 +304,7 @@ impl<T> LinkedVector<T> {
         if self.is_empty() {
             None
         } else {
-            self.front_().unwrap().value.as_ref()
+            self.data[self.head.0].as_ref()
         }
     }
 
@@ -348,7 +316,7 @@ impl<T> LinkedVector<T> {
         if self.is_empty() {
             None
         } else {
-            self.get_mut_(self.head).value.as_mut()
+            self.data[self.head.0].as_mut()
         }
     }
 
@@ -376,7 +344,11 @@ impl<T> LinkedVector<T> {
     /// 
     #[inline]
     pub fn back_node(&self) -> Option<HNode> {
-        self.front_().map(|node| node.prev)
+        if self.len == 0 {
+            None
+        } else {
+            Some(self.prev[self.head.0])
+        }
     }
 
     /// Provides a reference to the element indicated by the given handle. This
@@ -394,7 +366,7 @@ impl<T> LinkedVector<T> {
     #[inline]
     #[cfg(feature = "optionless-accessors")]
     pub fn get(&self, node: HNode) -> &T {
-        self.get_(node).value.as_ref().unwrap()
+        self.get_value_(node).unwrap()
     }
 
     /// Provides a reference to the element indicated by the given handle, or
@@ -412,7 +384,7 @@ impl<T> LinkedVector<T> {
     #[inline]
     #[cfg(not(feature = "optionless-accessors"))]
     pub fn get(&self, node: HNode) -> Option<&T> {
-        self.get_(node).value.as_ref()
+        self.get_value_(node)
     }
 
     /// Provides a mutable reference to the element indicated by the given
@@ -432,7 +404,7 @@ impl<T> LinkedVector<T> {
     #[inline]
     #[cfg(feature = "optionless-accessors")]
     pub fn get_mut(&mut self, node: HNode) -> &mut T {
-        self.get_mut_(node).value.as_mut().unwrap()
+        self.get_value_mut_(node).unwrap()
     }
 
     /// Provides a mutable reference to the element indicated by the given
@@ -453,7 +425,7 @@ impl<T> LinkedVector<T> {
     #[inline]
     #[cfg(not(feature = "optionless-accessors"))]
     pub fn get_mut(&mut self, node: HNode) -> Option<&mut T> {
-        self.get_mut_(node).value.as_mut()
+        self.get_value_mut_(node)
     }
 
     /// Returns the handle to the node at the given index, or `None` if the
@@ -591,7 +563,7 @@ impl<T> LinkedVector<T> {
     /// ```
     #[inline]
     pub fn next_node(&self, node: HNode) -> Option<HNode> {
-        let next = self.get_(node).next;
+        let next = self.get_next_(node);
         if next == BAD_HANDLE {
             None
         } else {
@@ -605,7 +577,7 @@ impl<T> LinkedVector<T> {
     /// 
     #[inline]
     pub fn next_value(&self, node: HNode) -> Option<&T> {
-        self.next_node(node).and_then(|n| self.get_(n).value.as_ref())
+        self.next_node(node).and_then(move |n| self.get_value_(n))
     }
 
     /// Returns a mutable reference to the next element's value in the list, or
@@ -614,7 +586,7 @@ impl<T> LinkedVector<T> {
     /// 
     #[inline]
     pub fn next_value_mut(&mut self, node: HNode) -> Option<&mut T> {
-        self.next_node(node).and_then(move |n| self.get_mut_(n).value.as_mut())
+        self.next_node(node).and_then(move |n| self.get_value_mut_(n))
     }
 
     /// Returns a handle to the previous node in the list, or `None` if the 
@@ -632,7 +604,7 @@ impl<T> LinkedVector<T> {
     #[inline]
     pub fn prev_node(&self, node: HNode) -> Option<HNode> {
         if node != self.head {
-            Some(self.get_(node).prev)
+            Some(self.get_prev_(node))
         } else {
             None
         }
@@ -644,7 +616,7 @@ impl<T> LinkedVector<T> {
     /// 
     #[inline]
     pub fn prev_value(&self, node: HNode) -> Option<&T> {
-        self.prev_node(node).and_then(|n| self.get_(n).value.as_ref())
+        self.prev_node(node).and_then(|n| self.get_value_(n))
     }
 
     /// Returns a mutable reference to the previous element's value in the list,
@@ -653,7 +625,7 @@ impl<T> LinkedVector<T> {
     /// 
     #[inline]
     pub fn prev_value_mut(&mut self, node: HNode) -> Option<&mut T> {
-        self.prev_node(node).and_then(move |n| self.get_mut_(n).value.as_mut())
+        self.prev_node(node).and_then(move |n| self.get_value_mut_(n))
     }
 
     /// Pops the last element of the vector. Returns `None` if the vector is
@@ -903,30 +875,6 @@ impl<T> LinkedVector<T> {
         self.iter().cloned().collect()
     }
 
-    /// Returns a reference to the last node. Returns `None` if the list is
-    /// empty. This operation completes in O(1) time.
-    /// 
-    #[inline]
-    fn back_(&self) -> Option<&Node<T>> {
-        if self.is_empty() {
-            None
-        } else {
-            Some(self.get_(self.get_(self.head).prev))
-        }
-    }
-
-    /// returns a reference to the first node. Returns `None` if the list is
-    /// empty. This operation completes in O(1) time.
-    /// 
-    #[inline]
-    fn front_(&self) -> Option<&Node<T>> {
-        if self.is_empty() {
-            None
-        } else {
-            Some(self.get_(self.head))
-        }
-    }
-
     /// Inserts `value` before the element indicated by `node`. If `node` is
     /// `None`, the element is inserted at the end of the list. Returns a handle
     /// to the newly inserted element. This operation completes in O(1) time.
@@ -938,26 +886,27 @@ impl<T> LinkedVector<T> {
             assert!(node.is_none(), "Empty list has no handles.");
             let hnew = self.new_node(value);
             self.head = hnew; 
-            self.get_mut_(hnew).prev = hnew;
+            self.prev[hnew.0] = hnew;
             self.len += 1;
             hnew 
         } else {
             let hnew = self.new_node(value);
             if let Some(hnode) = node {
-                let hprev = self.get_(hnode).prev;
-                self.get_mut_(hnew).prev = hprev;
-                self.get_mut_(hnew).next = hnode;
-                self.get_mut_(hnode).prev = hnew;
+                let hprev = self.prev[hnode.0];
+                self.prev[hnew.0] = hprev;
+                self.next[hnew.0] = hnode;
+                self.prev[hnode.0] = hnew;
+
                 if hnode == self.head {
                     self.head = hnew;
                 } else {
-                    self.get_mut_(hprev).next = hnew;
+                    self.next[hprev.0] = hnew;
                 }
             } else {
-                let hnode = self.get_(self.head).prev;
-                self.get_mut_(hnode).next = hnew;
-                self.get_mut_(hnew).prev  = hnode;
-                self.get_mut_(self.head).prev = hnew;
+                let hnode = self.prev[self.head.0];
+                self.next[hnode.0] = hnew;
+                self.prev[hnew.0] = hnode;
+                self.prev[self.head.0] = hnew;
             }
             self.len += 1;
             hnew
@@ -975,25 +924,26 @@ impl<T> LinkedVector<T> {
             assert!(node.is_none(), "Empty list has no handles.");
             None
         } else {
-            let hnode = node.unwrap_or(self.get_(self.head).prev);
+            let hnode = node.unwrap_or(self.prev[self.head.0]);
             if self.len > 1 {
-                let hprev = self.get_(hnode).prev;
-                let hnext = self.get_(hnode).next;
+                let hprev = self.prev[hnode.0];
+                let hnext = self.next[hnode.0];
+
                 if hnext == BAD_HANDLE {
-                    self.get_mut_(self.head).prev = hprev;
+                    self.prev[self.head.0] = hprev;
                 } else {
-                    self.get_mut_(hnext).prev = hprev;
+                    self.prev[hnext.0] = hprev;
                 }
                 if hnode == self.head {
                     self.head = hnext;
                 } else {
-                    self.get_mut_(hprev).next = hnext;
+                    self.next[hprev.0] = hnext;
                 }
             } else {
                 self.head = BAD_HANDLE;
             }
             self.len -= 1;
-            let value = self.get_mut_(hnode).value.take();
+            let value = self.data[hnode.0].take();
             self.push_recyc(hnode);
             value
         }
@@ -1003,29 +953,43 @@ impl<T> LinkedVector<T> {
     /// operation completes in O(1) time.
     /// 
     #[inline(always)]
-    pub(crate) fn get_(&self, node: HNode) -> &Node<T> {
+    pub(crate) fn get_value_(&self, node: HNode) -> Option<&T> {
         #[cfg(debug_assertions)]
         self.check_handle(node);
         
-        &self.vec[node.0]
+        self.data[node.0].as_ref()
     }
 
     /// Returns a mutable reference to the element indicated by the handle,
     /// `node`. This operation completes in O(1) time.
     /// 
     #[inline(always)]
-    pub(crate) fn get_mut_(&mut self, node: HNode) -> &mut Node<T> {
+    pub(crate) fn get_value_mut_(&mut self, node: HNode) -> Option<&mut T> {
         #[cfg(debug_assertions)]
         self.check_handle(node);
 
-        &mut self.vec[node.0]
+        self.data[node.0].as_mut()
+    }
+
+    #[inline(always)]
+    pub(crate) fn get_next_(&self, node: HNode) -> HNode {
+        #[cfg(debug_assertions)]
+        self.check_handle(node);
+        self.next[node.0]
+    }
+
+    #[inline(always)]
+    pub(crate) fn get_prev_(&self, node: HNode) -> HNode {
+        #[cfg(debug_assertions)]
+        self.check_handle(node);
+        self.prev[node.0]
     }
 
     #[cfg(debug_assertions)]
     pub(crate) fn check_handle(&self, node: HNode) {
         assert!(node.0 != BAD_HANDLE.0, "Handle is invalid.");
         assert!(node.2 == self.uuid, "Handle is not native."); 
-        assert!(node.1 == self.vec[node.0].gen, "Handle has expired.");
+        assert!(node.1 == self.gen[node.0], "Handle has expired.");
     }
 
     /// Renders a new element node and returns a handle to it. This operation
@@ -1036,27 +1000,33 @@ impl<T> LinkedVector<T> {
         if let Some(hnode) = self.pop_recyc() {
             #[cfg(debug_assertions)]
             {
-                let gen = self.vec[hnode.0].gen;
-                self.vec[hnode.0] = Node::new(value, gen);
+                let gen = self.gen[hnode.0];
+                self.data[hnode.0] = Some(value);
                 let mut hnode = hnode;
                 hnode.1 = gen;
                 hnode 
             }
             #[cfg(not(debug_assertions))]
             { 
-                self.vec[hnode.0] = Node::new(value);
-                hnode
+                self.data[hnode.0] = Some(value);
+                hnode 
             }
         } else {
             #[cfg(debug_assertions)]
             { 
-                self.vec.push(Node::new(value, 0));
-                HNode(self.vec.len() - 1, 0, self.uuid) 
+                self.data.push(Some(value));
+                self.next.push(BAD_HANDLE);
+                self.prev.push(BAD_HANDLE);
+                self.gen.push(0);
+                HNode(self.data.len() - 1, 0, self.uuid) 
             }
             #[cfg(not(debug_assertions))]
             { 
-                self.vec.push(Node::new(value));
-                HNode(self.vec.len() - 1) 
+                self.data.push(Some(value));
+                self.next.push(BAD_HANDLE);
+                self.prev.push(BAD_HANDLE);
+                HNode(self.data.len() - 1) 
+
             }
         }
     }
@@ -1071,8 +1041,8 @@ impl<T> LinkedVector<T> {
             None
         } else {
             let hnode = self.recyc;
-            self.recyc = self.vec[hnode.0].next;
-            self.vec[hnode.0].next = BAD_HANDLE;
+            self.recyc = self.next[hnode.0];
+            self.next[hnode.0] = BAD_HANDLE;
             Some(hnode) 
         }
     }
@@ -1082,16 +1052,16 @@ impl<T> LinkedVector<T> {
     /// 
     #[inline]
     fn push_recyc(&mut self, node: HNode) {
-        self.get_mut_(node).prev = BAD_HANDLE;
+        self.prev[node.0] = BAD_HANDLE;
         if self.recyc == BAD_HANDLE {
-            self.vec[node.0].next = BAD_HANDLE;
+            self.next[node.0] = BAD_HANDLE;
             self.recyc = node;
         } else {
-            self.vec[node.0].next = self.recyc;
+            self.next[node.0] = self.recyc;
             self.recyc = node;
         }
         #[cfg(debug_assertions)]
-        { self.vec[node.0].gen += 1; }
+        { self.gen[node.0] += 1; }
     }
 
     /// Sorts the list by the given comparison function. This operation 
@@ -1105,23 +1075,24 @@ impl<T> LinkedVector<T> {
         let mut handles = self.handles().collect::<Vec<_>>();
         if stable {
             handles.sort_by(|h1, h2| {
-                compare(self.vec[h1.0].value.as_ref().unwrap(), 
-                        self.vec[h2.0].value.as_ref().unwrap())
+                compare(self.data[h1.0].as_ref().unwrap(), 
+                        self.data[h2.0].as_ref().unwrap())
             });
         } else {
             handles.sort_unstable_by(|h1, h2| {
-                compare(self.vec[h1.0].value.as_ref().unwrap(), 
-                        self.vec[h2.0].value.as_ref().unwrap())
+                compare(self.data[h1.0].as_ref().unwrap(), 
+                        self.data[h2.0].as_ref().unwrap())
             });
         }
         for i in 0..self.len - 1 {
-            self.vec[handles[i].0].next = handles[i + 1];
-            self.vec[handles[i + 1].0].prev = handles[i];
+            self.next[handles[i].0] = handles[i + 1];
+            self.prev[handles[i + 1].0] = handles[i];
+
         }
         let tail = *handles.last().unwrap();
         self.head = handles[0];
-        self.vec[self.head.0].prev = tail;
-        self.vec[tail.0].next = BAD_HANDLE;
+        self.prev[self.head.0] = tail;
+        self.next[tail.0] = BAD_HANDLE;
     }
 }
 
@@ -1257,7 +1228,7 @@ impl<T> Index<usize> for LinkedVector<T> {
     #[inline]
     fn index(&self, index: usize) -> &Self::Output {
         self.handle(index)
-            .and_then(|h| self.vec[h.0].value.as_ref())
+            .and_then(|h| self.data[h.0].as_ref())
             .expect("Invalid index")
     }
 }
@@ -1266,7 +1237,7 @@ impl<T> IndexMut<usize> for LinkedVector<T> {
     #[inline]
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
         self.handle(index)
-            .and_then(|h| self.vec[h.0].value.as_mut())
+            .and_then(|h| self.data[h.0].as_mut())
             .expect("Invalid index")
     }
 }
@@ -1296,7 +1267,7 @@ impl<'a, T> Handles<'a, T> {
     pub fn new(lv: &'a LinkedVector<T>) -> Self {
         Self {
             hnode : lv.head,
-            hrev  : lv.front_().map(|h| h.prev).unwrap_or(BAD_HANDLE),
+            hrev  : lv.back_node().unwrap_or(BAD_HANDLE),
             len   : lv.len(),
             lv,
         }
@@ -1309,7 +1280,7 @@ impl<'a, T> Iterator for Handles<'a, T> {
     fn next(&mut self) -> Option<Self::Item> {
         if self.len > 0 {
             let hnode = self.hnode;
-            self.hnode = self.lv.get_(hnode).next;
+            self.hnode = self.lv.next[hnode.0];
             self.len -= 1;
             Some(hnode)
         } else {
@@ -1322,7 +1293,7 @@ impl<'a, T> Iterator for Handles<'a, T> {
     }
     #[inline]
     fn last(self) -> Option<Self::Item> {
-        self.lv.front_().map(|h| h.prev)
+        self.lv.back_node()
     }
 }
 
@@ -1331,8 +1302,7 @@ impl<'a, T> DoubleEndedIterator for Handles<'a, T> {
     fn next_back(&mut self) -> Option<Self::Item> {
         if self.len > 0 {
             let hrev = self.hrev;
-            let node = self.lv.get_(hrev);
-            self.hrev = node.prev;
+            self.hrev = self.lv.prev[hrev.0];
             self.len -= 1;
             Some(hrev)
         } else {
@@ -1359,7 +1329,7 @@ impl<'a, T> Iter<'a, T> {
     pub fn new(lv: &'a LinkedVector<T>) -> Self {
         Self {
             hnode : lv.head,
-            hrev  : lv.front_().map(|h| h.prev).unwrap_or(BAD_HANDLE),
+            hrev  : lv.back_node().unwrap_or(BAD_HANDLE),
             len   : lv.len(),
             lv,
         }
@@ -1372,7 +1342,7 @@ impl<'a, T> Iterator for Iter<'a, T> {
     fn next(&mut self) -> Option<Self::Item> {
         if self.len > 0 {
             let hnode = self.hnode;
-            self.hnode = self.lv.get_(hnode).next;
+            self.hnode = self.lv.next[hnode.0];
             self.len -= 1;
             #[cfg(feature = "optionless-accessors")]
             { Some(self.lv.get(hnode)) }
@@ -1398,8 +1368,7 @@ impl<'a, T> DoubleEndedIterator for Iter<'a, T> {
     fn next_back(&mut self) -> Option<Self::Item> {
         if self.len > 0 {
             let hrev = self.hrev;
-            let node = self.lv.get_(hrev);
-            self.hrev = node.prev;
+            self.hrev = self.lv.prev[hrev.0];
             self.len -= 1;
             #[cfg(feature = "optionless-accessors")]
             { Some(self.lv.get(hrev)) }
@@ -1423,7 +1392,7 @@ impl<'a, T> IntoIterator for &'a LinkedVector<T> {
     fn into_iter(self) -> Self::IntoIter {
         Iter {
             hnode : self.head,
-            hrev  : self.front_().map(|h| h.prev).unwrap_or(BAD_HANDLE),
+            hrev  : self.back_node().unwrap_or(BAD_HANDLE),
             len   : self.len(),
             lv    : self,
         }
@@ -1445,7 +1414,7 @@ impl<'a, T> IterMut<'a, T> {
     pub fn new(lv: &'a mut LinkedVector<T>) -> Self {
         Self {
             hnode : lv.head,
-            hrev  : lv.front_().map(|h| h.prev).unwrap_or(BAD_HANDLE),
+            hrev  : lv.back_node().unwrap_or(BAD_HANDLE),
             len   : lv.len(),
             lv,
         }
@@ -1458,7 +1427,7 @@ impl<'a, T> Iterator for IterMut<'a, T> {
     fn next(&mut self) -> Option<Self::Item> {
         if self.len > 0 {
             let hnode = self.hnode;
-            self.hnode = self.lv.get_(hnode).next;
+            self.hnode = self.lv.next[hnode.0];
             self.len -= 1;
             #[cfg(feature = "optionless-accessors")]
             { Some(unsafe { &mut *(self.lv.get_mut(hnode) as *mut T) }) }
@@ -1486,8 +1455,7 @@ impl<'a, T> DoubleEndedIterator for IterMut<'a, T> {
     fn next_back(&mut self) -> Option<Self::Item> {
         if self.len > 0 {
             let hrev = self.hrev;
-            let node = self.lv.get_(hrev);
-            self.hrev = node.prev;
+            self.hrev = self.lv.prev[hrev.0];
             self.len -= 1;
             #[cfg(feature = "optionless-accessors")]
             { Some(unsafe { &mut *(self.lv.get_mut(hrev) as *mut T) }) }
@@ -1514,7 +1482,7 @@ impl<'a, T> IntoIterator for &'a mut LinkedVector<T> {
     fn into_iter(self) -> Self::IntoIter {
         IterMut {
             hnode : self.head,
-            hrev  : self.front_().map(|h| h.prev).unwrap_or(BAD_HANDLE),
+            hrev  : self.back_node().unwrap_or(BAD_HANDLE),
             len   : self.len(),
             lv    : self,
         }

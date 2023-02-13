@@ -452,9 +452,9 @@ fn insert_after() {
     let h4 = lv1.insert_after(h1, 4);
     assert_eq!(lv1.front(), Some(&1));
     assert_eq!(lv1.back(), Some(&3));
-    assert_eq!(lv1.get_(h1).next(), h4);
-    assert_eq!(lv1.get_(h4).next(), h2);
-    assert_eq!(lv1.get_(h4).prev(), h1);
+    assert_eq!(lv1.next_node(h1), Some(h4));
+    assert_eq!(lv1.next_node(h4), Some(h2));
+    assert_eq!(lv1.prev_node(h4), Some(h1));
     assert_eq!(lv1.len(), 4);
 }
 
@@ -467,7 +467,7 @@ fn insert_before() {
     let h4 = lv1.insert(h3, 4);
     assert_eq!(lv1.front(), Some(&1));
     assert_eq!(lv1.back(), Some(&3));
-    assert_eq!(lv1.get_(h4).next(), h3);
+    assert_eq!(lv1.next_node(h4), Some(h3));
     assert_eq!(lv1.len(), 4);
 }
 

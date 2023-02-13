@@ -13,7 +13,6 @@ keywords = ["linked", "list", "vector"]
 categories = ["data-structures"]
 
 [features]
-
 # Certain accesors like `get()` and `get_mut()` that take a handle as a 
 # parameter would panic on a bad handle anyway, so it doesn't make sense that
 # they return an `Option`. This feature changes the `Option` return values for 
