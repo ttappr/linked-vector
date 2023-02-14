@@ -1492,7 +1492,6 @@ impl<'a, T> DoubleEndedIterator for IterMut<'a, T> {
             #[cfg(feature = "optionless-accessors")]
             { Some(unsafe { &mut *(self.lv.get_mut(hrev) as *mut T) }) }
 
-            // TODO - compare this version with 1.1 version.
             #[cfg(not(feature = "optionless-accessors"))]
             {
             Some(unsafe { &mut *(self.lv.get_mut(hrev).unwrap() as *mut T) })
