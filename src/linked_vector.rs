@@ -1296,7 +1296,7 @@ impl<'a, T> Handles<'a, T> {
     pub fn new(lv: &'a LinkedVector<T>) -> Self {
         Self {
             hnode : lv.head,
-            hrev  : lv.front_().map(|h| h.prev).unwrap_or(BAD_HANDLE),
+            hrev  : lv.back_node().unwrap_or(BAD_HANDLE),
             len   : lv.len(),
             lv,
         }
@@ -1359,7 +1359,7 @@ impl<'a, T> Iter<'a, T> {
     pub fn new(lv: &'a LinkedVector<T>) -> Self {
         Self {
             hnode : lv.head,
-            hrev  : lv.front_().map(|h| h.prev).unwrap_or(BAD_HANDLE),
+            hrev  : lv.back_node().unwrap_or(BAD_HANDLE),
             len   : lv.len(),
             lv,
         }
@@ -1423,7 +1423,7 @@ impl<'a, T> IntoIterator for &'a LinkedVector<T> {
     fn into_iter(self) -> Self::IntoIter {
         Iter {
             hnode : self.head,
-            hrev  : self.front_().map(|h| h.prev).unwrap_or(BAD_HANDLE),
+            hrev  : self.back_node().unwrap_or(BAD_HANDLE),
             len   : self.len(),
             lv    : self,
         }
@@ -1445,7 +1445,7 @@ impl<'a, T> IterMut<'a, T> {
     pub fn new(lv: &'a mut LinkedVector<T>) -> Self {
         Self {
             hnode : lv.head,
-            hrev  : lv.front_().map(|h| h.prev).unwrap_or(BAD_HANDLE),
+            hrev  : lv.back_node().unwrap_or(BAD_HANDLE),
             len   : lv.len(),
             lv,
         }
@@ -1514,7 +1514,7 @@ impl<'a, T> IntoIterator for &'a mut LinkedVector<T> {
     fn into_iter(self) -> Self::IntoIter {
         IterMut {
             hnode : self.head,
-            hrev  : self.front_().map(|h| h.prev).unwrap_or(BAD_HANDLE),
+            hrev  : self.back_node().unwrap_or(BAD_HANDLE),
             len   : self.len(),
             lv    : self,
         }
