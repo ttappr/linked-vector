@@ -15,8 +15,8 @@ count queues.
 
 ## Updates
 
-Version `v1.2.x` is a minor revision backward compatibile the prior `v1.x.x`
-versions. Users however, must enable the `"cursor-remove"` feature explicitly.
+Version `v1.2.x` is a minor revision backward compatible with prior `v1.x.x`
+versions. Users, however, must enable the `"cursor-remove"` feature explicitly.
 This turns on the `CursorMut::remove()` method. If you weren't using 
 `Cursor::remove()` before, then nothing needs to be done. Otherwise, you can 
 update your `Cargo.toml` file to include the feature, 
