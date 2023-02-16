@@ -1552,11 +1552,6 @@
 <a href="#1552" id="1552">1552</a>
 <a href="#1553" id="1553">1553</a>
 <a href="#1554" id="1554">1554</a>
-<a href="#1555" id="1555">1555</a>
-<a href="#1556" id="1556">1556</a>
-<a href="#1557" id="1557">1557</a>
-<a href="#1558" id="1558">1558</a>
-<a href="#1559" id="1559">1559</a>
 </pre><pre class="rust"><code>
 
 <span class="kw">use </span>core::fmt;
@@ -2855,7 +2850,7 @@
     </span><span class="kw">pub fn </span>new(lv: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>LinkedVector&lt;T&gt;) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             hnode : lv.head,
-            hrev  : lv.front_().map(|h| h.prev).unwrap_or(BAD_HANDLE),
+            hrev  : lv.back_node().unwrap_or(BAD_HANDLE),
             len   : lv.len(),
             lv,
         }
@@ -2918,7 +2913,7 @@
     </span><span class="kw">pub fn </span>new(lv: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>LinkedVector&lt;T&gt;) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             hnode : lv.head,
-            hrev  : lv.front_().map(|h| h.prev).unwrap_or(BAD_HANDLE),
+            hrev  : lv.back_node().unwrap_or(BAD_HANDLE),
             len   : lv.len(),
             lv,
         }
@@ -2982,7 +2977,7 @@
     </span><span class="kw">fn </span>into_iter(<span class="self">self</span>) -&gt; <span class="self">Self</span>::IntoIter {
         Iter {
             hnode : <span class="self">self</span>.head,
-            hrev  : <span class="self">self</span>.front_().map(|h| h.prev).unwrap_or(BAD_HANDLE),
+            hrev  : <span class="self">self</span>.back_node().unwrap_or(BAD_HANDLE),
             len   : <span class="self">self</span>.len(),
             lv    : <span class="self">self</span>,
         }
@@ -3004,7 +2999,7 @@
     </span><span class="kw">pub fn </span>new(lv: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>LinkedVector&lt;T&gt;) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             hnode : lv.head,
-            hrev  : lv.front_().map(|h| h.prev).unwrap_or(BAD_HANDLE),
+            hrev  : lv.back_node().unwrap_or(BAD_HANDLE),
             len   : lv.len(),
             lv,
         }
@@ -3020,12 +3015,10 @@
             <span class="self">self</span>.hnode = <span class="self">self</span>.lv.get_(hnode).next;
             <span class="self">self</span>.len -= <span class="number">1</span>;
             <span class="attr">#[cfg(feature = <span class="string">&quot;optionless-accessors&quot;</span>)]
-            </span>{ <span class="prelude-val">Some</span>(<span class="kw">unsafe </span>{ <span class="kw-2">&amp;mut *</span>(<span class="self">self</span>.lv.get_mut(hnode) <span class="kw">as </span><span class="kw-2">*mut </span>T) }) }
+            </span><span class="kw">unsafe </span>{ <span class="prelude-val">Some</span>(<span class="kw-2">&amp;mut *</span>(<span class="self">self</span>.lv.get_mut(hnode) <span class="kw">as </span><span class="kw-2">*mut </span>T))}
 
             <span class="attr">#[cfg(not(feature = <span class="string">&quot;optionless-accessors&quot;</span>))]
-            </span>{ 
-            <span class="prelude-val">Some</span>(<span class="kw">unsafe </span>{ <span class="kw-2">&amp;mut *</span>(<span class="self">self</span>.lv.get_mut(hnode).unwrap() <span class="kw">as </span><span class="kw-2">*mut </span>T)}) 
-            }
+            </span><span class="kw">unsafe </span>{ <span class="prelude-val">Some</span>(<span class="kw-2">&amp;mut *</span>(<span class="self">self</span>.lv.get_mut(hnode).unwrap() <span class="kw">as </span><span class="kw-2">*mut </span>T))}
         } <span class="kw">else </span>{
             <span class="prelude-val">None
         </span>}
@@ -3049,13 +3042,10 @@
             <span class="self">self</span>.hrev = node.prev;
             <span class="self">self</span>.len -= <span class="number">1</span>;
             <span class="attr">#[cfg(feature = <span class="string">&quot;optionless-accessors&quot;</span>)]
-            </span>{ <span class="prelude-val">Some</span>(<span class="kw">unsafe </span>{ <span class="kw-2">&amp;mut *</span>(<span class="self">self</span>.lv.get_mut(hrev) <span class="kw">as </span><span class="kw-2">*mut </span>T) }) }
+            </span><span class="kw">unsafe </span>{ <span class="prelude-val">Some</span>(<span class="kw-2">&amp;mut *</span>(<span class="self">self</span>.lv.get_mut(hrev) <span class="kw">as </span><span class="kw-2">*mut </span>T))}
 
-            <span class="comment">// TODO - compare this version with 1.1 version.
-            </span><span class="attr">#[cfg(not(feature = <span class="string">&quot;optionless-accessors&quot;</span>))]
-            </span>{
-            <span class="prelude-val">Some</span>(<span class="kw">unsafe </span>{ <span class="kw-2">&amp;mut *</span>(<span class="self">self</span>.lv.get_mut(hrev).unwrap() <span class="kw">as </span><span class="kw-2">*mut </span>T) })
-            }
+            <span class="attr">#[cfg(not(feature = <span class="string">&quot;optionless-accessors&quot;</span>))]
+            </span><span class="kw">unsafe </span>{ <span class="prelude-val">Some</span>(<span class="kw-2">&amp;mut *</span>(<span class="self">self</span>.lv.get_mut(hrev).unwrap() <span class="kw">as </span><span class="kw-2">*mut </span>T))}
         } <span class="kw">else </span>{
             <span class="prelude-val">None
         </span>}
@@ -3073,7 +3063,7 @@
     </span><span class="kw">fn </span>into_iter(<span class="self">self</span>) -&gt; <span class="self">Self</span>::IntoIter {
         IterMut {
             hnode : <span class="self">self</span>.head,
-            hrev  : <span class="self">self</span>.front_().map(|h| h.prev).unwrap_or(BAD_HANDLE),
+            hrev  : <span class="self">self</span>.back_node().unwrap_or(BAD_HANDLE),
             len   : <span class="self">self</span>.len(),
             lv    : <span class="self">self</span>,
         }
