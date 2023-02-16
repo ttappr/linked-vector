@@ -1461,12 +1461,10 @@ impl<'a, T> Iterator for IterMut<'a, T> {
             self.hnode = self.lv.get_(hnode).next;
             self.len -= 1;
             #[cfg(feature = "optionless-accessors")]
-            { Some(unsafe { &mut *(self.lv.get_mut(hnode) as *mut T) }) }
+            unsafe { Some(&mut *(self.lv.get_mut(hnode) as *mut T))}
 
             #[cfg(not(feature = "optionless-accessors"))]
-            { 
-            Some(unsafe { &mut *(self.lv.get_mut(hnode).unwrap() as *mut T)}) 
-            }
+            unsafe { Some(&mut *(self.lv.get_mut(hnode).unwrap() as *mut T))}
         } else {
             None
         }
@@ -1490,12 +1488,10 @@ impl<'a, T> DoubleEndedIterator for IterMut<'a, T> {
             self.hrev = node.prev;
             self.len -= 1;
             #[cfg(feature = "optionless-accessors")]
-            { Some(unsafe { &mut *(self.lv.get_mut(hrev) as *mut T) }) }
+            unsafe { Some(&mut *(self.lv.get_mut(hrev) as *mut T))}
 
             #[cfg(not(feature = "optionless-accessors"))]
-            {
-            Some(unsafe { &mut *(self.lv.get_mut(hrev).unwrap() as *mut T) })
-            }
+            unsafe { Some(&mut *(self.lv.get_mut(hrev).unwrap() as *mut T))}
         } else {
             None
         }

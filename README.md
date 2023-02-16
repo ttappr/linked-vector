@@ -200,7 +200,7 @@ cursor.move_next();
 
 assert_eq!(*cursor, 2);
 
-let hend = cursor.move_to_end().expect("Moving to end");
+let hend = cursor.move_to_back().expect("Moving to end");
 let hbak = cursor.backward(3).expect("Moving back 3");
 
 assert_eq!(*cursor, 4);
