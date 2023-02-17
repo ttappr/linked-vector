@@ -1,6 +1,5 @@
 
-use core::ops::Deref;
-use core::ops::DerefMut;
+use core::ops::{Deref, DerefMut};
 
 use crate::linked_vector::*;
 

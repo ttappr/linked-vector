@@ -1,12 +1,10 @@
 
 
-use core::fmt;
+use core::cmp::Ordering;
+use core::fmt::{self, Debug, Formatter};
+use core::hash::{Hash, Hasher};
 use core::iter::{FromIterator, FusedIterator};
 use core::ops::{Index, IndexMut};
-use core::cmp::Ordering;
-use core::hash::{Hash, Hasher};
-use core::fmt::Formatter;
-use core::fmt::Debug;
 
 use crate::cursor::*;
 
